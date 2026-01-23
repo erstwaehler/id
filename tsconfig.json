@@ -23,7 +23,13 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+      "#env": ["./src/env.ts"],
+      "#flags": ["./src/lib/flags.ts"],
+      "#auth": ["./src/lib/auth.ts"],
+      "#auth/client": ["./src/lib/auth-client.ts"],
+      "#logger": ["./src/lib/logging.ts"],
+      "~/*": ["./src/*"],
+      "@/*": ["./*"],
+    },
+  },
 }

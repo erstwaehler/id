@@ -1,13 +1,14 @@
-import { config } from 'dotenv'
-import { defineConfig } from 'drizzle-kit'
+import { defineConfig } from "drizzle-kit";
+import env from "./src/env.ts";
 
-config({ path: ['.env.local', '.env'] })
+const createConnectionString = (host: string) =>
+  `postgres://${env.AUTHDB_USER}:${env.AUTHDB_PASSWORD}@${host}/${env.AUTHDB_DATABASE}?sslmode=require`;
 
 export default defineConfig({
-  out: './drizzle',
-  schema: './src/db/schema.ts',
-  dialect: 'postgresql',
+  schema: "./src/lib/auth/schema.ts",
+  out: "./src/lib/auth/migrations",
+  dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL,
+    url: createConnectionString(env.AUTHDB_WRITE),
   },
-})
+});

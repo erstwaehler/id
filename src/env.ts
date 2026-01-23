@@ -1,19 +1,58 @@
-import { createEnv } from '@t3-oss/env-core'
-import { z } from 'zod'
+import { createEnv } from "@t3-oss/env-core";
+import { z } from "zod";
+
+const getBetterAuthUrl = () => {
+  // Handle client-side
+  if (typeof window !== "undefined" && window.location.host) {
+    const protocol = window.location.protocol;
+    return `${protocol}//${window.location.host}`;
+  }
+
+  // Handle server-side with Vercel environment
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Handle server-side with explicit HOST/PORT
+  if (process.env.HOST || process.env.PORT) {
+    const host = process.env.HOST || "localhost";
+    const port = process.env.PORT || "3000";
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    return `${protocol}://${host}${port !== "80" && port !== "443" ? `:${port}` : ""}`;
+  }
+
+  // Development fallback
+  return "http://localhost:3000";
+};
+const hostUrl = getBetterAuthUrl();
+
+process.env.BETTER_AUTH_URL = hostUrl;
+process.env.HOST_URL = hostUrl;
+
+// test
+process.env.VITE_HOST_URL = hostUrl;
 
 export const env = createEnv({
   server: {
-    SERVER_URL: z.string().url().optional(),
+    AUTHDB_DATABASE: z.string().min(1),
+    AUTHDB_PASSWORD: z.string().min(1),
+    AUTHDB_READ_1: z.string(),
+    AUTHDB_READ_2: z.string(),
+    AUTHDB_USER: z.string().min(1),
+    AUTHDB_WRITE: z.string(),
+    BETTER_AUTH_SECRET: z.string().min(32),
+    BETTER_AUTH_URL: z.string().url(),
+    HOST_URL: z.string().url(),
   },
 
   /**
    * The prefix that client-side variables must have. This is enforced both at
    * a type-level and at runtime.
    */
-  clientPrefix: 'VITE_',
+  clientPrefix: "VITE_",
 
   client: {
-    VITE_APP_TITLE: z.string().min(1).optional(),
+    VITE_HOST_URL: z.string().url(),
   },
 
   /**
@@ -36,4 +75,5 @@ export const env = createEnv({
    * explicitly specify this option as true.
    */
   emptyStringAsUndefined: true,
-})
+});
+export default env;
