@@ -14,12 +14,12 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as DiDayRouteImport } from './routes/di-day'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConsentRouteImport } from './routes/consent'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as DiDayRouteImport } from './routes/di.day'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminSystemRouteImport } from './routes/admin/system'
 import { Route as AdminAuditRouteImport } from './routes/admin/audit'
@@ -56,6 +56,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiDayRoute = DiDayRouteImport.update({
+  id: '/di-day',
+  path: '/di-day',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeviceRoute = DeviceRouteImport.update({
   id: '/device',
   path: '/device',
@@ -79,11 +84,6 @@ const IndexRoute = IndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiDayRoute = DiDayRouteImport.update({
-  id: '/di/day',
-  path: '/di/day',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -142,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
+  '/di-day': typeof DiDayRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -154,7 +155,6 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/system': typeof AdminSystemRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
-  '/di/day': typeof DiDayRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
@@ -165,6 +165,7 @@ export interface FileRoutesByTo {
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
+  '/di-day': typeof DiDayRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -177,7 +178,6 @@ export interface FileRoutesByTo {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/system': typeof AdminSystemRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
-  '/di/day': typeof DiDayRoute
   '/admin': typeof AdminIndexRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
@@ -189,6 +189,7 @@ export interface FileRoutesById {
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
+  '/di-day': typeof DiDayRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -201,7 +202,6 @@ export interface FileRoutesById {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/system': typeof AdminSystemRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
-  '/di/day': typeof DiDayRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
@@ -214,6 +214,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/dashboard'
     | '/device'
+    | '/di-day'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -226,7 +227,6 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/system'
     | '/admin/users'
-    | '/di/day'
     | '/admin/'
     | '/admin/users/$userId'
     | '/admin/users/create'
@@ -237,6 +237,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/dashboard'
     | '/device'
+    | '/di-day'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -249,7 +250,6 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/system'
     | '/admin/users'
-    | '/di/day'
     | '/admin'
     | '/admin/users/$userId'
     | '/admin/users/create'
@@ -260,6 +260,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/dashboard'
     | '/device'
+    | '/di-day'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -272,7 +273,6 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/system'
     | '/admin/users'
-    | '/di/day'
     | '/admin/'
     | '/admin/users/$userId'
     | '/admin/users/create'
@@ -284,6 +284,7 @@ export interface RootRouteChildren {
   ConsentRoute: typeof ConsentRoute
   DashboardRoute: typeof DashboardRoute
   DeviceRoute: typeof DeviceRoute
+  DiDayRoute: typeof DiDayRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -296,7 +297,6 @@ export interface RootRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminSystemRoute: typeof AdminSystemRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
-  DiDayRoute: typeof DiDayRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -338,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/di-day': {
+      id: '/di-day'
+      path: '/di-day'
+      fullPath: '/di-day'
+      preLoaderRoute: typeof DiDayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/device': {
       id: '/device'
       path: '/device'
@@ -371,13 +378,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/di/day': {
-      id: '/di/day'
-      path: '/di/day'
-      fullPath: '/di/day'
-      preLoaderRoute: typeof DiDayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -472,6 +472,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsentRoute: ConsentRoute,
   DashboardRoute: DashboardRoute,
   DeviceRoute: DeviceRoute,
+  DiDayRoute: DiDayRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
@@ -484,7 +485,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminSystemRoute: AdminSystemRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
-  DiDayRoute: DiDayRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

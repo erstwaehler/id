@@ -36,12 +36,12 @@ export const securityHeaders: Record<string, string> = {
 	// 3. Pass the nonce to all inline scripts via data attributes
 	"Content-Security-Policy": [
 		"default-src 'self'",
-		"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://eu.posthog.com https://challenges.cloudflare.com",
+		"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://eu.posthog.com https://challenges.cloudflare.com https://vercel.live",
 		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 		"font-src 'self' https://fonts.gstatic.com",
 		"img-src 'self' data: blob: https:",
-		"connect-src 'self' https://eu.posthog.com https://api.axiom.co https://*.better-auth.com wss:",
-		"frame-src 'self' https://challenges.cloudflare.com",
+		"connect-src 'self' https://eu.posthog.com https://api.axiom.co https://*.better-auth.com https://vercel.live wss:",
+		"frame-src 'self' https://challenges.cloudflare.com https://vercel.live",
 		"object-src 'none'",
 		"base-uri 'self'",
 		"form-action 'self'",
@@ -58,10 +58,13 @@ export function generateNonce(): string {
 	if (typeof crypto !== "undefined" && crypto.getRandomValues) {
 		const array = new Uint8Array(16);
 		crypto.getRandomValues(array);
-		return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
+		return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+			"",
+		);
 	}
 	// Fallback for environments without crypto
-	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	const chars =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	let nonce = "";
 	for (let i = 0; i < 32; i++) {
 		nonce += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -76,12 +79,12 @@ export function generateNonce(): string {
 export function getCSPWithNonce(nonce: string): string {
 	return [
 		"default-src 'self'",
-		`script-src 'self' 'nonce-${nonce}' https://eu.posthog.com https://challenges.cloudflare.com`,
+		`script-src 'self' 'nonce-${nonce}' https://eu.posthog.com https://challenges.cloudflare.com https://vercel.live`,
 		`style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
 		"font-src 'self' https://fonts.gstatic.com",
 		"img-src 'self' data: blob: https:",
-		"connect-src 'self' https://eu.posthog.com https://api.axiom.co https://*.better-auth.com wss:",
-		"frame-src 'self' https://challenges.cloudflare.com",
+		"connect-src 'self' https://eu.posthog.com https://api.axiom.co https://*.better-auth.com https://vercel.live wss:",
+		"frame-src 'self' https://challenges.cloudflare.com https://vercel.live",
 		"object-src 'none'",
 		"base-uri 'self'",
 		"form-action 'self'",
@@ -166,12 +169,14 @@ export const validationPatterns = {
 	email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 
 	// Password requirements: 12+ chars, upper, lower, number, special
-	password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/,
+	password:
+		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/,
 
 	// Display name: 2-50 chars, letters, spaces, hyphens, apostrophes
 	displayName: /^[\p{L}\s'-]{2,50}$/u,
 
 	// Bio: max 500 chars, no control characters
+	// biome-ignore lint/suspicious/noControlCharactersInRegex: We explicitly want to exclude control characters
 	bio: /^[^\x00-\x1F]{0,500}$/,
 
 	// UUID v4 format
@@ -193,7 +198,9 @@ export const validationPatterns = {
  * Validate email against allowed school domains
  */
 export function isAllowedSchoolEmail(email: string): boolean {
-	return validationPatterns.schoolDomains.some((pattern) => pattern.test(email));
+	return validationPatterns.schoolDomains.some((pattern) =>
+		pattern.test(email),
+	);
 }
 
 /**

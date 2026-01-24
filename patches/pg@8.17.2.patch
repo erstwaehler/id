@@ -1,0 +1,23 @@
+diff --git a/lib/crypto/utils-legacy.js b/lib/crypto/utils-legacy.js
+index d70fdb638d36166787afe6c15e5f680bb6fcb556..a411df2ad7e29c917e626a71728374a509b11dc3 100644
+--- a/lib/crypto/utils-legacy.js
++++ b/lib/crypto/utils-legacy.js
+@@ -2,7 +2,7 @@
+ // This file contains crypto utility functions for versions of Node.js < 15.0.0,
+ // which does not support the WebCrypto.subtle API.
+ 
+-const nodeCrypto = require('crypto')
++const nodeCrypto = require('node:crypto')
+ 
+ function md5(string) {
+   return nodeCrypto.createHash('md5').update(string, 'utf-8').digest('hex')
+diff --git a/lib/crypto/utils-webcrypto.js b/lib/crypto/utils-webcrypto.js
+index 65aa4a182d322b1f8b00a313d10970306694d4dd..c6411f4f7fe6ffbe7fb3c2d361e5b899bb679f4b 100644
+--- a/lib/crypto/utils-webcrypto.js
++++ b/lib/crypto/utils-webcrypto.js
+@@ -1,4 +1,4 @@
+-const nodeCrypto = require('crypto')
++const nodeCrypto = require('node:crypto')
+ 
+ module.exports = {
+   postgresMd5PasswordHash,

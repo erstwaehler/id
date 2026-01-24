@@ -48,7 +48,6 @@
     "bun-types": "^1.3.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "crypto": "^1.0.1",
     "drizzle-kit": "^0.31.8",
     "drizzle-orm": "^0.45.0",
     "effect": "^3.19.15",
@@ -89,5 +88,8 @@
     "vite": "^7.1.7",
     "vitest": "^3.0.5",
     "web-vitals": "^5.1.0"
+  },
+  "patchedDependencies": {
+    "pg@8.17.2": "patches/pg@8.17.2.patch"
   }
 }
