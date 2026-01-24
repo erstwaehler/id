@@ -21,9 +21,9 @@ type Story = StoryObj<typeof CookieBanner>;
 
 export const Default: Story = {
 	render: () => {
-		// Clear localStorage to show banner
+		// Clear localStorage to show banner (use correct key)
 		if (typeof window !== "undefined") {
-			localStorage.removeItem("ewf_cookie_consent");
+			localStorage.removeItem("ewf-cookie-consent");
 		}
 		return (
 			<div className="min-h-[300px] relative">

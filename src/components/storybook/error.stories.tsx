@@ -23,27 +23,34 @@ export default meta;
 export const GenericError: StoryObj = {
 	render: () => (
 		<ErrorDisplay
-			title="Etwas ist schiefgelaufen"
-			message="Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+			error={new Error("Something went wrong")}
 			traceId="abc123-def456-ghi789"
 		/>
 	),
 };
 
 export const NotFound: StoryObj = {
-	render: () => <NotFoundError resource="Benutzer" />,
+	render: () => <NotFoundError />,
 };
 
 export const AccessDenied: StoryObj = {
-	render: () => <PermissionDenied requiredRole="admin" />,
+	render: () => <PermissionDenied requiredPermission="admin" />,
 };
 
 export const ErrorWithRetry: StoryObj = {
 	render: () => (
 		<ErrorDisplay
-			title="Verbindungsfehler"
-			message="Die Verbindung zum Server ist fehlgeschlagen."
+			error={new Error("Connection failed")}
 			onRetry={() => alert("Retry clicked!")}
+		/>
+	),
+};
+
+export const ErrorNotFullPage: StoryObj = {
+	render: () => (
+		<ErrorDisplay
+			error={new Error("Partial error")}
+			fullPage={false}
 		/>
 	),
 };
