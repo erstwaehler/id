@@ -275,6 +275,33 @@
 	"api_key_expired": "Abgelaufen",
 	"api_key_revoked": "Widerrufen",
 
+	"cookie_title": "Cookie-Einstellungen",
+	"cookie_description": "Wir verwenden Cookies, um deine Erfahrung zu verbessern. Einige sind notwendig, andere helfen uns die Plattform zu verbessern.",
+	"cookie_settings": "Einstellungen",
+	"cookie_essential_only": "Nur notwendige",
+	"cookie_accept_all": "Alle akzeptieren",
+	"cookie_settings_title": "Cookie-Einstellungen verwalten",
+	"cookie_essential": "Notwendige Cookies",
+	"cookie_essential_desc": "Diese Cookies sind für die Funktion der Website erforderlich und können nicht deaktiviert werden.",
+	"cookie_analytics": "Analyse-Cookies",
+	"cookie_analytics_desc": "Helfen uns zu verstehen, wie die Website genutzt wird (PostHog, anonymisiert).",
+	"cookie_marketing": "Marketing-Cookies",
+	"cookie_marketing_desc": "Werden derzeit nicht verwendet.",
+
+	"error_page_title": "Etwas ist schiefgelaufen",
+	"error_page_description": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.",
+	"error_not_found_title": "Seite nicht gefunden",
+	"error_not_found_description": "Die angeforderte Seite existiert nicht.",
+	"error_go_home": "Zur Startseite",
+	"error_try_again": "Erneut versuchen",
+
+	"loading_page": "Lade Seite...",
+	"loading_data": "Lade Daten...",
+
+	"accessibility_skip_nav": "Zum Hauptinhalt springen",
+	"accessibility_open_menu": "Menü öffnen",
+	"accessibility_close_menu": "Menü schließen",
+
 	"footer_copyright": "© {year} Erstwähler Forum Stade",
 	"footer_made_with": "Mit ❤️ für die Demokratie"
 }

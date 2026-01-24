@@ -275,6 +275,33 @@
 	"api_key_expired": "Expired",
 	"api_key_revoked": "Revoked",
 
+	"cookie_title": "Cookie Settings",
+	"cookie_description": "We use cookies to enhance your experience. Some are necessary, others help us improve the platform.",
+	"cookie_settings": "Settings",
+	"cookie_essential_only": "Essential only",
+	"cookie_accept_all": "Accept all",
+	"cookie_settings_title": "Manage Cookie Preferences",
+	"cookie_essential": "Essential Cookies",
+	"cookie_essential_desc": "These cookies are required for the website to function and cannot be disabled.",
+	"cookie_analytics": "Analytics Cookies",
+	"cookie_analytics_desc": "Help us understand how the website is used (PostHog, anonymized).",
+	"cookie_marketing": "Marketing Cookies",
+	"cookie_marketing_desc": "Currently not used.",
+
+	"error_page_title": "Something went wrong",
+	"error_page_description": "An unexpected error occurred. Please try again later.",
+	"error_not_found_title": "Page not found",
+	"error_not_found_description": "The requested page does not exist.",
+	"error_go_home": "Go to homepage",
+	"error_try_again": "Try again",
+
+	"loading_page": "Loading page...",
+	"loading_data": "Loading data...",
+
+	"accessibility_skip_nav": "Skip to main content",
+	"accessibility_open_menu": "Open menu",
+	"accessibility_close_menu": "Close menu",
+
 	"footer_copyright": "© {year} Erstwähler Forum Stade",
 	"footer_made_with": "Made with ❤️ for democracy"
 }

@@ -8,8 +8,10 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { getLocale } from "@/paraglide/runtime";
 import Header from "../components/Header";
+import { CookieBanner } from "../components/CookieBanner";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
+import * as m from "@/paraglide/messages";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
@@ -34,13 +36,21 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "EWF-ID | Erstwähler Foundation Identity",
+				title: "EWF-ID | Erstwähler Forum Identity",
+			},
+			{
+				name: "description",
+				content: m.app_description(),
 			},
 		],
 		links: [
 			{
 				rel: "stylesheet",
 				href: appCss,
+			},
+			{
+				rel: "icon",
+				href: "/favicon.ico",
 			},
 		],
 	}),
@@ -54,9 +64,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body>
-				<Header />
+			<body className="bg-slate-950 text-white min-h-screen">
 				{children}
+				<CookieBanner />
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",
