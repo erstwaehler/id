@@ -17,6 +17,7 @@ interface SendEmailOptions {
 
 /**
  * Send an email using Resend
+ * Resend automatically generates plain text version from HTML if not provided
  */
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
 	const { to, subject, html, text } = options;
@@ -27,7 +28,8 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
 			to,
 			subject,
 			html,
-			text: text || htmlToText(html),
+			// If text is provided, use it; otherwise let Resend auto-generate from HTML
+			...(text && { text }),
 		});
 		console.log(`[Email] Sent email to ${to}: ${subject}`);
 	} catch (error) {
@@ -200,16 +202,4 @@ export async function sendDeletionConfirmationEmail(
 `;
 
 	await sendEmail({ to: email, subject, html });
-}
-
-/**
- * Simple HTML to text converter
- */
-function htmlToText(html: string): string {
-	return html
-		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-		.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-		.replace(/<[^>]+>/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
 }
