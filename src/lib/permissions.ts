@@ -4,8 +4,8 @@
  */
 import { createAccessControl } from "better-auth/plugins/access";
 import {
-	defaultStatements,
 	adminAc,
+	defaultStatements,
 	userAc,
 } from "better-auth/plugins/admin/access";
 
@@ -18,7 +18,14 @@ const statement = {
 
 	// Internal system permissions
 	oidcp_role: ["team", "admin"],
-	allowed_apps: ["ewf-id", "ewf-dashboard", "schedule", "vote", "live", "screens"],
+	allowed_apps: [
+		"ewf-id",
+		"ewf-dashboard",
+		"schedule",
+		"vote",
+		"live",
+		"screens",
+	],
 
 	// Schedule app permissions
 	"schedule:access": ["student", "teacher", "team", "admin"],
@@ -78,58 +85,58 @@ export const ac = createAccessControl(statement);
 
 // Student role - base level permissions
 export const student = ac.newRole({
-	"schedule:access": true,
-	"schedule:event:view": true,
-	"schedule:rsvp:create": true,
-	"vote:access": true,
-	"vote:ballot:view": true,
-	"vote:ballot:cast": true,
-	"live:access": true,
-	"live:question:submit": true,
-	"live:vote:submit": true,
-	"profile:view": true,
-	"profile:edit": true,
-	"profile:security:edit": true,
-	"profile:data:export": true,
-	"profile:account:delete": true,
+	"schedule:access": ["student"],
+	"schedule:event:view": ["student"],
+	"schedule:rsvp:create": ["student"],
+	"vote:access": ["student"],
+	"vote:ballot:view": ["student"],
+	"vote:ballot:cast": ["student"],
+	"live:access": ["student"],
+	"live:question:submit": ["student"],
+	"live:vote:submit": ["student"],
+	"profile:view": ["student"],
+	"profile:edit": ["student"],
+	"profile:security:edit": ["student"],
+	"profile:data:export": ["student"],
+	"profile:account:delete": ["student"],
 });
 
 // Teacher role - inherits student + additional permissions
 export const teacher = ac.newRole({
 	...student.statements,
-	"schedule:event:view:draft": true,
-	"schedule:rsvp:manage": true,
-	"vote:results:view": true,
+	"schedule:event:view:draft": ["teacher"],
+	"schedule:rsvp:manage": ["teacher"],
+	"vote:results:view": ["teacher"],
 });
 
 // Team role - inherits teacher + event management
 export const team = ac.newRole({
 	...teacher.statements,
-	"oidcp_role": true,
-	"schedule:event:create": true,
-	"schedule:event:edit": true,
-	"schedule:event:delete": true,
-	"schedule:event:publish": true,
-	"live:event:manage": true,
-	"live:question:moderate": true,
-	"screens:access": true,
-	"screens:manage": true,
-	"screens:emergency": true,
+	oidcp_role: ["team"],
+	"schedule:event:create": ["team"],
+	"schedule:event:edit": ["team"],
+	"schedule:event:delete": ["team"],
+	"schedule:event:publish": ["team"],
+	"live:event:manage": ["team"],
+	"live:question:moderate": ["team"],
+	"screens:access": ["team"],
+	"screens:manage": ["team"],
+	"screens:emergency": ["team"],
 });
 
 // Admin role - full access
 export const admin = ac.newRole({
 	...adminAc.statements,
 	...team.statements,
-	"schedule:event:delete:any": true,
-	"vote:audit:view": true,
-	"admin:access": true,
-	"admin:users:view": true,
-	"admin:users:edit": true,
-	"admin:users:delete": true,
-	"admin:users:impersonate": true,
-	"admin:roles:manage": true,
-	"admin:audit:view": true,
+	"schedule:event:delete:any": ["admin"],
+	"vote:audit:view": ["admin"],
+	"admin:access": ["admin"],
+	"admin:users:view": ["admin"],
+	"admin:users:edit": ["admin"],
+	"admin:users:delete": ["admin"],
+	"admin:users:impersonate": ["admin"],
+	"admin:roles:manage": ["admin"],
+	"admin:audit:view": ["admin"],
 });
 
 // User role - alias for student (Better Auth compatibility)

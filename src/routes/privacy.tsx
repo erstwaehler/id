@@ -25,10 +25,10 @@ function PrivacyPage() {
 
 			{/* Content */}
 			<main className="max-w-4xl mx-auto px-6 py-12">
-				<h1 className="text-4xl font-bold text-white mb-2">Datenschutzrichtlinie</h1>
-				<p className="text-slate-400 mb-8">
-					Zuletzt aktualisiert: Januar 2025
-				</p>
+				<h1 className="text-4xl font-bold text-white mb-2">
+					Datenschutzrichtlinie
+				</h1>
+				<p className="text-slate-400 mb-8">Zuletzt aktualisiert: Januar 2025</p>
 
 				<div className="prose prose-invert prose-slate max-w-none">
 					<section className="mb-12">
@@ -36,7 +36,8 @@ function PrivacyPage() {
 							1. Verantwortliche Stelle
 						</h2>
 						<p className="text-slate-300 mb-4">
-							Verantwortlich für die Datenverarbeitung ist das Erstwähler Forum Stade.
+							Verantwortlich für die Datenverarbeitung ist das Erstwähler Forum
+							Stade.
 						</p>
 						<p className="text-slate-300">
 							Kontakt für Datenschutzanfragen:{" "}
@@ -81,7 +82,10 @@ function PrivacyPage() {
 							<li>Bereitstellung der Authentifizierungsdienste</li>
 							<li>Sicherheit und Betrugsprävention</li>
 							<li>Verbesserung der Benutzererfahrung</li>
-							<li>Kommunikation (Passwort-Rücksetzung, wichtige Benachrichtigungen)</li>
+							<li>
+								Kommunikation (Passwort-Rücksetzung, wichtige
+								Benachrichtigungen)
+							</li>
 						</ul>
 					</section>
 
@@ -89,11 +93,11 @@ function PrivacyPage() {
 						<h2 className="text-2xl font-semibold text-white mb-4">
 							4. Datenweitergabe
 						</h2>
-						<p className="text-slate-300 mb-4">
-							Wir teilen deine Daten mit:
-						</p>
+						<p className="text-slate-300 mb-4">Wir teilen deine Daten mit:</p>
 						<ul className="list-disc list-inside text-slate-300 space-y-2">
-							<li>EWF-Anwendungen (Termine, Abstimmung, Live, Screens) - über OIDC</li>
+							<li>
+								EWF-Anwendungen (Termine, Abstimmung, Live, Screens) - über OIDC
+							</li>
 							<li>Unseren Auftragsverarbeitern (siehe unten)</li>
 						</ul>
 						<p className="text-slate-300 mt-4">
@@ -114,7 +118,9 @@ function PrivacyPage() {
 							</div>
 							<div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
 								<p className="font-medium text-white">Neon.tech</p>
-								<p className="text-sm text-slate-400">Datenbank (EU-Frankfurt)</p>
+								<p className="text-sm text-slate-400">
+									Datenbank (EU-Frankfurt)
+								</p>
 							</div>
 							<div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
 								<p className="font-medium text-white">Resend</p>
@@ -122,7 +128,9 @@ function PrivacyPage() {
 							</div>
 							<div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
 								<p className="font-medium text-white">PostHog</p>
-								<p className="text-sm text-slate-400">Anonymisierte Analysen (EU)</p>
+								<p className="text-sm text-slate-400">
+									Anonymisierte Analysen (EU)
+								</p>
 							</div>
 						</div>
 					</section>
@@ -165,7 +173,9 @@ function PrivacyPage() {
 							>
 								<Mail className="w-5 h-5 text-cyan-400" />
 								<div>
-									<p className="font-medium text-white">Recht auf Berichtigung</p>
+									<p className="font-medium text-white">
+										Recht auf Berichtigung
+									</p>
 									<p className="text-sm text-slate-400">
 										Korrigiere fehlerhafte Daten
 									</p>
@@ -200,8 +210,8 @@ function PrivacyPage() {
 								Sofortige Soft-Löschung, endgültige Löschung nach 14 Tagen
 							</li>
 							<li>
-								<strong className="text-slate-200">Protokolle:</strong> 7-90 Tage
-								je nach Typ
+								<strong className="text-slate-200">Protokolle:</strong> 7-90
+								Tage je nach Typ
 							</li>
 						</ul>
 					</section>
@@ -231,10 +241,16 @@ function PrivacyPage() {
 				<div className="max-w-4xl mx-auto flex items-center justify-between text-sm text-slate-500">
 					<span>© {new Date().getFullYear()} Erstwähler Forum Stade</span>
 					<div className="flex gap-6">
-						<Link to="/terms" className="hover:text-slate-300 transition-colors">
+						<Link
+							to="/terms"
+							className="hover:text-slate-300 transition-colors"
+						>
 							{m.legal_terms()}
 						</Link>
-						<Link to="/di.day" className="hover:text-slate-300 transition-colors">
+						<Link
+							to="/di.day"
+							className="hover:text-slate-300 transition-colors"
+						>
 							{m.legal_diday()}
 						</Link>
 					</div>

@@ -2,8 +2,11 @@
  * Register Page
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { ArrowRight, Info } from "lucide-react";
+import { useState } from "react";
+import * as m from "@/paraglide/messages";
+import { SchoolSelector } from "~/components/auth/SchoolSelector";
+import { Button } from "~/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -11,10 +14,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { SchoolSelector } from "~/components/auth/SchoolSelector";
 import { authClient } from "~/lib/auth-client";
-import * as m from "@/paraglide/messages";
 
 export const Route = createFileRoute("/register")({ component: RegisterPage });
 
@@ -75,9 +75,7 @@ function RegisterPage() {
 						{/* Info box */}
 						<div className="flex gap-3 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
 							<Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-							<p className="text-sm text-blue-300">
-								{m.auth_register_info()}
-							</p>
+							<p className="text-sm text-blue-300">{m.auth_register_info()}</p>
 						</div>
 
 						{/* Continue button */}
@@ -118,7 +116,10 @@ function RegisterPage() {
 
 				{/* Footer links */}
 				<div className="mt-8 flex justify-center gap-6 text-sm text-slate-500">
-					<Link to="/privacy" className="hover:text-slate-300 transition-colors">
+					<Link
+						to="/privacy"
+						className="hover:text-slate-300 transition-colors"
+					>
 						{m.legal_privacy()}
 					</Link>
 					<Link to="/terms" className="hover:text-slate-300 transition-colors">

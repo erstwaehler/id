@@ -2,11 +2,10 @@
  * Account Profile Page
  */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import { ArrowLeft, Save, User } from "lucide-react";
+import { useState } from "react";
+import * as m from "@/paraglide/messages";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -14,8 +13,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { authClient } from "~/lib/auth-client";
-import * as m from "@/paraglide/messages";
 
 export const Route = createFileRoute("/account/profile")({
 	component: ProfilePage,
@@ -98,7 +98,9 @@ function ProfilePage() {
 						)}
 					</div>
 					<div>
-						<h1 className="text-2xl font-bold text-white">{m.profile_title()}</h1>
+						<h1 className="text-2xl font-bold text-white">
+							{m.profile_title()}
+						</h1>
 						<p className="text-slate-400">{user.email}</p>
 					</div>
 				</div>
@@ -157,7 +159,9 @@ function ProfilePage() {
 									disabled
 									className="bg-slate-800/50 text-slate-400"
 								/>
-								<p className="text-xs text-slate-500">{m.profile_email_hint()}</p>
+								<p className="text-xs text-slate-500">
+									{m.profile_email_hint()}
+								</p>
 							</div>
 
 							<div className="space-y-2">

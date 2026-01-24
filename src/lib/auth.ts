@@ -1,24 +1,31 @@
 // import "server-only"; // disabled for CLI
+
+import { randomUUID } from "node:crypto";
+import { passkey } from "@better-auth/passkey";
+import argon2 from "argon2";
 import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
 	admin as adminPlugin,
-	haveIBeenPwned,
-	twoFactor,
 	bearer,
-	oAuthProxy,
+	haveIBeenPwned,
 	multiSession,
+	oAuthProxy,
 	openAPI,
+	twoFactor,
 } from "better-auth/plugins";
-import { passkey } from "@better-auth/passkey";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import env from "#env";
-import { ac, admin, user, team, teacher, student } from "./permissions";
-import ms from "ms";
-import argon2 from "argon2";
-import { randomUUID } from "crypto";
-import { db } from "./auth-db";
+import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { tanstackStartCookies } from "better-auth/tanstack-start/solid";
+import ms from "ms";
+import env from "#env";
 import { getSchoolFromEmail, isAllowedEmailDomain } from "~/data/schools";
+import { db } from "./auth-db";
+import {
+	sendDeletionConfirmationEmail,
+	sendPasswordResetEmail,
+	sendVerificationEmail,
+} from "./email";
+import { ac, admin, student, teacher, team, user } from "./permissions";
 
 /**
  * EWF-ID Better Auth Configuration
@@ -42,11 +49,12 @@ export const auth = betterAuth({
 	// Email verification configuration
 	emailVerification: {
 		sendVerificationEmail: async (data) => {
-			// Email will be implemented with Resend
-			console.log(
-				`[Auth] Would send verification email to ${data.user.email}`,
+			const verificationUrl = `${env.HOST_URL}/verify-email?token=${data.token}`;
+			await sendVerificationEmail(
+				data.user.email,
+				data.user.name || "Benutzer",
+				verificationUrl,
 			);
-			return Promise.resolve();
 		},
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
@@ -61,11 +69,12 @@ export const auth = betterAuth({
 		maxPasswordLength: 128,
 		autoSignIn: false, // Require email verification first
 		sendResetPassword: async (data) => {
-			// Email will be implemented with Resend
-			console.log(
-				`[Auth] Would send password reset email to ${data.user.email}`,
+			const resetUrl = `${env.HOST_URL}/reset-password?token=${data.token}`;
+			await sendPasswordResetEmail(
+				data.user.email,
+				data.user.name || "Benutzer",
+				resetUrl,
 			);
-			return Promise.resolve();
 		},
 		resetPasswordTokenExpiresIn: ms("1h") / 1000, // 1 hour
 		password: {
@@ -75,52 +84,6 @@ export const auth = betterAuth({
 			verify(data) {
 				return argon2.verify(data.hash, data.password);
 			},
-		},
-	},
-
-	// Social OAuth providers - School OIDC (SPEC §4.1.2)
-	socialProviders: {
-		// Athenaeum (IServ)
-		athenaeum: {
-			type: "oidc",
-			clientId: env.OIDC_ATHENAEUM_CLIENT_ID,
-			clientSecret: env.OIDC_ATHENAEUM_CLIENT_SECRET,
-			issuer: env.OIDC_ATHENAEUM_ISSUER,
-			scopes: ["openid", "email", "profile"],
-			mapProfileToUser: (profile) => ({
-				email: profile.email,
-				name: profile.name || profile.preferred_username || profile.email,
-				emailVerified: true, // School OIDC emails are pre-verified
-				image: profile.picture,
-			}),
-		},
-		// VLG (Moodle)
-		vlg: {
-			type: "oidc",
-			clientId: env.OIDC_VLG_CLIENT_ID,
-			clientSecret: env.OIDC_VLG_CLIENT_SECRET,
-			issuer: env.OIDC_VLG_ISSUER,
-			scopes: ["openid", "email", "profile"],
-			mapProfileToUser: (profile) => ({
-				email: profile.email,
-				name: profile.name || profile.preferred_username || profile.email,
-				emailVerified: true,
-				image: profile.picture,
-			}),
-		},
-		// IGS (IServ)
-		igs: {
-			type: "oidc",
-			clientId: env.OIDC_IGS_CLIENT_ID,
-			clientSecret: env.OIDC_IGS_CLIENT_SECRET,
-			issuer: env.OIDC_IGS_ISSUER,
-			scopes: ["openid", "email", "profile"],
-			mapProfileToUser: (profile) => ({
-				email: profile.email,
-				name: profile.name || profile.preferred_username || profile.email,
-				emailVerified: true,
-				image: profile.picture,
-			}),
 		},
 	},
 
@@ -158,8 +121,7 @@ export const auth = betterAuth({
 
 		// §6.1.3 - Passkey Support (WebAuthn)
 		passkey({
-			rpID:
-				env.NODE_ENV === "production" ? "id.ewf-stade.de" : "localhost",
+			rpID: env.NODE_ENV === "production" ? "id.ewf-stade.de" : "localhost",
 			rpName: "EWF-ID",
 			origin: env.HOST_URL,
 			authenticatorSelection: {
@@ -173,13 +135,38 @@ export const auth = betterAuth({
 		bearer(),
 
 		// §6.2.2 - Have I Been Pwned check
-		haveIBeenPwned({
-			threshold: 1, // Block if password found in any breach
-		}),
+		haveIBeenPwned(),
 
 		// §6.3.2 - Multi-Session Management
 		multiSession({
 			maximumSessions: 5,
+		}),
+
+		// School OIDC Providers (SPEC §4.1.2)
+		genericOAuth({
+			config: [
+				{
+					providerId: "athenaeum",
+					clientId: env.OIDC_ATHENAEUM_CLIENT_ID,
+					clientSecret: env.OIDC_ATHENAEUM_CLIENT_SECRET,
+					discoveryUrl: `${env.OIDC_ATHENAEUM_ISSUER}/.well-known/openid-configuration`,
+					scopes: ["openid", "email", "profile"],
+				},
+				{
+					providerId: "vlg",
+					clientId: env.OIDC_VLG_CLIENT_ID,
+					clientSecret: env.OIDC_VLG_CLIENT_SECRET,
+					discoveryUrl: `${env.OIDC_VLG_ISSUER}/.well-known/openid-configuration`,
+					scopes: ["openid", "email", "profile"],
+				},
+				{
+					providerId: "igs",
+					clientId: env.OIDC_IGS_CLIENT_ID,
+					clientSecret: env.OIDC_IGS_CLIENT_SECRET,
+					discoveryUrl: `${env.OIDC_IGS_ISSUER}/.well-known/openid-configuration`,
+					scopes: ["openid", "email", "profile"],
+				},
+			],
 		}),
 
 		// OAuth proxy for OIDC provider functionality
@@ -202,10 +189,15 @@ export const auth = betterAuth({
 		deleteUser: {
 			enabled: true, // GDPR: Right to erasure
 			sendDeleteAccountVerification: async (data) => {
-				console.log(
-					`[Auth] Would send deletion confirmation to ${data.user.email}`,
+				const deletionDate = new Date();
+				deletionDate.setDate(deletionDate.getDate() + 14);
+				const cancelUrl = `${env.HOST_URL}/cancel-deletion?token=${data.token}`;
+				await sendDeletionConfirmationEmail(
+					data.user.email,
+					data.user.name || "Benutzer",
+					deletionDate,
+					cancelUrl,
 				);
-				return Promise.resolve();
 			},
 		},
 		additionalFields: {

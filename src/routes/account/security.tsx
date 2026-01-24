@@ -2,33 +2,26 @@
  * Account Security Page - 2FA, Passkeys, Sessions
  */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import {
 	ArrowLeft,
-	Shield,
+	CheckCircle,
 	Key,
-	Smartphone,
 	Laptop,
 	LogOut,
 	Plus,
-	Trash2,
-	CheckCircle,
-	XCircle,
 	QrCode,
+	Shield,
+	Smartphone,
+	Trash2,
+	XCircle,
 } from "lucide-react";
+import { useState } from "react";
+import * as m from "@/paraglide/messages";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Separator } from "~/components/ui/separator";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "~/components/ui/card";
 import { authClient } from "~/lib/auth-client";
-import * as m from "@/paraglide/messages";
 
 export const Route = createFileRoute("/account/security")({
 	component: SecurityPage,
@@ -125,7 +118,9 @@ function SecurityPage() {
 						<Shield className="w-6 h-6 text-white" />
 					</div>
 					<div>
-						<h1 className="text-2xl font-bold text-white">{m.security_title()}</h1>
+						<h1 className="text-2xl font-bold text-white">
+							{m.security_title()}
+						</h1>
 						<p className="text-slate-400">
 							Verwalte deine Sicherheitseinstellungen
 						</p>
@@ -135,7 +130,9 @@ function SecurityPage() {
 				{/* Password Section */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-lg">{m.security_password_section()}</CardTitle>
+						<CardTitle className="text-lg">
+							{m.security_password_section()}
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						{showPasswordForm ? (
@@ -167,7 +164,10 @@ function SecurityPage() {
 								</div>
 							</form>
 						) : (
-							<Button variant="outline" onClick={() => setShowPasswordForm(true)}>
+							<Button
+								variant="outline"
+								onClick={() => setShowPasswordForm(true)}
+							>
 								{m.security_password_change()}
 							</Button>
 						)}
@@ -178,7 +178,9 @@ function SecurityPage() {
 				<Card>
 					<CardHeader>
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">{m.security_2fa_section()}</CardTitle>
+							<CardTitle className="text-lg">
+								{m.security_2fa_section()}
+							</CardTitle>
 							<div className="flex items-center gap-2">
 								{twoFactorEnabled ? (
 									<>
@@ -211,7 +213,11 @@ function SecurityPage() {
 								</p>
 								<div className="space-y-2">
 									<Label>{m.security_2fa_setup_verify()}</Label>
-									<Input placeholder="000000" maxLength={6} className="text-center text-2xl tracking-widest" />
+									<Input
+										placeholder="000000"
+										maxLength={6}
+										className="text-center text-2xl tracking-widest"
+									/>
 								</div>
 								<div className="flex gap-3">
 									<Button className="flex-1">{m.common_confirm()}</Button>
@@ -249,7 +255,9 @@ function SecurityPage() {
 				<Card>
 					<CardHeader>
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">{m.security_passkeys_section()}</CardTitle>
+							<CardTitle className="text-lg">
+								{m.security_passkeys_section()}
+							</CardTitle>
 							<Button size="sm" variant="outline" onClick={handleAddPasskey}>
 								<Plus className="w-4 h-4 mr-2" />
 								{m.security_passkeys_add()}
@@ -277,7 +285,9 @@ function SecurityPage() {
 													{passkey.name}
 												</p>
 												<p className="text-xs text-slate-500">
-													{m.security_passkeys_last_used({ date: passkey.lastUsed })}
+													{m.security_passkeys_last_used({
+														date: passkey.lastUsed,
+													})}
 												</p>
 											</div>
 										</div>
@@ -300,7 +310,9 @@ function SecurityPage() {
 				<Card>
 					<CardHeader>
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">{m.security_sessions_section()}</CardTitle>
+							<CardTitle className="text-lg">
+								{m.security_sessions_section()}
+							</CardTitle>
 							{sessions.filter((s) => !s.current).length > 0 && (
 								<Button
 									size="sm"

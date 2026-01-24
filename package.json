@@ -53,6 +53,7 @@
     "posthog-js": "^1.335.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "resend": "^6.8.0",
     "server-only": "^0.0.1",
     "storybook": "^10.1.10",
     "tailwind-merge": "^3.0.2",

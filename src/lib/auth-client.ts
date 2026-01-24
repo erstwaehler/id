@@ -2,13 +2,15 @@
  * EWF-ID Auth Client
  * Client-side authentication utilities for React components
  */
-import { createAuthClient } from "better-auth/react";
+
+import { passkeyClient } from "@better-auth/passkey/client";
 import {
-	twoFactorClient,
 	adminClient,
-	passkeyClient,
+	genericOAuthClient,
 	multiSessionClient,
+	twoFactorClient,
 } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
 
 /**
  * Auth client with all required plugins
@@ -20,17 +22,13 @@ export const authClient = createAuthClient({
 		adminClient(),
 		passkeyClient(),
 		multiSessionClient(),
+		genericOAuthClient(),
 	],
 });
 
 // Export typed hooks for React components
-export const {
-	useSession,
-	signIn,
-	signOut,
-	signUp,
-	useListSessions,
-} = authClient;
+export const { useSession, signIn, signOut, signUp, useListSessions } =
+	authClient;
 
 // Type exports
 export type Session = typeof authClient.$Infer.Session;

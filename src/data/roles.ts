@@ -68,7 +68,10 @@ export function getRole(roleId: RoleId): Role {
 /**
  * Check if a role has at least the minimum required level
  */
-export function hasMinimumRole(userRole: RoleId, requiredRole: RoleId): boolean {
+export function hasMinimumRole(
+	userRole: RoleId,
+	requiredRole: RoleId,
+): boolean {
 	return roles[userRole].level >= roles[requiredRole].level;
 }
 

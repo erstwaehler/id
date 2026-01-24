@@ -2,30 +2,35 @@
  * Digital Independence Day Page
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Shield, Server, Lock, Eye, Heart, Globe } from "lucide-react";
+import {
+	ArrowLeft,
+	Eye,
+	Globe,
+	Heart,
+	Lock,
+	Server,
+	Shield,
+} from "lucide-react";
 import * as m from "@/paraglide/messages";
 
-export const Route = createFileRoute("/di.day")({ component: DiDayPage });
+export const Route = createFileRoute("/di/day")({ component: DiDayPage });
 
 function DiDayPage() {
 	const principles = [
 		{
 			icon: <Shield className="w-6 h-6" />,
 			title: "Transparenz",
-			description:
-				"Wir zeigen dir genau, welche Daten wir sammeln und warum.",
+			description: "Wir zeigen dir genau, welche Daten wir sammeln und warum.",
 		},
 		{
 			icon: <Lock className="w-6 h-6" />,
 			title: "Datensparsamkeit",
-			description:
-				"Wir sammeln nur die Daten, die wir wirklich brauchen.",
+			description: "Wir sammeln nur die Daten, die wir wirklich brauchen.",
 		},
 		{
 			icon: <Eye className="w-6 h-6" />,
 			title: "Kontrolle",
-			description:
-				"Du hast jederzeit die volle Kontrolle über deine Daten.",
+			description: "Du hast jederzeit die volle Kontrolle über deine Daten.",
 		},
 		{
 			icon: <Heart className="w-6 h-6" />,
@@ -102,9 +107,10 @@ function DiDayPage() {
 						Unser Bekenntnis zu digitaler Souveränität und Datenschutz
 					</p>
 					<p className="text-slate-400 max-w-2xl mx-auto">
-						Der Digital Independence Day erinnert uns daran, dass unsere digitale
-						Freiheit von bewussten Entscheidungen abhängt. Bei EWF-ID setzen wir
-						uns für transparente, datenschutzfreundliche Technologie ein.
+						Der Digital Independence Day erinnert uns daran, dass unsere
+						digitale Freiheit von bewussten Entscheidungen abhängt. Bei EWF-ID
+						setzen wir uns für transparente, datenschutzfreundliche Technologie
+						ein.
 					</p>
 				</div>
 			</section>
@@ -153,7 +159,9 @@ function DiDayPage() {
 							>
 								<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 									<div>
-										<h3 className="font-semibold text-white">{processor.name}</h3>
+										<h3 className="font-semibold text-white">
+											{processor.name}
+										</h3>
 										<p className="text-sm text-cyan-400">{processor.purpose}</p>
 									</div>
 									<div className="text-right">
@@ -240,10 +248,16 @@ function DiDayPage() {
 				<div className="max-w-4xl mx-auto flex items-center justify-between text-sm text-slate-500">
 					<span>© {new Date().getFullYear()} Erstwähler Forum Stade</span>
 					<div className="flex gap-6">
-						<Link to="/privacy" className="hover:text-slate-300 transition-colors">
+						<Link
+							to="/privacy"
+							className="hover:text-slate-300 transition-colors"
+						>
 							{m.legal_privacy()}
 						</Link>
-						<Link to="/terms" className="hover:text-slate-300 transition-colors">
+						<Link
+							to="/terms"
+							className="hover:text-slate-300 transition-colors"
+						>
 							{m.legal_terms()}
 						</Link>
 					</div>

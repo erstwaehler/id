@@ -4,13 +4,13 @@
  */
 import { relations } from "drizzle-orm";
 import {
+	boolean,
+	index,
+	integer,
+	json,
 	pgTable,
 	text,
 	timestamp,
-	boolean,
-	integer,
-	index,
-	json,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -183,7 +183,9 @@ export const auditLog = pgTable(
 	{
 		id: text("id").primaryKey(),
 		timestamp: timestamp("timestamp").defaultNow().notNull(),
-		actorId: text("actor_id").references(() => user.id, { onDelete: "set null" }),
+		actorId: text("actor_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
 		actorType: text("actor_type").notNull(), // user, admin, system
 		actorEmail: text("actor_email"),
 		action: text("action").notNull(), // user.created, user.deleted, etc.

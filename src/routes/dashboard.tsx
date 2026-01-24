@@ -3,19 +3,20 @@
  */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-	User,
-	Shield,
-	Settings,
-	LogOut,
 	Calendar,
-	Vote,
-	Users,
-	Tv,
 	ChevronRight,
 	Clock,
 	Key,
+	LogOut,
+	Settings,
+	Shield,
 	Smartphone,
+	Tv,
+	User,
+	Users,
+	Vote,
 } from "lucide-react";
+import * as m from "@/paraglide/messages";
 import { Button } from "~/components/ui/button";
 import {
 	Card,
@@ -25,7 +26,6 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { authClient } from "~/lib/auth-client";
-import * as m from "@/paraglide/messages";
 
 export const Route = createFileRoute("/dashboard")({
 	component: DashboardPage,
@@ -129,9 +129,7 @@ function DashboardPage() {
 					</Link>
 
 					<div className="flex items-center gap-4">
-						<span className="text-sm text-slate-400">
-							{user.email}
-						</span>
+						<span className="text-sm text-slate-400">{user.email}</span>
 						<Button variant="ghost" size="sm" onClick={handleLogout}>
 							<LogOut className="w-4 h-4 mr-2" />
 							{m.nav_logout()}
@@ -149,7 +147,9 @@ function DashboardPage() {
 					</h1>
 					<p className="text-slate-400 flex items-center gap-2">
 						<Clock className="w-4 h-4" />
-						{m.dashboard_last_login({ date: new Date().toLocaleDateString("de-DE") })}
+						{m.dashboard_last_login({
+							date: new Date().toLocaleDateString("de-DE"),
+						})}
 					</p>
 				</div>
 
@@ -157,7 +157,9 @@ function DashboardPage() {
 					{/* Quick Actions */}
 					<Card className="lg:col-span-2">
 						<CardHeader>
-							<CardTitle className="text-lg">{m.dashboard_quick_actions()}</CardTitle>
+							<CardTitle className="text-lg">
+								{m.dashboard_quick_actions()}
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -185,7 +187,9 @@ function DashboardPage() {
 					{/* Recent Activity */}
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-lg">{m.dashboard_recent_activity()}</CardTitle>
+							<CardTitle className="text-lg">
+								{m.dashboard_recent_activity()}
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-4">
@@ -209,7 +213,9 @@ function DashboardPage() {
 					{/* Connected Apps */}
 					<Card className="lg:col-span-3">
 						<CardHeader>
-							<CardTitle className="text-lg">{m.dashboard_connected_apps()}</CardTitle>
+							<CardTitle className="text-lg">
+								{m.dashboard_connected_apps()}
+							</CardTitle>
 							<CardDescription>
 								Anwendungen, die auf dein EWF-ID zugreifen können
 							</CardDescription>

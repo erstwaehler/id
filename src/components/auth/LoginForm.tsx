@@ -2,9 +2,10 @@
  * Login Form Component
  * Handles email/password login with validation
  */
-import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Key, ArrowRight } from "lucide-react";
+
 import { Link } from "@tanstack/react-router";
+import { ArrowRight, Eye, EyeOff, Key, Lock, Mail } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -21,7 +22,9 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+	const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+		{},
+	);
 
 	const validateForm = () => {
 		const newErrors: { email?: string; password?: string } = {};
@@ -57,7 +60,7 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
 			} else {
 				onSuccess?.();
 			}
-		} catch (error) {
+		} catch (_error) {
 			onError?.("Ein unerwarteter Fehler ist aufgetreten");
 		} finally {
 			setIsLoading(false);
@@ -80,7 +83,7 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
 			} else {
 				onSuccess?.();
 			}
-		} catch (error) {
+		} catch (_error) {
 			onError?.("Passkey-Authentifizierung fehlgeschlagen");
 		} finally {
 			setIsLoading(false);

@@ -2,8 +2,8 @@
  * School Selector Component
  * Used in registration flow to select school for OIDC login
  */
-import { useState } from "react";
-import { School, GraduationCap, Building2 } from "lucide-react";
+
+import { Building2, GraduationCap, School } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 interface SchoolOption {

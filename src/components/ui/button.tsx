@@ -2,8 +2,9 @@
  * Button component with variants
  * Follows FRONTEND_SKILL.md for distinctive aesthetics
  */
-import { type ButtonHTMLAttributes, forwardRef } from "react";
+
 import { cva, type VariantProps } from "class-variance-authority";
+import { type ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "~/lib/utils";
 
 const buttonVariants = cva(
@@ -19,10 +20,8 @@ const buttonVariants = cva(
 					"border-2 border-slate-700 bg-transparent text-slate-200 hover:bg-slate-800 hover:border-cyan-500/50 hover:text-white",
 				secondary:
 					"bg-slate-800 text-slate-200 shadow-md hover:bg-slate-700 hover:text-white",
-				ghost:
-					"text-slate-400 hover:bg-slate-800/50 hover:text-slate-200",
-				link:
-					"text-cyan-400 underline-offset-4 hover:underline hover:text-cyan-300",
+				ghost: "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200",
+				link: "text-cyan-400 underline-offset-4 hover:underline hover:text-cyan-300",
 			},
 			size: {
 				default: "h-11 px-6 py-2 text-sm rounded-lg",
@@ -45,7 +44,10 @@ export interface ButtonProps
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-	({ className, variant, size, isLoading, children, disabled, ...props }, ref) => {
+	(
+		{ className, variant, size, isLoading, children, disabled, ...props },
+		ref,
+	) => {
 		return (
 			<button
 				className={cn(buttonVariants({ variant, size, className }))}

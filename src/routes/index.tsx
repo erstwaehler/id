@@ -4,18 +4,18 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+	ArrowRight,
+	Calendar,
+	Fingerprint,
+	Globe,
+	Lock,
 	Shield,
+	Tv,
 	Users,
 	Vote,
-	Calendar,
-	Tv,
-	ArrowRight,
-	Fingerprint,
-	Lock,
-	Globe,
 } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import * as m from "@/paraglide/messages";
+import { Button } from "~/components/ui/button";
 
 export const Route = createFileRoute("/")({ component: LandingPage });
 
@@ -24,12 +24,14 @@ function LandingPage() {
 		{
 			icon: <Shield className="w-8 h-8" />,
 			title: "Sicher",
-			description: "Zwei-Faktor-Authentifizierung und Passkeys für maximale Sicherheit",
+			description:
+				"Zwei-Faktor-Authentifizierung und Passkeys für maximale Sicherheit",
 		},
 		{
 			icon: <Fingerprint className="w-8 h-8" />,
 			title: "Einfach",
-			description: "Anmeldung mit deinem Schul-Account – keine zusätzlichen Passwörter",
+			description:
+				"Anmeldung mit deinem Schul-Account – keine zusätzlichen Passwörter",
 		},
 		{
 			icon: <Lock className="w-8 h-8" />,
@@ -162,7 +164,8 @@ function LandingPage() {
 						Ein Account, alle Apps
 					</h2>
 					<p className="text-slate-400 text-center mb-12 max-w-2xl mx-auto">
-						Mit deinem EWF-ID hast du Zugang zu allen Anwendungen des Erstwähler Forums
+						Mit deinem EWF-ID hast du Zugang zu allen Anwendungen des Erstwähler
+						Forums
 					</p>
 
 					<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -196,7 +199,9 @@ function LandingPage() {
 								<span className="text-sm font-bold text-white">ID</span>
 							</div>
 							<span className="text-slate-400 text-sm">
-								{m.footer_copyright({ year: new Date().getFullYear().toString() })}
+								{m.footer_copyright({
+									year: new Date().getFullYear().toString(),
+								})}
 							</span>
 						</div>
 

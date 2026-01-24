@@ -25,10 +25,10 @@ function TermsPage() {
 
 			{/* Content */}
 			<main className="max-w-4xl mx-auto px-6 py-12">
-				<h1 className="text-4xl font-bold text-white mb-2">Nutzungsbedingungen</h1>
-				<p className="text-slate-400 mb-8">
-					Zuletzt aktualisiert: Januar 2025
-				</p>
+				<h1 className="text-4xl font-bold text-white mb-2">
+					Nutzungsbedingungen
+				</h1>
+				<p className="text-slate-400 mb-8">Zuletzt aktualisiert: Januar 2025</p>
 
 				<div className="prose prose-invert prose-slate max-w-none">
 					<section className="mb-12">
@@ -36,9 +36,10 @@ function TermsPage() {
 							1. Geltungsbereich
 						</h2>
 						<p className="text-slate-300">
-							Diese Nutzungsbedingungen gelten für die Nutzung von EWF-ID,
-							dem zentralen Authentifizierungssystem des Erstwähler Forums Stade.
-							Mit der Registrierung und Nutzung akzeptierst du diese Bedingungen.
+							Diese Nutzungsbedingungen gelten für die Nutzung von EWF-ID, dem
+							zentralen Authentifizierungssystem des Erstwähler Forums Stade.
+							Mit der Registrierung und Nutzung akzeptierst du diese
+							Bedingungen.
 						</p>
 					</section>
 
@@ -50,7 +51,10 @@ function TermsPage() {
 							EWF-ID steht folgenden Personen zur Verfügung:
 						</p>
 						<ul className="list-disc list-inside text-slate-300 space-y-2">
-							<li>Schülerinnen und Schüler der Partnerschulen (Athenaeum, VLG, IGS)</li>
+							<li>
+								Schülerinnen und Schüler der Partnerschulen (Athenaeum, VLG,
+								IGS)
+							</li>
 							<li>Lehrkräfte und Personal der Partnerschulen</li>
 							<li>Teammitglieder des Erstwähler Forums</li>
 							<li>Administratoren</li>
@@ -62,13 +66,16 @@ function TermsPage() {
 							3. Kontoregistrierung
 						</h2>
 						<p className="text-slate-300 mb-4">
-							Die Registrierung erfolgt über den OIDC-Login deiner Schule.
-							Du bist für die Sicherheit deines Kontos verantwortlich:
+							Die Registrierung erfolgt über den OIDC-Login deiner Schule. Du
+							bist für die Sicherheit deines Kontos verantwortlich:
 						</p>
 						<ul className="list-disc list-inside text-slate-300 space-y-2">
 							<li>Teile deine Zugangsdaten nicht mit anderen</li>
 							<li>Verwende ein sicheres Passwort (falls zutreffend)</li>
-							<li>Aktiviere Zwei-Faktor-Authentifizierung für zusätzliche Sicherheit</li>
+							<li>
+								Aktiviere Zwei-Faktor-Authentifizierung für zusätzliche
+								Sicherheit
+							</li>
 							<li>Melde verdächtige Aktivitäten sofort</li>
 						</ul>
 					</section>
@@ -78,7 +85,8 @@ function TermsPage() {
 							4. Akzeptables Verhalten
 						</h2>
 						<p className="text-slate-300 mb-4">
-							Bei der Nutzung von EWF-ID und verbundenen Anwendungen ist folgendes
+							Bei der Nutzung von EWF-ID und verbundenen Anwendungen ist
+							folgendes
 							<strong className="text-red-400"> nicht erlaubt</strong>:
 						</p>
 						<ul className="list-disc list-inside text-slate-300 space-y-2">
@@ -96,7 +104,8 @@ function TermsPage() {
 							5. Kontosperrung
 						</h2>
 						<p className="text-slate-300">
-							Wir behalten uns das Recht vor, Konten zu sperren oder zu löschen bei:
+							Wir behalten uns das Recht vor, Konten zu sperren oder zu löschen
+							bei:
 						</p>
 						<ul className="list-disc list-inside text-slate-300 space-y-2 mt-4">
 							<li>Verstößen gegen diese Nutzungsbedingungen</li>
@@ -111,10 +120,11 @@ function TermsPage() {
 							6. Dienstverfügbarkeit
 						</h2>
 						<p className="text-slate-300">
-							Wir bemühen uns, EWF-ID mit einer Verfügbarkeit von 99,9% bereitzustellen.
-							Geplante Wartungsarbeiten werden rechtzeitig angekündigt.
-							Für Ausfälle oder Datenverlust übernehmen wir keine Haftung,
-							sofern diese nicht durch grobe Fahrlässigkeit verursacht wurden.
+							Wir bemühen uns, EWF-ID mit einer Verfügbarkeit von 99,9%
+							bereitzustellen. Geplante Wartungsarbeiten werden rechtzeitig
+							angekündigt. Für Ausfälle oder Datenverlust übernehmen wir keine
+							Haftung, sofern diese nicht durch grobe Fahrlässigkeit verursacht
+							wurden.
 						</p>
 					</section>
 
@@ -137,10 +147,10 @@ function TermsPage() {
 							8. Änderungen
 						</h2>
 						<p className="text-slate-300">
-							Wir können diese Nutzungsbedingungen jederzeit ändern.
-							Wesentliche Änderungen werden per E-Mail oder über die Plattform
-							angekündigt. Die fortgesetzte Nutzung nach Änderungen gilt als
-							Zustimmung zu den neuen Bedingungen.
+							Wir können diese Nutzungsbedingungen jederzeit ändern. Wesentliche
+							Änderungen werden per E-Mail oder über die Plattform angekündigt.
+							Die fortgesetzte Nutzung nach Änderungen gilt als Zustimmung zu
+							den neuen Bedingungen.
 						</p>
 					</section>
 
@@ -175,10 +185,16 @@ function TermsPage() {
 				<div className="max-w-4xl mx-auto flex items-center justify-between text-sm text-slate-500">
 					<span>© {new Date().getFullYear()} Erstwähler Forum Stade</span>
 					<div className="flex gap-6">
-						<Link to="/privacy" className="hover:text-slate-300 transition-colors">
+						<Link
+							to="/privacy"
+							className="hover:text-slate-300 transition-colors"
+						>
 							{m.legal_privacy()}
 						</Link>
-						<Link to="/di.day" className="hover:text-slate-300 transition-colors">
+						<Link
+							to="/di.day"
+							className="hover:text-slate-300 transition-colors"
+						>
 							{m.legal_diday()}
 						</Link>
 					</div>

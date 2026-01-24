@@ -3,6 +3,8 @@
  */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import * as m from "@/paraglide/messages";
+import { LoginForm } from "~/components/auth/LoginForm";
 import {
 	Card,
 	CardContent,
@@ -10,8 +12,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import { LoginForm } from "~/components/auth/LoginForm";
-import * as m from "@/paraglide/messages";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
 
@@ -70,7 +70,10 @@ function LoginPage() {
 
 				{/* Footer links */}
 				<div className="mt-8 flex justify-center gap-6 text-sm text-slate-500">
-					<Link to="/privacy" className="hover:text-slate-300 transition-colors">
+					<Link
+						to="/privacy"
+						className="hover:text-slate-300 transition-colors"
+					>
 						{m.legal_privacy()}
 					</Link>
 					<Link to="/terms" className="hover:text-slate-300 transition-colors">
