@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import * as m from "@/paraglide/messages";
 
-export const Route = createFileRoute("/di-day")({ component: DiDayPage });
+export const Route = createFileRoute("/di.day")({ component: DiDayPage });
 
 function DiDayPage() {
 	const principles = [

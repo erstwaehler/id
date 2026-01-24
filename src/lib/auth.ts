@@ -1,4 +1,4 @@
-import "server-only";
+// removed server only, some bundle prerender keep spilling to client
 import { randomUUID } from "node:crypto";
 import { passkey } from "@better-auth/passkey";
 import argon2 from "argon2";

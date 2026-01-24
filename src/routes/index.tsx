@@ -219,7 +219,7 @@ function LandingPage() {
                 {m.legal_terms()}
               </Link>
               <Link
-                to="/di-day"
+                to="/di.day"
                 className="text-slate-400 hover:text-cyan-400 transition-colors"
               >
                 {m.legal_diday()}

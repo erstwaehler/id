@@ -248,7 +248,7 @@ function PrivacyPage() {
               {m.legal_terms()}
             </Link>
             <Link
-              to="/di-day"
+              to="/di.day"
               className="hover:text-slate-300 transition-colors"
             >
               {m.legal_diday()}

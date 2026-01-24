@@ -14,7 +14,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as DiDayRouteImport } from './routes/di-day'
+import { Route as DiDotdayRouteImport } from './routes/di[.]day'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConsentRouteImport } from './routes/consent'
@@ -56,9 +56,9 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DiDayRoute = DiDayRouteImport.update({
-  id: '/di-day',
-  path: '/di-day',
+const DiDotdayRoute = DiDotdayRouteImport.update({
+  id: '/di.day',
+  path: '/di.day',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeviceRoute = DeviceRouteImport.update({
@@ -142,7 +142,7 @@ export interface FileRoutesByFullPath {
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
-  '/di-day': typeof DiDayRoute
+  '/di.day': typeof DiDotdayRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -165,7 +165,7 @@ export interface FileRoutesByTo {
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
-  '/di-day': typeof DiDayRoute
+  '/di.day': typeof DiDotdayRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -189,7 +189,7 @@ export interface FileRoutesById {
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
-  '/di-day': typeof DiDayRoute
+  '/di.day': typeof DiDotdayRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -214,7 +214,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/dashboard'
     | '/device'
-    | '/di-day'
+    | '/di.day'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -237,7 +237,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/dashboard'
     | '/device'
-    | '/di-day'
+    | '/di.day'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -260,7 +260,7 @@ export interface FileRouteTypes {
     | '/consent'
     | '/dashboard'
     | '/device'
-    | '/di-day'
+    | '/di.day'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -284,7 +284,7 @@ export interface RootRouteChildren {
   ConsentRoute: typeof ConsentRoute
   DashboardRoute: typeof DashboardRoute
   DeviceRoute: typeof DeviceRoute
-  DiDayRoute: typeof DiDayRoute
+  DiDotdayRoute: typeof DiDotdayRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -338,11 +338,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/di-day': {
-      id: '/di-day'
-      path: '/di-day'
-      fullPath: '/di-day'
-      preLoaderRoute: typeof DiDayRouteImport
+    '/di.day': {
+      id: '/di.day'
+      path: '/di.day'
+      fullPath: '/di.day'
+      preLoaderRoute: typeof DiDotdayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/device': {
@@ -472,7 +472,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsentRoute: ConsentRoute,
   DashboardRoute: DashboardRoute,
   DeviceRoute: DeviceRoute,
-  DiDayRoute: DiDayRoute,
+  DiDotdayRoute: DiDotdayRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
