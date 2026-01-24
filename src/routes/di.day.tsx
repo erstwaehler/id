@@ -38,7 +38,7 @@ function DiDayPage() {
 			description:
 				"Wir verkaufen keine Daten und zeigen keine personalisierte Werbung.",
 		},
-	];
+	]
 
 	const subprocessors = [
 		{
@@ -77,7 +77,7 @@ function DiDayPage() {
 			location: "Global",
 			data: "Challenge-Antworten",
 		},
-	];
+	]
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
@@ -264,5 +264,5 @@ function DiDayPage() {
 				</div>
 			</footer>
 		</div>
-	);
+	)
 }

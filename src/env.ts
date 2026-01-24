@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const getBetterAuthUrl = () => {
 	// Handle client-side
-	if (window?.location.host) {
+	if (typeof window !== "undefined" && window.location.host) {
 		const protocol = window.location.protocol;
 		return `${protocol}//${window.location.host}`;
 	}
