@@ -40,10 +40,7 @@ async function sendEmail(options: EmailOptions): Promise<void> {
   } catch (error) {
     console.error("Email sending failed:", error);
     // Don't throw - we don't want email failures to break auth flows
-    // Log to PostHog for monitoring
-    if (typeof window !== "undefined" && window.posthog) {
-      window.posthog.captureException(error);
-    }
+    // TODO: Log to PostHog server-side or error tracking service
   }
 }
 

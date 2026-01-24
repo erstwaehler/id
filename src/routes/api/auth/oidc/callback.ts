@@ -10,6 +10,7 @@ import { db } from "#lib/auth-db";
 import { user } from "#lib/auth/schema";
 import { eq } from "drizzle-orm";
 import { sendWelcomeEmail } from "#lib/email";
+import { randomUUID } from "crypto";
 
 export const Route = createFileRoute("/api/auth/oidc/callback")({
   server: {
@@ -37,7 +38,13 @@ export const Route = createFileRoute("/api/auth/oidc/callback")({
             );
           }
           
-          // Try all schools until one works
+          // TODO: SECURITY - Validate state against stored state in session
+          // This is critical for CSRF protection
+          // For now, we accept any state - MUST BE FIXED BEFORE PRODUCTION
+          
+          // TODO: IMPROVEMENT - Parse state to determine which school provider
+          // State format: {schoolId}:{randomState}:{redirectUrl}
+          // For now, try all schools (inefficient but works)
           let userInfo: any = null;
           let schoolId: keyof typeof schoolOIDCConfig | null = null;
           
@@ -48,6 +55,7 @@ export const Route = createFileRoute("/api/auth/oidc/callback")({
               schoolId = id as keyof typeof schoolOIDCConfig;
               break;
             } catch (err) {
+              // Try next school if this one fails
               continue;
             }
           }
@@ -78,8 +86,11 @@ export const Route = createFileRoute("/api/auth/oidc/callback")({
               })
               .where(eq(user.id, existingUsers[0].id));
           } else {
+            // Use consistent ID generation
+            const userId = `user_${randomUUID()}`;
+            
             await db.insert(user).values({
-              id: crypto.randomUUID(),
+              id: userId,
               email,
               name,
               emailVerified: true,
@@ -94,7 +105,12 @@ export const Route = createFileRoute("/api/auth/oidc/callback")({
             await sendWelcomeEmail({ to: email, userName: name, school });
           }
           
-          return Response.redirect("/dashboard", 302);
+          // TODO: SECURITY - Validate redirect URL to prevent open redirects
+          // Only allow internal redirects or whitelisted domains
+          // For now, hard-coded to dashboard
+          const redirectUrl = "/dashboard";
+          
+          return Response.redirect(redirectUrl, 302);
         } catch (error) {
           console.error("OIDC callback error:", error);
           return Response.redirect(
