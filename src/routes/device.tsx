@@ -12,6 +12,9 @@ export const Route = createFileRoute("/device")({
 
 type AuthState = "input" | "loading" | "success" | "error" | "expired";
 
+// Device auth configuration - would be fetched from API in production
+const DEVICE_AUTH_TIMEOUT_MS = 1500;
+
 function DeviceAuthPage() {
 	const [code, setCode] = useState("");
 	const [state, setState] = useState<AuthState>("input");
@@ -24,19 +27,21 @@ function DeviceAuthPage() {
 
 		setState("loading");
 
-		// Simulate API call - in reality this would verify the device code
-		setTimeout(() => {
-			if (code.toUpperCase() === "TESTCODE") {
-				setAppName("EWF Schedule TV App");
-				setState("success");
-			} else if (code.toUpperCase() === "EXPIRED1") {
-				setError("Der Code ist abgelaufen. Bitte fordere einen neuen Code an.");
-				setState("expired");
-			} else {
-				setError("Ungültiger Code. Bitte überprüfe den Code und versuche es erneut.");
-				setState("error");
-			}
-		}, 1500);
+		// In production, this would call the API to verify the device code
+		// For now, simulate the API call
+		try {
+			// TODO: Replace with actual API call
+			// const response = await fetch('/api/auth/device/verify', { ... });
+			await new Promise((resolve) => setTimeout(resolve, DEVICE_AUTH_TIMEOUT_MS));
+			
+			// Simulate API response - in production this would be server-validated
+			// This is placeholder logic that should be replaced with actual device code verification
+			setAppName("Pending App Authorization");
+			setState("success");
+		} catch {
+			setError("device_error");
+			setState("error");
+		}
 	};
 
 	const handleAuthorize = () => {
@@ -49,7 +54,7 @@ function DeviceAuthPage() {
 
 	const handleDeny = () => {
 		setState("error");
-		setError("Autorisierung abgelehnt.");
+		setError("device_denied");
 	};
 
 	const handleReset = () => {

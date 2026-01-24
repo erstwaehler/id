@@ -6,17 +6,30 @@
 import { flag, dedupe } from "flags";
 
 /**
+ * PostHog interface for type safety
+ */
+interface PostHogInstance {
+	isFeatureEnabled: (key: string) => boolean | undefined;
+}
+
+declare global {
+	interface Window {
+		posthog?: PostHogInstance;
+	}
+}
+
+/**
  * Get PostHog feature flag value
  * This function checks PostHog for feature flag state
  */
-async function getPostHogFlag(key: string, userId?: string): Promise<boolean> {
+async function getPostHogFlag(key: string): Promise<boolean> {
 	// In development or when PostHog is not configured, return false
 	if (typeof window === "undefined") {
 		return false;
 	}
 
 	// Check if PostHog is available
-	const posthog = (window as unknown as { posthog?: { isFeatureEnabled: (key: string) => boolean } }).posthog;
+	const posthog = window.posthog;
 	if (!posthog) {
 		return false;
 	}
