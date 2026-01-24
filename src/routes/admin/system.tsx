@@ -2,7 +2,7 @@
  * Admin System Settings Page
  * Implements SPEC.md §5.3 - System Configuration
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertCircle,
@@ -19,8 +19,20 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/admin/system")({
+	beforeLoad: async () => {
+		const session = await authClient.getSession();
+		if (!session.data?.user) {
+			throw redirect({ to: "/login", search: { redirect: "/admin/system" } });
+		}
+		// Check if user has admin role
+		const role = session.data.user.role;
+		if (role !== "admin") {
+			throw redirect({ to: "/dashboard" });
+		}
+	},
 	component: AdminSystemPage,
 });
 

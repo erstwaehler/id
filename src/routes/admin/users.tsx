@@ -2,15 +2,17 @@
  * Admin User Management Page
  * Implements SPEC.md §5.3 - User Management
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
 	Activity,
+	Ban,
 	ChevronLeft,
 	ChevronRight,
 	Edit,
 	Eye,
 	Key,
-	MoreVertical,
+	Loader2,
 	Plus,
 	Search,
 	Settings,
@@ -20,94 +22,80 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/admin/users")({
+	beforeLoad: async () => {
+		const session = await authClient.getSession();
+		if (!session.data?.user) {
+			throw redirect({ to: "/login", search: { redirect: "/admin/users" } });
+		}
+		// Check if user has admin or team role
+		const role = session.data.user.role;
+		if (role !== "admin" && role !== "team") {
+			throw redirect({ to: "/dashboard" });
+		}
+	},
 	component: AdminUsersPage,
 });
 
-interface User {
-	id: string;
-	email: string;
-	firstName: string;
-	lastName: string;
-	displayName: string | null;
-	school: string;
-	role: string;
-	createdAt: string;
-	lastLoginAt: string | null;
-	twoFactorEnabled: boolean;
-	emailVerified: boolean;
-}
-
-// Mock data - would be fetched from API
-const mockUsers: User[] = [
-	{
-		id: "1",
-		email: "max.mustermann@athenetz.de",
-		firstName: "Max",
-		lastName: "Mustermann",
-		displayName: null,
-		school: "athenaeum",
-		role: "student",
-		createdAt: "2025-01-15T10:30:00Z",
-		lastLoginAt: "2025-01-23T14:22:00Z",
-		twoFactorEnabled: true,
-		emailVerified: true,
-	},
-	{
-		id: "2",
-		email: "anna.schmidt@vlg-stade.de",
-		firstName: "Anna",
-		lastName: "Schmidt",
-		displayName: "Anna S.",
-		school: "vlg",
-		role: "teacher",
-		createdAt: "2025-01-10T08:15:00Z",
-		lastLoginAt: "2025-01-22T09:45:00Z",
-		twoFactorEnabled: false,
-		emailVerified: true,
-	},
-	{
-		id: "3",
-		email: "team@ewf-stade.de",
-		firstName: "Team",
-		lastName: "EWF",
-		displayName: "EWF Team",
-		school: "ewf",
-		role: "team",
-		createdAt: "2025-01-01T00:00:00Z",
-		lastLoginAt: "2025-01-23T16:00:00Z",
-		twoFactorEnabled: true,
-		emailVerified: true,
-	},
-	{
-		id: "4",
-		email: "admin@ewf-stade.de",
-		firstName: "Admin",
-		lastName: "EWF",
-		displayName: null,
-		school: "ewf",
-		role: "admin",
-		createdAt: "2025-01-01T00:00:00Z",
-		lastLoginAt: "2025-01-23T18:30:00Z",
-		twoFactorEnabled: true,
-		emailVerified: true,
-	},
-];
-
 function AdminUsersPage() {
+	const queryClient = useQueryClient();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [roleFilter, setRoleFilter] = useState<string>("all");
 	const [schoolFilter, setSchoolFilter] = useState<string>("all");
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 10;
 
-	const filteredUsers = mockUsers.filter((user) => {
+	// Fetch users using Better Auth admin client
+	const {
+		data: usersData,
+		isLoading,
+		error,
+	} = useQuery({
+		queryKey: ["admin", "users", "list"],
+		queryFn: async () => {
+			const response = await authClient.admin.listUsers({
+				query: { limit: 1000 },
+			});
+			return response.data?.users ?? [];
+		},
+	});
+
+	// Ban user mutation
+	const banMutation = useMutation({
+		mutationFn: async (userId: string) => {
+			await authClient.admin.banUser({ userId });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+		},
+	});
+
+	// Impersonate user mutation
+	const impersonateMutation = useMutation({
+		mutationFn: async (userId: string) => {
+			await authClient.admin.impersonateUser({ userId });
+		},
+	});
+
+	// Remove user mutation
+	const removeMutation = useMutation({
+		mutationFn: async (userId: string) => {
+			await authClient.admin.removeUser({ userId });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+		},
+	});
+
+	const users = usersData ?? [];
+
+	const filteredUsers = users.filter((user) => {
 		const matchesSearch =
 			searchQuery === "" ||
 			user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			user.lastName.toLowerCase().includes(searchQuery.toLowerCase());
+			(user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
 		const matchesRole = roleFilter === "all" || user.role === roleFilter;
 		const matchesSchool =
 			schoolFilter === "all" || user.school === schoolFilter;
@@ -236,6 +224,15 @@ function AdminUsersPage() {
 				</div>
 
 				{/* Users Table */}
+				{isLoading ? (
+					<div className="flex items-center justify-center py-20">
+						<Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+					</div>
+				) : error ? (
+					<div className="text-center py-20 text-red-400">
+						Fehler beim Laden der Benutzer
+					</div>
+				) : (
 				<div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
 					<table className="w-full">
 						<thead>
@@ -253,7 +250,7 @@ function AdminUsersPage() {
 									Status
 								</th>
 								<th className="text-left px-6 py-4 text-slate-400 font-medium">
-									Letzter Login
+									Registriert
 								</th>
 								<th className="text-right px-6 py-4 text-slate-400 font-medium">
 									Aktionen
@@ -268,14 +265,20 @@ function AdminUsersPage() {
 								>
 									<td className="px-6 py-4">
 										<div className="flex items-center gap-3">
+											{user.image ? (
+												<img
+													src={user.image}
+													alt={user.name ?? "User"}
+													className="w-10 h-10 rounded-full"
+												/>
+											) : (
 											<div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold">
-												{user.firstName[0]}
-												{user.lastName[0]}
+												{(user.name ?? user.email)?.[0]?.toUpperCase() ?? "?"}
 											</div>
+											)}
 											<div>
 												<div className="text-white font-medium">
-													{user.displayName ||
-														`${user.firstName} ${user.lastName}`}
+													{user.name ?? user.email}
 												</div>
 												<div className="text-slate-400 text-sm">
 													{user.email}
@@ -291,51 +294,71 @@ function AdminUsersPage() {
 													? "VLG"
 													: user.school === "igs"
 														? "IGS"
-														: "EWF"}
+														: user.school ?? "—"}
 										</span>
 									</td>
 									<td className="px-6 py-4">
-										<RoleBadge role={user.role} />
+										<RoleBadge role={user.role ?? "user"} />
 									</td>
 									<td className="px-6 py-4">
 										<div className="flex items-center gap-2">
 											{user.emailVerified && (
-												<span className="w-2 h-2 rounded-full bg-emerald-500" />
+												<span className="w-2 h-2 rounded-full bg-emerald-500" title="E-Mail verifiziert" />
 											)}
 											{user.twoFactorEnabled && (
-												<Shield className="w-4 h-4 text-cyan-400" />
+												<Shield className="w-4 h-4 text-cyan-400" title="2FA aktiv" />
+											)}
+											{user.banned && (
+												<Ban className="w-4 h-4 text-red-400" title="Gesperrt" />
 											)}
 										</div>
 									</td>
 									<td className="px-6 py-4 text-slate-400 text-sm">
-										{user.lastLoginAt
-											? new Date(user.lastLoginAt).toLocaleDateString("de-DE")
-											: "Nie"}
+										{user.createdAt
+											? new Date(user.createdAt).toLocaleDateString("de-DE")
+											: "—"}
 									</td>
 									<td className="px-6 py-4 text-right">
 										<div className="flex items-center justify-end gap-2">
 											<Link
 												to={`/admin/users/${user.id}`}
 												className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+												title="Anzeigen"
 											>
 												<Eye className="w-4 h-4" />
 											</Link>
-											<Link
-												to={`/admin/users/${user.id}/edit`}
-												className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-											>
-												<Edit className="w-4 h-4" />
-											</Link>
 											<button
 												type="button"
-												className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-colors"
+												onClick={() => impersonateMutation.mutate(user.id)}
+												disabled={impersonateMutation.isPending}
+												className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
 												title="Impersonieren"
 											>
 												<UserCog className="w-4 h-4" />
 											</button>
 											<button
 												type="button"
-												className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+												onClick={() => {
+													if (confirm(`Benutzer ${user.email} sperren?`)) {
+														banMutation.mutate(user.id);
+													}
+												}}
+												disabled={banMutation.isPending || user.banned}
+												className="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
+												title="Sperren"
+											>
+												<Ban className="w-4 h-4" />
+											</button>
+											<button
+												type="button"
+												onClick={() => {
+													if (confirm(`Benutzer ${user.email} löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) {
+														removeMutation.mutate(user.id);
+													}
+												}}
+												disabled={removeMutation.isPending}
+												className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
+												title="Löschen"
 											>
 												<Trash2 className="w-4 h-4" />
 											</button>
@@ -346,6 +369,7 @@ function AdminUsersPage() {
 						</tbody>
 					</table>
 				</div>
+				)}
 
 				{/* Pagination */}
 				{totalPages > 1 && (

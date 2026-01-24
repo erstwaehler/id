@@ -2,15 +2,16 @@
  * Admin Audit Log Page
  * Implements SPEC.md §5.3 - Audit Log Viewer
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertTriangle,
 	ChevronLeft,
 	ChevronRight,
 	Download,
-	Filter,
 	Key,
+	Loader2,
 	LogIn,
 	LogOut,
 	RefreshCw,
@@ -22,8 +23,20 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/admin/audit")({
+	beforeLoad: async () => {
+		const session = await authClient.getSession();
+		if (!session.data?.user) {
+			throw redirect({ to: "/login", search: { redirect: "/admin/audit" } });
+		}
+		// Check if user has admin or team role
+		const role = session.data.user.role;
+		if (role !== "admin" && role !== "team") {
+			throw redirect({ to: "/dashboard" });
+		}
+	},
 	component: AdminAuditPage,
 });
 
@@ -40,82 +53,6 @@ interface AuditEntry {
 	severity: "info" | "warning" | "error";
 }
 
-// Mock data
-const mockAuditEntries: AuditEntry[] = [
-	{
-		id: "1",
-		userId: "user-1",
-		userEmail: "admin@ewf-stade.de",
-		action: "user.impersonate",
-		resource: "user:user-2",
-		details: "Impersonated user max.mustermann@athenetz.de",
-		ipAddress: "192.168.1.1",
-		userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-		timestamp: "2025-01-23T18:30:00Z",
-		severity: "warning",
-	},
-	{
-		id: "2",
-		userId: "user-3",
-		userEmail: "max.mustermann@athenetz.de",
-		action: "auth.login",
-		resource: "session",
-		details: "Login via school OIDC (Athenaeum)",
-		ipAddress: "10.0.0.50",
-		userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)",
-		timestamp: "2025-01-23T14:22:00Z",
-		severity: "info",
-	},
-	{
-		id: "3",
-		userId: "user-4",
-		userEmail: "anna.schmidt@vlg-stade.de",
-		action: "auth.2fa.enable",
-		resource: "user:user-4",
-		details: "Two-factor authentication enabled",
-		ipAddress: "172.16.0.100",
-		userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-		timestamp: "2025-01-23T12:15:00Z",
-		severity: "info",
-	},
-	{
-		id: "4",
-		userId: "user-5",
-		userEmail: "test@athenetz.de",
-		action: "auth.login.failed",
-		resource: "session",
-		details: "Invalid password (attempt 3/5)",
-		ipAddress: "8.8.8.8",
-		userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-		timestamp: "2025-01-23T11:00:00Z",
-		severity: "warning",
-	},
-	{
-		id: "5",
-		userId: "system",
-		userEmail: "system@ewf-id",
-		action: "system.rate_limit",
-		resource: "ip:8.8.8.8",
-		details: "Rate limit triggered for login endpoint",
-		ipAddress: "8.8.8.8",
-		userAgent: "N/A",
-		timestamp: "2025-01-23T11:05:00Z",
-		severity: "error",
-	},
-	{
-		id: "6",
-		userId: "user-1",
-		userEmail: "admin@ewf-stade.de",
-		action: "user.role.assign",
-		resource: "user:user-6",
-		details: "Assigned role 'team' to user",
-		ipAddress: "192.168.1.1",
-		userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-		timestamp: "2025-01-23T10:00:00Z",
-		severity: "info",
-	},
-];
-
 function AdminAuditPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [actionFilter, setActionFilter] = useState<string>("all");
@@ -124,7 +61,34 @@ function AdminAuditPage() {
 	const [autoRefresh, setAutoRefresh] = useState(false);
 	const itemsPerPage = 20;
 
-	const filteredEntries = mockAuditEntries.filter((entry) => {
+	// TODO: Fetch from audit log database once schema is implemented
+	// For now, use session data for basic audit info
+	const { data: sessionsData, isLoading } = useQuery({
+		queryKey: ["admin", "sessions", "audit"],
+		queryFn: async () => {
+			const response = await authClient.admin.listSessions({
+				query: { limit: 100 },
+			});
+			return response.data?.sessions ?? [];
+		},
+		refetchInterval: autoRefresh ? 5000 : false,
+	});
+
+	// Convert sessions to audit-like entries for display
+	const auditEntries: AuditEntry[] = (sessionsData ?? []).map((session) => ({
+		id: session.id,
+		userId: session.userId,
+		userEmail: session.userId, // Would need user lookup
+		action: "auth.session.active",
+		resource: `session:${session.id}`,
+		details: `Session active from ${session.userAgent ?? "Unknown device"}`,
+		ipAddress: session.ipAddress ?? "Unknown",
+		userAgent: session.userAgent ?? "Unknown",
+		timestamp: session.createdAt?.toString() ?? new Date().toISOString(),
+		severity: "info" as const,
+	}));
+
+	const filteredEntries = auditEntries.filter((entry) => {
 		const matchesSearch =
 			searchQuery === "" ||
 			entry.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -300,6 +264,11 @@ function AdminAuditPage() {
 				</div>
 
 				{/* Audit Log Table */}
+				{isLoading ? (
+					<div className="flex items-center justify-center py-20">
+						<Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+					</div>
+				) : (
 				<div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
 					<div className="overflow-x-auto">
 						<table className="w-full">
@@ -384,6 +353,7 @@ function AdminAuditPage() {
 						</table>
 					</div>
 				</div>
+				)}
 
 				{/* Pagination */}
 				{totalPages > 1 && (

@@ -2,42 +2,94 @@
  * Admin Dashboard Index Page
  * Implements SPEC.md §5.3 - Admin Dashboard Statistics
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertTriangle,
 	Key,
+	Loader2,
 	Settings,
 	Shield,
 	Users,
 } from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/admin/")({
+	beforeLoad: async () => {
+		const session = await authClient.getSession();
+		if (!session.data?.user) {
+			throw redirect({ to: "/login", search: { redirect: "/admin" } });
+		}
+		// Check if user has admin or team role
+		const role = session.data.user.role;
+		if (role !== "admin" && role !== "team") {
+			throw redirect({ to: "/dashboard" });
+		}
+	},
 	component: AdminDashboard,
 });
 
 function AdminDashboard() {
-	// In a real implementation, these would be fetched from the API
+	const { data: session } = authClient.useSession();
+
+	// Fetch admin statistics using TanStack Query with Better Auth admin API
+	const { data: usersData, isLoading: usersLoading } = useQuery({
+		queryKey: ["admin", "users", "list"],
+		queryFn: async () => {
+			const response = await authClient.admin.listUsers({
+				query: { limit: 1000 },
+			});
+			return response.data?.users ?? [];
+		},
+		enabled: !!session?.user,
+	});
+
+	const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
+		queryKey: ["admin", "sessions"],
+		queryFn: async () => {
+			const response = await authClient.admin.listSessions({
+				query: { limit: 1000 },
+			});
+			return response.data?.sessions ?? [];
+		},
+		enabled: !!session?.user,
+	});
+
+	// Calculate statistics from real data
+	const users = usersData ?? [];
+	const sessions = sessionsData ?? [];
+
 	const stats = {
-		totalUsers: 1247,
-		activeUsers: 892,
+		totalUsers: users.length,
+		activeUsers: users.filter(
+			(u) =>
+				u.updatedAt &&
+				new Date(u.updatedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+		).length,
 		usersByRole: {
-			student: 1089,
-			teacher: 112,
-			team: 34,
-			admin: 12,
+			student: users.filter((u) => u.role === "student").length,
+			teacher: users.filter((u) => u.role === "teacher").length,
+			team: users.filter((u) => u.role === "team").length,
+			admin: users.filter((u) => u.role === "admin").length,
 		},
 		usersBySchool: {
-			athenaeum: 523,
-			vlg: 412,
-			igs: 289,
-			ewf: 23,
+			athenaeum: users.filter((u) => u.school === "athenaeum").length,
+			vlg: users.filter((u) => u.school === "vlg").length,
+			igs: users.filter((u) => u.school === "igs").length,
+			ewf: users.filter((u) => u.school === "ewf").length,
 		},
-		activeSessions: 156,
-		failedLogins24h: 23,
-		twoFactorAdoption: 34,
-		apiKeys: 8,
+		activeSessions: sessions.length,
+		failedLogins24h: 0, // Would need audit log query
+		twoFactorAdoption: users.length
+			? Math.round(
+					(users.filter((u) => u.twoFactorEnabled).length / users.length) * 100,
+				)
+			: 0,
+		apiKeys: 0, // Would need separate query
 	};
+
+	const isLoading = usersLoading || sessionsLoading;
 
 	return (
 		<div className="min-h-screen bg-slate-950">
@@ -101,6 +153,12 @@ function AdminDashboard() {
 					</p>
 				</div>
 
+				{isLoading ? (
+					<div className="flex items-center justify-center py-20">
+						<Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+					</div>
+				) : (
+					<>
 				{/* Stats Grid */}
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 					<StatCard
@@ -239,6 +297,8 @@ function AdminDashboard() {
 						</p>
 					</Link>
 				</div>
+				</>
+				)}
 			</main>
 		</div>
 	);

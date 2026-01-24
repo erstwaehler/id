@@ -18,6 +18,7 @@ import { Route as DiDotdayRouteImport } from './routes/di[.]day'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConsentRouteImport } from './routes/consent'
+import { Route as CatchallRouteImport } from './routes/$catchall'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
@@ -74,6 +75,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ConsentRoute = ConsentRouteImport.update({
   id: '/consent',
   path: '/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatchallRoute = CatchallRouteImport.update({
+  id: '/$catchall',
+  path: '/$catchall',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -139,6 +145,7 @@ const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$catchall': typeof CatchallRoute
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$catchall': typeof CatchallRoute
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
@@ -186,6 +194,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$catchall': typeof CatchallRoute
   '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
   '/device': typeof DeviceRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$catchall'
     | '/consent'
     | '/dashboard'
     | '/device'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$catchall'
     | '/consent'
     | '/dashboard'
     | '/device'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$catchall'
     | '/consent'
     | '/dashboard'
     | '/device'
@@ -281,6 +293,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatchallRoute: typeof CatchallRoute
   ConsentRoute: typeof ConsentRoute
   DashboardRoute: typeof DashboardRoute
   DeviceRoute: typeof DeviceRoute
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       path: '/consent'
       fullPath: '/consent'
       preLoaderRoute: typeof ConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$catchall': {
+      id: '/$catchall'
+      path: '/$catchall'
+      fullPath: '/$catchall'
+      preLoaderRoute: typeof CatchallRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -469,6 +489,7 @@ const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatchallRoute: CatchallRoute,
   ConsentRoute: ConsentRoute,
   DashboardRoute: DashboardRoute,
   DeviceRoute: DeviceRoute,

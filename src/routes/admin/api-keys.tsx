@@ -2,7 +2,7 @@
  * Admin API Keys Page
  * Implements SPEC.md §5.3 & §6.1.3 - API Key Management
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
 	Activity,
 	AlertCircle,
@@ -11,14 +11,27 @@ import {
 	Eye,
 	EyeOff,
 	Key,
+	Loader2,
 	Plus,
 	Settings,
 	Trash2,
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/admin/api-keys")({
+	beforeLoad: async () => {
+		const session = await authClient.getSession();
+		if (!session.data?.user) {
+			throw redirect({ to: "/login", search: { redirect: "/admin/api-keys" } });
+		}
+		// Check if user has admin role
+		const role = session.data.user.role;
+		if (role !== "admin") {
+			throw redirect({ to: "/dashboard" });
+		}
+	},
 	component: AdminApiKeysPage,
 });
 
