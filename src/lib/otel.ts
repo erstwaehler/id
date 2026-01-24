@@ -1,65 +1,45 @@
 /**
- * OpenTelemetry (OTEL) Configuration
+ * OpenTelemetry (OTEL) Tracing
  * Implements SPEC.md §10.2 - Distributed tracing and observability
+ * 
+ * Uses Effect's built-in tracing capabilities for diagnostic data collection.
+ * Focus on capturing actionable information about failures and operations.
+ * 
+ * @see https://effect.website/docs/observability/tracing
  */
-import { Effect, Context, Layer, pipe } from "effect";
+import { Effect, Tracer, Layer, Cause, pipe } from "effect";
 
 // =============================================================================
 // Types
 // =============================================================================
 
-export interface Span {
+export interface SpanContext {
 	readonly traceId: string;
 	readonly spanId: string;
-	readonly name: string;
-	readonly startTime: number;
-	setAttribute(key: string, value: string | number | boolean): void;
-	recordException(error: Error): void;
-	end(): void;
 }
 
-export interface OtelService {
-	/**
-	 * Get the current trace ID for correlation
-	 */
-	readonly getCurrentTraceId: () => string | undefined;
-
-	/**
-	 * Start a new span for tracing
-	 */
-	readonly startSpan: (name: string, attributes?: Record<string, string | number | boolean>) => Span;
-
-	/**
-	 * Execute an effect within a traced span
-	 */
-	readonly withSpan: <A, E, R>(
-		name: string,
-		effect: Effect.Effect<A, E, R>,
-		attributes?: Record<string, string | number | boolean>
-	) => Effect.Effect<A, E, R>;
-
-	/**
-	 * Send trace data to Axiom
-	 */
-	readonly flush: () => Promise<void>;
+export interface DiagnosticData {
+	traceId: string;
+	spanId: string;
+	operation: string;
+	status: "ok" | "error";
+	durationMs: number;
+	timestamp: string;
+	error?: {
+		type: string;
+		message: string;
+		stack?: string;
+		cause?: string;
+	};
+	context: Record<string, unknown>;
 }
 
 // =============================================================================
-// Service Tag
+// Trace ID Management
 // =============================================================================
 
-export class Otel extends Context.Tag("Otel")<Otel, OtelService>() {}
-
-// =============================================================================
-// Implementation
-// =============================================================================
-
-// Simple trace ID storage (would use AsyncLocalStorage in Node.js)
 let currentTraceId: string | undefined;
 
-/**
- * Generate a random trace ID (simplified W3C Trace Context format)
- */
 function generateTraceId(): string {
 	const chars = "0123456789abcdef";
 	let id = "";
@@ -69,9 +49,6 @@ function generateTraceId(): string {
 	return id;
 }
 
-/**
- * Generate a random span ID
- */
 function generateSpanId(): string {
 	const chars = "0123456789abcdef";
 	let id = "";
@@ -81,143 +58,294 @@ function generateSpanId(): string {
 	return id;
 }
 
+// =============================================================================
+// Diagnostic Data Collection
+// =============================================================================
+
+/** Store for failed spans - used for error reporting */
+const failedSpans: DiagnosticData[] = [];
+const MAX_FAILED_SPANS = 100;
+
 /**
- * Create a span object
+ * Record a failed span for diagnostic purposes
  */
-function createSpan(name: string, traceId: string): Span {
-	const spanId = generateSpanId();
-	const startTime = Date.now();
-	const attributes: Record<string, string | number | boolean> = {};
-	let exception: Error | undefined;
+function recordFailedSpan(data: DiagnosticData): void {
+	failedSpans.push(data);
+	if (failedSpans.length > MAX_FAILED_SPANS) {
+		failedSpans.shift();
+	}
+	
+	// Always log errors for visibility
+	console.error(`[TRACE ERROR] ${data.operation}`, {
+		traceId: data.traceId,
+		error: data.error,
+		context: data.context,
+		durationMs: data.durationMs,
+	});
+}
 
-	return {
-		traceId,
-		spanId,
-		name,
-		startTime,
-		setAttribute(key: string, value: string | number | boolean) {
-			attributes[key] = value;
-		},
-		recordException(error: Error) {
-			exception = error;
-			attributes["exception.type"] = error.name;
-			attributes["exception.message"] = error.message;
-		},
-		end() {
-			const endTime = Date.now();
-			const duration = endTime - startTime;
+/**
+ * Get recent failed spans for debugging
+ */
+export function getRecentFailures(): DiagnosticData[] {
+	return [...failedSpans];
+}
 
-			// Log span data (in production, this would be sent to Axiom)
-			if (typeof window === "undefined") {
-				// Server-side: log to console for development, send to Axiom in production
-				const spanData = {
+/**
+ * Clear failure history
+ */
+export function clearFailures(): void {
+	failedSpans.length = 0;
+}
+
+// =============================================================================
+// Custom Tracer for Axiom/Error Tracking
+// =============================================================================
+
+/**
+ * Production tracer that captures diagnostic data
+ * - Logs errors with full context
+ * - Stores failed spans for debugging
+ * - Sends to Axiom in production
+ */
+const DiagnosticTracer = Tracer.make({
+	span: (name, parent, context, links, startTime, kind) => {
+		const traceId = parent._tag === "Some" 
+			? parent.value.traceId 
+			: generateTraceId();
+		const spanId = generateSpanId();
+
+		currentTraceId = traceId;
+
+		const attributes = new Map<string, unknown>();
+
+		return {
+			_tag: "Span",
+			name,
+			spanId,
+			traceId,
+			parent,
+			context,
+			links,
+			kind,
+			status: { _tag: "Started", startTime },
+			
+			attribute: (key: string, value: unknown) => {
+				attributes.set(key, value);
+			},
+			
+			event: (eventName: string, _time: bigint, attrs?: Record<string, unknown>) => {
+				// Record significant events (not just debug)
+				if (eventName === "error" || eventName === "exception") {
+					console.error(`[TRACE EVENT] ${name}/${eventName}`, attrs);
+				}
+			},
+			
+			end: (endTime: bigint, exit) => {
+				const durationMs = Number(endTime - startTime) / 1_000_000;
+				const isError = exit._tag === "Failure";
+
+				const diagnosticData: DiagnosticData = {
 					traceId,
 					spanId,
-					name,
-					startTime: new Date(startTime).toISOString(),
-					endTime: new Date(endTime).toISOString(),
-					durationMs: duration,
-					attributes,
-					status: exception ? "ERROR" : "OK",
+					operation: name,
+					status: isError ? "error" : "ok",
+					durationMs,
+					timestamp: new Date().toISOString(),
+					context: Object.fromEntries(attributes),
 				};
 
-				// In development, log to console
-				if (process.env.NODE_ENV === "development") {
-					console.log("[OTEL Span]", JSON.stringify(spanData, null, 2));
+				// Extract error information from the Cause
+				if (isError) {
+					const cause = exit.cause;
+					const defects = Cause.defects(cause);
+					const failures = Cause.failures(cause);
+					
+					if (defects.length > 0) {
+						const defect = defects[0];
+						diagnosticData.error = {
+							type: defect instanceof Error ? defect.name : "Defect",
+							message: defect instanceof Error ? defect.message : String(defect),
+							stack: defect instanceof Error ? defect.stack : undefined,
+						};
+					} else if (failures.length > 0) {
+						const failure = failures[0];
+						diagnosticData.error = {
+							type: failure instanceof Error ? failure.name : typeof failure,
+							message: failure instanceof Error ? failure.message : String(failure),
+							stack: failure instanceof Error ? failure.stack : undefined,
+						};
+					} else {
+						diagnosticData.error = {
+							type: "UnknownError",
+							message: Cause.pretty(cause),
+						};
+					}
+					
+					recordFailedSpan(diagnosticData);
 				}
 
-				// TODO: In production, send to Axiom via OTLP
-				// await sendToAxiom(spanData);
-			}
-		},
+				// In production, send to Axiom
+				// Only send errors or slow operations (>1s) to reduce noise
+				if (isError || durationMs > 1000) {
+					sendToAxiom(diagnosticData);
+				}
+			},
+		};
+	},
+	context: (f, _fiber) => f(),
+});
+
+/**
+ * Send diagnostic data to Axiom
+ */
+async function sendToAxiom(data: DiagnosticData): Promise<void> {
+	const axiomToken = typeof process !== "undefined" ? process.env?.AXIOM_TOKEN : undefined;
+	const axiomDataset = typeof process !== "undefined" ? process.env?.AXIOM_DATASET : undefined;
+	
+	if (!axiomToken || !axiomDataset) {
+		return; // Axiom not configured
+	}
+
+	try {
+		await fetch("https://api.axiom.co/v1/datasets/" + axiomDataset + "/ingest", {
+			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${axiomToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify([{
+				_time: data.timestamp,
+				traceId: data.traceId,
+				spanId: data.spanId,
+				operation: data.operation,
+				status: data.status,
+				durationMs: data.durationMs,
+				error: data.error,
+				context: data.context,
+			}]),
+		});
+	} catch {
+		// Silently fail - don't break the app for telemetry
+	}
+}
+
+export const DiagnosticTracerLayer = Layer.succeed(Tracer.Tracer, DiagnosticTracer);
+
+// =============================================================================
+// Effect Tracing Helpers with Diagnostic Focus
+// =============================================================================
+
+/**
+ * Wrap an effect with tracing and automatic error annotation
+ * 
+ * @example
+ * ```ts
+ * const login = pipe(
+ *   authenticateUser(email, password),
+ *   withTrace("auth.login", { 
+ *     email,
+ *     method: "password" 
+ *   })
+ * );
+ * ```
+ */
+export function withTrace<A, E, R>(
+	operation: string,
+	context?: Record<string, string | number | boolean>
+) {
+	return (effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, R> => {
+		return pipe(
+			effect,
+			// Add context annotations before the operation
+			Effect.tap(() => {
+				if (context) {
+					return Effect.forEach(
+						Object.entries(context),
+						([key, value]) => Effect.annotateCurrentSpan(key, value),
+						{ discard: true }
+					);
+				}
+				return Effect.void;
+			}),
+			// Wrap with span
+			Effect.withSpan(operation),
+			// On error, add error details to span
+			Effect.tapErrorCause((cause) => 
+				Effect.forEach(
+					[
+						["error.type", Cause.isFailType(cause) ? "Failure" : "Defect"],
+						["error.message", Cause.pretty(cause).slice(0, 500)],
+					] as const,
+					([key, value]) => Effect.annotateCurrentSpan(key, value),
+					{ discard: true }
+				)
+			)
+		);
 	};
 }
 
 /**
- * Live implementation of the OTEL service
+ * Add diagnostic context to the current span
+ * Use this to add information that helps debug failures
+ * 
+ * @example
+ * ```ts
+ * pipe(
+ *   fetchUser(userId),
+ *   Effect.tap((user) => annotate({
+ *     "user.id": user.id,
+ *     "user.role": user.role,
+ *     "user.school": user.school,
+ *   }))
+ * )
+ * ```
  */
-const OtelLive: OtelService = {
-	getCurrentTraceId: () => currentTraceId,
+export function annotate(
+	context: Record<string, string | number | boolean>
+): Effect.Effect<void> {
+	return Effect.forEach(
+		Object.entries(context),
+		([key, value]) => Effect.annotateCurrentSpan(key, value),
+		{ discard: true }
+	);
+}
 
-	startSpan: (name: string, attributes?: Record<string, string | number | boolean>) => {
-		const traceId = currentTraceId ?? generateTraceId();
-		if (!currentTraceId) {
-			currentTraceId = traceId;
-		}
-
-		const span = createSpan(name, traceId);
-
-		if (attributes) {
-			for (const [key, value] of Object.entries(attributes)) {
-				span.setAttribute(key, value);
-			}
-		}
-
-		return span;
-	},
-
-	withSpan: <A, E, R>(
-		name: string,
-		effect: Effect.Effect<A, E, R>,
-		attributes?: Record<string, string | number | boolean>
-	): Effect.Effect<A, E, R> => {
-		return pipe(
-			Effect.sync(() => {
-				const traceId = currentTraceId ?? generateTraceId();
-				if (!currentTraceId) {
-					currentTraceId = traceId;
-				}
-				return createSpan(name, traceId);
-			}),
-			Effect.flatMap((span) => {
-				if (attributes) {
-					for (const [key, value] of Object.entries(attributes)) {
-						span.setAttribute(key, value);
-					}
-				}
-
-				return pipe(
-					effect,
-					Effect.tap(() => Effect.sync(() => span.end())),
-					Effect.tapError((error) =>
-						Effect.sync(() => {
-							if (error instanceof Error) {
-								span.recordException(error);
-							}
-							span.end();
-						})
-					)
-				);
-			})
-		);
-	},
-
-	flush: async () => {
-		// Clear current trace context
-		currentTraceId = undefined;
-		// In production, this would flush any pending spans to Axiom
-	},
-};
+/**
+ * Record an error in the current span with full context
+ */
+export function recordError(
+	error: Error | string,
+	context?: Record<string, string | number | boolean>
+): Effect.Effect<void> {
+	const errorObj = typeof error === "string" ? new Error(error) : error;
+	
+	return Effect.forEach(
+		[
+			["error.occurred", true],
+			["error.type", errorObj.name],
+			["error.message", errorObj.message],
+			...(errorObj.stack ? [["error.stack", errorObj.stack.slice(0, 1000)] as const] : []),
+			...Object.entries(context ?? {}),
+		] as const,
+		([key, value]) => Effect.annotateCurrentSpan(key, value),
+		{ discard: true }
+	);
+}
 
 // =============================================================================
-// Layer
-// =============================================================================
-
-export const OtelLiveLayer = Layer.succeed(Otel, OtelLive);
-
-// =============================================================================
-// Helper Functions (for use outside Effect context)
+// External Integration
 // =============================================================================
 
 /**
- * Get current trace ID for PostHog exception tracking
+ * Get current trace ID for external systems (PostHog, Sentry)
  */
 export function getCurrentTraceId(): string | undefined {
 	return currentTraceId;
 }
 
 /**
- * Start a new trace context
+ * Start a new trace (call at request boundary)
  */
 export function startTrace(): string {
 	currentTraceId = generateTraceId();
@@ -225,43 +353,63 @@ export function startTrace(): string {
 }
 
 /**
- * Clear the current trace context
+ * Clear trace context
  */
 export function clearTrace(): void {
 	currentTraceId = undefined;
 }
 
 /**
- * Simple traced function wrapper for non-Effect code
+ * Get diagnostic info for error reporting
  */
-export function traced<T>(
-	name: string,
+export function getDiagnosticInfo(): { traceId: string | undefined; recentFailures: number } {
+	return {
+		traceId: currentTraceId,
+		recentFailures: failedSpans.length,
+	};
+}
+
+// =============================================================================
+// Legacy Support
+// =============================================================================
+
+/**
+ * Trace an async function (for non-Effect code)
+ */
+export async function tracedAsync<T>(
+	operation: string,
 	fn: () => T | Promise<T>,
-	attributes?: Record<string, string | number | boolean>
+	context?: Record<string, string | number | boolean>
 ): Promise<T> {
-	const span = OtelLive.startSpan(name, attributes);
+	const traceId = currentTraceId ?? generateTraceId();
+	currentTraceId = traceId;
+	const spanId = generateSpanId();
+	const startTime = Date.now();
 
 	try {
-		const result = fn();
-
-		if (result instanceof Promise) {
-			return result
-				.then((value) => {
-					span.end();
-					return value;
-				})
-				.catch((error) => {
-					span.recordException(error instanceof Error ? error : new Error(String(error)));
-					span.end();
-					throw error;
-				});
-		}
-
-		span.end();
-		return Promise.resolve(result);
+		const result = await fn();
+		return result;
 	} catch (error) {
-		span.recordException(error instanceof Error ? error : new Error(String(error)));
-		span.end();
+		const errorObj = error instanceof Error ? error : new Error(String(error));
+		
+		recordFailedSpan({
+			traceId,
+			spanId,
+			operation,
+			status: "error",
+			durationMs: Date.now() - startTime,
+			timestamp: new Date().toISOString(),
+			error: {
+				type: errorObj.name,
+				message: errorObj.message,
+				stack: errorObj.stack,
+			},
+			context: context ?? {},
+		});
+
 		throw error;
 	}
 }
+
+// Re-export Effect utilities
+export { Effect, Tracer };

@@ -211,18 +211,45 @@ const AnalyticsLive: AnalyticsService = {
 };
 
 /**
- * Hash user ID for privacy
- * Uses a simple hash for PostHog identification without sending actual IDs
+ * Hash user ID for privacy using SHA-256
+ * Creates a cryptographically secure hash for PostHog identification
+ */
+async function hashUserIdAsync(userId: string): Promise<string> {
+	if (typeof window !== "undefined" && window.crypto?.subtle) {
+		try {
+			const encoder = new TextEncoder();
+			const data = encoder.encode(userId);
+			const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+			const hashArray = Array.from(new Uint8Array(hashBuffer));
+			const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+			return `user_${hashHex.slice(0, 16)}`; // Use first 16 chars for brevity
+		} catch {
+			// Fallback if crypto fails
+			return hashUserIdSync(userId);
+		}
+	}
+	return hashUserIdSync(userId);
+}
+
+/**
+ * Synchronous hash fallback for server-side or when crypto.subtle is unavailable
+ * Note: This is weaker but serves as a fallback only
+ */
+function hashUserIdSync(userId: string): string {
+	// Use a simple but reasonable hash for fallback
+	let hash = 5381;
+	for (let i = 0; i < userId.length; i++) {
+		hash = ((hash << 5) + hash) ^ userId.charCodeAt(i);
+	}
+	return `user_${Math.abs(hash).toString(16).padStart(8, "0")}`;
+}
+
+/**
+ * Synchronous hash for immediate use (uses fallback)
+ * For async contexts, prefer hashUserIdAsync
  */
 function hashUserId(userId: string): string {
-	// Simple hash function - in production, use crypto.subtle.digest
-	let hash = 0;
-	for (let i = 0; i < userId.length; i++) {
-		const char = userId.charCodeAt(i);
-		hash = (hash << 5) - hash + char;
-		hash = hash & hash; // Convert to 32bit integer
-	}
-	return `user_${Math.abs(hash).toString(16)}`;
+	return hashUserIdSync(userId);
 }
 
 // =============================================================================

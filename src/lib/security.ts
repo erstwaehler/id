@@ -28,7 +28,12 @@ export const securityHeaders: Record<string, string> = {
 		"camera=(), microphone=(), geolocation=(), interest-cohort=()",
 
 	// CSP - Content Security Policy
-	// Note: TanStack Start may require adjustments for inline scripts
+	// Note: 'unsafe-inline' and 'unsafe-eval' are required for TanStack Start/Vite
+	// This is a known limitation of bundlers that use dynamic code evaluation.
+	// For improved security in production:
+	// 1. Implement nonce-based CSP with generateNonce() function below
+	// 2. Use the getCSPWithNonce() function to create per-request CSP headers
+	// 3. Pass the nonce to all inline scripts via data attributes
 	"Content-Security-Policy": [
 		"default-src 'self'",
 		"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://eu.posthog.com https://challenges.cloudflare.com",
@@ -44,6 +49,46 @@ export const securityHeaders: Record<string, string> = {
 		"upgrade-insecure-requests",
 	].join("; "),
 };
+
+/**
+ * Generate a cryptographically secure nonce for CSP
+ * Use this for nonce-based CSP when unsafe-inline is not acceptable
+ */
+export function generateNonce(): string {
+	if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+		const array = new Uint8Array(16);
+		crypto.getRandomValues(array);
+		return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
+	}
+	// Fallback for environments without crypto
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	let nonce = "";
+	for (let i = 0; i < 32; i++) {
+		nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	return nonce;
+}
+
+/**
+ * Get CSP header with nonce for improved security
+ * Use this when you can inject the nonce into all inline scripts
+ */
+export function getCSPWithNonce(nonce: string): string {
+	return [
+		"default-src 'self'",
+		`script-src 'self' 'nonce-${nonce}' https://eu.posthog.com https://challenges.cloudflare.com`,
+		`style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
+		"font-src 'self' https://fonts.gstatic.com",
+		"img-src 'self' data: blob: https:",
+		"connect-src 'self' https://eu.posthog.com https://api.axiom.co https://*.better-auth.com wss:",
+		"frame-src 'self' https://challenges.cloudflare.com",
+		"object-src 'none'",
+		"base-uri 'self'",
+		"form-action 'self'",
+		"frame-ancestors 'self'",
+		"upgrade-insecure-requests",
+	].join("; ");
+}
 
 /**
  * Rate limiting configuration per endpoint type
