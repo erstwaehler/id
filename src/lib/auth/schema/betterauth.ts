@@ -1,12 +1,15 @@
 import { relations } from "drizzle-orm";
 import {
-  pgTable,
+  
+  pgSchema,
   text,
   timestamp,
   boolean,
   integer,
   index,
 } from "drizzle-orm/pg-core";
+
+const pgTable = pgSchema("betterauth").table;
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),

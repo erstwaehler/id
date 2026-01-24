@@ -1,5 +1,4 @@
-// import "server-only"; // disabled for CLI
-
+import "server-only";
 import { randomUUID } from "node:crypto";
 import { passkey } from "@better-auth/passkey";
 import argon2 from "argon2";
@@ -26,7 +25,7 @@ import {
   sendVerificationEmail,
 } from "./email";
 import { ac, admin, student, teacher, team, user } from "./permissions";
-import * as schema from "./auth/schema";
+import * as schema from "./auth/schema/betterauth";
 
 /**
  * EWF-ID Better Auth Configuration
