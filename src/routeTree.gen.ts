@@ -14,12 +14,19 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as DeviceRouteImport } from './routes/device'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ConsentRouteImport } from './routes/consent'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as DiDayRouteImport } from './routes/di.day'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoI18nRouteImport } from './routes/demo.i18n'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminSystemRouteImport } from './routes/admin/system'
+import { Route as AdminAuditRouteImport } from './routes/admin/audit'
+import { Route as AdminApiKeysRouteImport } from './routes/admin/api-keys'
 import { Route as AccountSettingsRouteImport } from './routes/account/settings'
 import { Route as AccountSecurityRouteImport } from './routes/account/security'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
@@ -58,14 +65,29 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeviceRoute = DeviceRouteImport.update({
+  id: '/device',
+  path: '/device',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsentRoute = ConsentRouteImport.update({
+  id: '/consent',
+  path: '/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiDayRoute = DiDayRouteImport.update({
@@ -86,6 +108,26 @@ const DemoI18nRoute = DemoI18nRouteImport.update({
 const DemoBetterAuthRoute = DemoBetterAuthRouteImport.update({
   id: '/demo/better-auth',
   path: '/demo/better-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSystemRoute = AdminSystemRouteImport.update({
+  id: '/admin/system',
+  path: '/admin/system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/admin/audit',
+  path: '/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminApiKeysRoute = AdminApiKeysRouteImport.update({
+  id: '/admin/api-keys',
+  path: '/admin/api-keys',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountSettingsRoute = AccountSettingsRouteImport.update({
@@ -151,7 +193,9 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
+  '/device': typeof DeviceRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -160,10 +204,15 @@ export interface FileRoutesByFullPath {
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/admin/api-keys': typeof AdminApiKeysRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/system': typeof AdminSystemRoute
+  '/admin/users': typeof AdminUsersRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/di/day': typeof DiDayRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
@@ -176,7 +225,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
+  '/device': typeof DeviceRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -185,10 +236,15 @@ export interface FileRoutesByTo {
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/admin/api-keys': typeof AdminApiKeysRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/system': typeof AdminSystemRoute
+  '/admin/users': typeof AdminUsersRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/di/day': typeof DiDayRoute
+  '/admin': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
@@ -202,7 +258,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/consent': typeof ConsentRoute
   '/dashboard': typeof DashboardRoute
+  '/device': typeof DeviceRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -211,10 +269,15 @@ export interface FileRoutesById {
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/admin/api-keys': typeof AdminApiKeysRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/system': typeof AdminSystemRoute
+  '/admin/users': typeof AdminUsersRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/di/day': typeof DiDayRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
@@ -229,7 +292,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/consent'
     | '/dashboard'
+    | '/device'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -238,10 +303,15 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/admin/api-keys'
+    | '/admin/audit'
+    | '/admin/system'
+    | '/admin/users'
     | '/demo/better-auth'
     | '/demo/i18n'
     | '/demo/tanstack-query'
     | '/di/day'
+    | '/admin/'
     | '/api/auth/$'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
@@ -254,7 +324,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/consent'
     | '/dashboard'
+    | '/device'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -263,10 +335,15 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/admin/api-keys'
+    | '/admin/audit'
+    | '/admin/system'
+    | '/admin/users'
     | '/demo/better-auth'
     | '/demo/i18n'
     | '/demo/tanstack-query'
     | '/di/day'
+    | '/admin'
     | '/api/auth/$'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
@@ -279,7 +356,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/consent'
     | '/dashboard'
+    | '/device'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -288,10 +367,15 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/admin/api-keys'
+    | '/admin/audit'
+    | '/admin/system'
+    | '/admin/users'
     | '/demo/better-auth'
     | '/demo/i18n'
     | '/demo/tanstack-query'
     | '/di/day'
+    | '/admin/'
     | '/api/auth/$'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
@@ -305,7 +389,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConsentRoute: typeof ConsentRoute
   DashboardRoute: typeof DashboardRoute
+  DeviceRoute: typeof DeviceRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -314,10 +400,15 @@ export interface RootRouteChildren {
   AccountProfileRoute: typeof AccountProfileRoute
   AccountSecurityRoute: typeof AccountSecurityRoute
   AccountSettingsRoute: typeof AccountSettingsRoute
+  AdminApiKeysRoute: typeof AdminApiKeysRoute
+  AdminAuditRoute: typeof AdminAuditRoute
+  AdminSystemRoute: typeof AdminSystemRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
   DemoI18nRoute: typeof DemoI18nRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   DiDayRoute: typeof DiDayRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoApiTqTodosRoute: typeof DemoApiTqTodosRoute
@@ -366,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/device': {
+      id: '/device'
+      path: '/device'
+      fullPath: '/device'
+      preLoaderRoute: typeof DeviceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -373,11 +471,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/consent': {
+      id: '/consent'
+      path: '/consent'
+      fullPath: '/consent'
+      preLoaderRoute: typeof ConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/di/day': {
@@ -406,6 +518,34 @@ declare module '@tanstack/react-router' {
       path: '/demo/better-auth'
       fullPath: '/demo/better-auth'
       preLoaderRoute: typeof DemoBetterAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/system': {
+      id: '/admin/system'
+      path: '/admin/system'
+      fullPath: '/admin/system'
+      preLoaderRoute: typeof AdminSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/admin/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/api-keys': {
+      id: '/admin/api-keys'
+      path: '/admin/api-keys'
+      fullPath: '/admin/api-keys'
+      preLoaderRoute: typeof AdminApiKeysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/settings': {
@@ -497,7 +637,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConsentRoute: ConsentRoute,
   DashboardRoute: DashboardRoute,
+  DeviceRoute: DeviceRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
@@ -506,10 +648,15 @@ const rootRouteChildren: RootRouteChildren = {
   AccountProfileRoute: AccountProfileRoute,
   AccountSecurityRoute: AccountSecurityRoute,
   AccountSettingsRoute: AccountSettingsRoute,
+  AdminApiKeysRoute: AdminApiKeysRoute,
+  AdminAuditRoute: AdminAuditRoute,
+  AdminSystemRoute: AdminSystemRoute,
+  AdminUsersRoute: AdminUsersRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,
   DemoI18nRoute: DemoI18nRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   DiDayRoute: DiDayRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoApiTqTodosRoute: DemoApiTqTodosRoute,
