@@ -209,16 +209,3 @@ export function sanitizeInput(input: string): string {
 		.replace(/'/g, "&#x27;")
 		.replace(/\//g, "&#x2F;");
 }
-
-/**
- * Generate nonce for CSP
- * Used for inline scripts when needed
- */
-export function generateNonce(): string {
-	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	let nonce = "";
-	for (let i = 0; i < 32; i++) {
-		nonce += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return nonce;
-}

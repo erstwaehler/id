@@ -36,7 +36,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "EWF-ID | Erstwähler Forum Identity",
+				title: `${m.app_name()} | ${m.app_tagline()}`,
 			},
 			{
 				name: "description",
