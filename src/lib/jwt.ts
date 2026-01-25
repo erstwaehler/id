@@ -3,15 +3,23 @@
  * SPEC.md Phase 5 - Task 5.1
  *
  * Provides JWT signing and verification for OIDC
+ * 
+ * In production, set OIDC_PRIVATE_KEY and OIDC_PUBLIC_KEY environment variables
+ * with PEM-encoded RSA keys. If not set, keys will be generated on startup
+ * (not recommended for production as tokens won't survive restarts).
  */
-import { createPrivateKey, createPublicKey, generateKeyPairSync, randomUUID } from "node:crypto";
+import { generateKeyPairSync, randomUUID } from "node:crypto";
 import { SignJWT, importPKCS8, importSPKI, jwtVerify, exportJWK } from "jose";
 
-// Key pair for JWT signing (in production, load from secure storage)
+// Key pair for JWT signing
 let privateKey: CryptoKey | null = null;
 let publicKey: CryptoKey | null = null;
 let jwk: object | null = null;
 const keyId = "ewf-id-key-1";
+
+// Check for production keys in environment
+const ENV_PRIVATE_KEY = process.env.OIDC_PRIVATE_KEY;
+const ENV_PUBLIC_KEY = process.env.OIDC_PUBLIC_KEY;
 
 // Generate RSA key pair on first use
 async function ensureKeys() {
@@ -19,15 +27,28 @@ async function ensureKeys() {
     return { privateKey, publicKey };
   }
 
-  // Generate RSA key pair
-  const { privateKey: privKey, publicKey: pubKey } = generateKeyPairSync("rsa", {
-    modulusLength: 2048,
-    publicKeyEncoding: { type: "spki", format: "pem" },
-    privateKeyEncoding: { type: "pkcs8", format: "pem" },
-  });
+  let privKeyPem: string;
+  let pubKeyPem: string;
 
-  privateKey = await importPKCS8(privKey as string, "RS256");
-  publicKey = await importSPKI(pubKey as string, "RS256");
+  if (ENV_PRIVATE_KEY && ENV_PUBLIC_KEY) {
+    // Use production keys from environment
+    privKeyPem = ENV_PRIVATE_KEY.replace(/\\n/g, "\n");
+    pubKeyPem = ENV_PUBLIC_KEY.replace(/\\n/g, "\n");
+    console.log("[JWT] Using RSA keys from environment variables");
+  } else {
+    // Generate ephemeral keys (development only)
+    console.warn("[JWT] WARNING: Generating ephemeral RSA keys. Set OIDC_PRIVATE_KEY and OIDC_PUBLIC_KEY for production.");
+    const { privateKey: privKey, publicKey: pubKey } = generateKeyPairSync("rsa", {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: "spki", format: "pem" },
+      privateKeyEncoding: { type: "pkcs8", format: "pem" },
+    });
+    privKeyPem = privKey as string;
+    pubKeyPem = pubKey as string;
+  }
+
+  privateKey = await importPKCS8(privKeyPem, "RS256");
+  publicKey = await importSPKI(pubKeyPem, "RS256");
 
   // Export public key as JWK
   jwk = await exportJWK(publicKey);

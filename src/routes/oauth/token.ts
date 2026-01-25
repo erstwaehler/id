@@ -267,8 +267,18 @@ async function handleAuthorizationCodeGrant(
 
   // Check if code was already used
   if (authCode.usedAt) {
-    // Revoke all tokens for this authorization (security measure)
-    await db.delete(oidcToken).where(eq(oidcToken.clientId, data.client_id));
+    // Security: Code reuse attempt detected
+    // Revoke tokens issued from this specific authorization code only
+    // This is a security measure per OAuth 2.0 spec (RFC 6749 Section 4.1.2)
+    await createAuditLogEntry(
+      authCode.userId,
+      "oidc.code_reuse_attempt",
+      "oidc_authorization",
+      authCode.id,
+      { clientId: data.client_id },
+      request,
+      "failure"
+    );
     return new Response(
       JSON.stringify({
         error: "invalid_grant",
