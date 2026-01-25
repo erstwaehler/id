@@ -6,9 +6,9 @@
  * POST /api/users/me/api-keys - Create API key
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { apiKey, auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { apiKey, auditLog } from "~/lib/auth/schema/audit";
 import { eq, and, desc } from "drizzle-orm";
 import { randomUUID, randomBytes, createHash } from "node:crypto";
 import argon2 from "argon2";
@@ -35,7 +35,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -45,7 +45,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -109,7 +112,7 @@ export const Route = createFileRoute("/api/users/me/api-keys")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -146,7 +149,7 @@ export const Route = createFileRoute("/api/users/me/api-keys")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -166,7 +169,7 @@ export const Route = createFileRoute("/api/users/me/api-keys")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -175,7 +178,9 @@ export const Route = createFileRoute("/api/users/me/api-keys")({
         const keyHash = await hashApiKey(key);
 
         // Calculate expiration
-        const expiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000) : null;
+        const expiresAt = expiresIn
+          ? new Date(Date.now() + expiresIn * 1000)
+          : null;
 
         // Store key
         const keyId = randomUUID();
@@ -191,7 +196,14 @@ export const Route = createFileRoute("/api/users/me/api-keys")({
           enabled: true,
         });
 
-        await createAuditLogEntry(userId, "api_key.create", "api_key", keyId, { name }, request);
+        await createAuditLogEntry(
+          userId,
+          "api_key.create",
+          "api_key",
+          keyId,
+          { name },
+          request,
+        );
 
         // Return key only once - it cannot be retrieved again
         return new Response(
@@ -208,7 +220,7 @@ export const Route = createFileRoute("/api/users/me/api-keys")({
           {
             status: 201,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

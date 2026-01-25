@@ -5,8 +5,8 @@
  * POST /oauth/revoke - Revoke tokens
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "@/lib/auth-db";
-import { oidcClient, oidcToken, auditLog } from "@/lib/auth/schema/audit";
+import { db } from "~/lib/auth-db";
+import { oidcClient, oidcToken, auditLog } from "~/lib/auth/schema/audit";
 import { eq, and } from "drizzle-orm";
 import { randomUUID, createHash } from "node:crypto";
 import argon2 from "argon2";
@@ -26,7 +26,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -36,7 +36,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -45,7 +48,10 @@ async function createAuditLogEntry(
   }
 }
 
-async function verifyClientSecret(clientSecretHash: string, providedSecret: string): Promise<boolean> {
+async function verifyClientSecret(
+  clientSecretHash: string,
+  providedSecret: string,
+): Promise<boolean> {
   try {
     return await argon2.verify(clientSecretHash, providedSecret);
   } catch {
@@ -53,7 +59,9 @@ async function verifyClientSecret(clientSecretHash: string, providedSecret: stri
   }
 }
 
-function parseBasicAuth(authHeader: string | null): { clientId: string; clientSecret: string } | null {
+function parseBasicAuth(
+  authHeader: string | null,
+): { clientId: string; clientSecret: string } | null {
   if (!authHeader?.startsWith("Basic ")) {
     return null;
   }
@@ -83,7 +91,10 @@ export const Route = createFileRoute("/oauth/revoke")({
           body = await request.json();
         } else if (contentType.includes("application/x-www-form-urlencoded")) {
           const formData = await request.formData();
-          body = Object.fromEntries(formData.entries()) as Record<string, string>;
+          body = Object.fromEntries(formData.entries()) as Record<
+            string,
+            string
+          >;
         } else {
           // Per RFC 7009, always return 200
           return new Response(null, { status: 200 });
@@ -102,10 +113,15 @@ export const Route = createFileRoute("/oauth/revoke")({
           return new Response(null, { status: 200 });
         }
 
-        const { token, token_type_hint, client_id, client_secret } = validation.data;
+        const { token, token_type_hint, client_id, client_secret } =
+          validation.data;
 
         // Validate client
-        const [client] = await db.select().from(oidcClient).where(eq(oidcClient.clientId, client_id)).limit(1);
+        const [client] = await db
+          .select()
+          .from(oidcClient)
+          .where(eq(oidcClient.clientId, client_id))
+          .limit(1);
 
         if (!client || !client.enabled) {
           return new Response(null, { status: 200 });
@@ -113,7 +129,10 @@ export const Route = createFileRoute("/oauth/revoke")({
 
         // Verify client secret if required
         if (client.tokenEndpointAuthMethod !== "none" && client_secret) {
-          const validSecret = await verifyClientSecret(client.clientSecretHash, client_secret);
+          const validSecret = await verifyClientSecret(
+            client.clientSecretHash,
+            client_secret,
+          );
           if (!validSecret) {
             return new Response(
               JSON.stringify({
@@ -122,24 +141,35 @@ export const Route = createFileRoute("/oauth/revoke")({
               {
                 status: 401,
                 headers: { "Content-Type": "application/json" },
-              }
+              },
             );
           }
         }
 
         // Find and revoke token
         const tokenHash = await hashToken(token);
-        const tokenTypes = token_type_hint ? [token_type_hint] : ["access_token", "refresh_token"];
+        const tokenTypes = token_type_hint
+          ? [token_type_hint]
+          : ["access_token", "refresh_token"];
 
         for (const tokenType of tokenTypes) {
           const [storedToken] = await db
             .select()
             .from(oidcToken)
-            .where(and(eq(oidcToken.tokenHash, tokenHash), eq(oidcToken.type, tokenType), eq(oidcToken.clientId, client_id)))
+            .where(
+              and(
+                eq(oidcToken.tokenHash, tokenHash),
+                eq(oidcToken.type, tokenType),
+                eq(oidcToken.clientId, client_id),
+              ),
+            )
             .limit(1);
 
           if (storedToken && !storedToken.revokedAt) {
-            await db.update(oidcToken).set({ revokedAt: new Date() }).where(eq(oidcToken.id, storedToken.id));
+            await db
+              .update(oidcToken)
+              .set({ revokedAt: new Date() })
+              .where(eq(oidcToken.id, storedToken.id));
 
             await createAuditLogEntry(
               storedToken.userId,
@@ -147,7 +177,7 @@ export const Route = createFileRoute("/oauth/revoke")({
               "oidc_token",
               storedToken.id,
               { clientId: client_id, tokenType },
-              request
+              request,
             );
 
             // If revoking refresh token, also revoke associated access tokens
@@ -155,7 +185,13 @@ export const Route = createFileRoute("/oauth/revoke")({
               await db
                 .update(oidcToken)
                 .set({ revokedAt: new Date() })
-                .where(and(eq(oidcToken.userId, storedToken.userId), eq(oidcToken.clientId, client_id), eq(oidcToken.type, "access_token")));
+                .where(
+                  and(
+                    eq(oidcToken.userId, storedToken.userId),
+                    eq(oidcToken.clientId, client_id),
+                    eq(oidcToken.type, "access_token"),
+                  ),
+                );
             }
 
             break;

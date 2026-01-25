@@ -6,9 +6,9 @@
  * POST /api/admin/oidc-clients - Create OIDC client (admin only)
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { oidcClient, auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { oidcClient, auditLog } from "~/lib/auth/schema/audit";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID, randomBytes } from "node:crypto";
 import argon2 from "argon2";
@@ -25,9 +25,13 @@ const createOidcClientSchema = z.object({
   redirectUris: z.array(z.string().url()).min(1),
   postLogoutRedirectUris: z.array(z.string().url()).default([]),
   allowedScopes: z.array(z.string()).default(["openid", "profile", "email"]),
-  grantTypes: z.array(z.string()).default(["authorization_code", "refresh_token"]),
+  grantTypes: z
+    .array(z.string())
+    .default(["authorization_code", "refresh_token"]),
   responseTypes: z.array(z.string()).default(["code"]),
-  tokenEndpointAuthMethod: z.enum(["client_secret_basic", "client_secret_post", "none"]).default("client_secret_basic"),
+  tokenEndpointAuthMethod: z
+    .enum(["client_secret_basic", "client_secret_post", "none"])
+    .default("client_secret_basic"),
   accessTokenTtl: z.number().min(300).max(86400).default(3600),
   refreshTokenTtl: z.number().min(86400).max(31536000).default(2592000),
   idTokenTtl: z.number().min(300).max(86400).default(3600),
@@ -59,7 +63,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -69,7 +73,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -101,10 +108,13 @@ export const Route = createFileRoute("/api/admin/oidc-clients")({
         }
 
         if (!isTeamOrAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - team role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - team role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const clients = await db
@@ -136,7 +146,7 @@ export const Route = createFileRoute("/api/admin/oidc-clients")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -152,10 +162,13 @@ export const Route = createFileRoute("/api/admin/oidc-clients")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         let body: unknown;
@@ -178,7 +191,7 @@ export const Route = createFileRoute("/api/admin/oidc-clients")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -221,7 +234,7 @@ export const Route = createFileRoute("/api/admin/oidc-clients")({
           "oidc_client",
           id,
           { name: validation.data.name, clientId },
-          request
+          request,
         );
 
         // Return credentials only once
@@ -233,12 +246,13 @@ export const Route = createFileRoute("/api/admin/oidc-clients")({
             name: validation.data.name,
             redirectUris: validation.data.redirectUris,
             allowedScopes: validation.data.allowedScopes,
-            warning: "Save the client_secret securely. It will not be shown again.",
+            warning:
+              "Save the client_secret securely. It will not be shown again.",
           }),
           {
             status: 201,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

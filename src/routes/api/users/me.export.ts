@@ -5,10 +5,20 @@
  * POST /api/users/me/export - Request data export
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable, session as sessionTable, account as accountTable, passkey as passkeyTable } from "@/lib/auth/schema/betterauth";
-import { auditLog, dataExportRequest, userSchool, apiKey } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import {
+  user as userTable,
+  session as sessionTable,
+  account as accountTable,
+  passkey as passkeyTable,
+} from "~/lib/auth/schema/betterauth";
+import {
+  auditLog,
+  dataExportRequest,
+  userSchool,
+  apiKey,
+} from "~/lib/auth/schema/audit";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
@@ -26,7 +36,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -36,7 +46,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -79,22 +92,41 @@ export const Route = createFileRoute("/api/users/me/export")({
             {
               status: 409,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
         // Collect all user data
-        const [userData] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [userData] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
-        const sessions = await db.select().from(sessionTable).where(eq(sessionTable.userId, userId));
+        const sessions = await db
+          .select()
+          .from(sessionTable)
+          .where(eq(sessionTable.userId, userId));
 
-        const accounts = await db.select().from(accountTable).where(eq(accountTable.userId, userId));
+        const accounts = await db
+          .select()
+          .from(accountTable)
+          .where(eq(accountTable.userId, userId));
 
-        const passkeys = await db.select().from(passkeyTable).where(eq(passkeyTable.userId, userId));
+        const passkeys = await db
+          .select()
+          .from(passkeyTable)
+          .where(eq(passkeyTable.userId, userId));
 
-        const schools = await db.select().from(userSchool).where(eq(userSchool.userId, userId));
+        const schools = await db
+          .select()
+          .from(userSchool)
+          .where(eq(userSchool.userId, userId));
 
-        const apiKeys = await db.select().from(apiKey).where(eq(apiKey.userId, userId));
+        const apiKeys = await db
+          .select()
+          .from(apiKey)
+          .where(eq(apiKey.userId, userId));
 
         const logs = await db
           .select()
@@ -186,7 +218,14 @@ export const Route = createFileRoute("/api/users/me/export")({
           completedAt: new Date(),
         });
 
-        await createAuditLogEntry(userId, "data_export.request", "user", userId, {}, request);
+        await createAuditLogEntry(
+          userId,
+          "data_export.request",
+          "user",
+          userId,
+          {},
+          request,
+        );
 
         // Return the data directly (in production, this would be a download link)
         return new Response(JSON.stringify(exportData), {

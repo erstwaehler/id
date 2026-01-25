@@ -4,8 +4,8 @@
  *
  * Shared audit logging functionality for all API routes
  */
-import { db } from "@/lib/auth-db";
-import { auditLog } from "@/lib/auth/schema/audit";
+import { db } from "~/lib/auth-db";
+import { auditLog } from "~/lib/auth/schema/audit";
 import { randomUUID } from "node:crypto";
 
 export interface AuditLogOptions {
@@ -23,13 +23,13 @@ export interface AuditLogOptions {
 
 /**
  * Create an audit log entry
- * 
+ *
  * @param options - Audit log options
  * @param request - The HTTP request (for IP and user agent extraction)
  */
 export async function createAuditLog(
   options: AuditLogOptions,
-  request?: Request
+  request?: Request,
 ): Promise<void> {
   try {
     const ipAddress = request
@@ -163,4 +163,5 @@ export const AuditResources = {
   ANALYTICS: "analytics",
 } as const;
 
-export type AuditResource = (typeof AuditResources)[keyof typeof AuditResources];
+export type AuditResource =
+  (typeof AuditResources)[keyof typeof AuditResources];

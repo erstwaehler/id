@@ -5,10 +5,10 @@
  * GET /api/admin/audit-logs - List audit logs (paginated, filtered)
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable } from "@/lib/auth/schema/betterauth";
-import { auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import { auditLog } from "~/lib/auth/schema/audit";
 import { eq, desc, asc, ilike, or, and, gte, lte, count } from "drizzle-orm";
 import { z } from "zod";
 
@@ -50,10 +50,13 @@ export const Route = createFileRoute("/api/admin/audit-logs")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Parse query params
@@ -70,11 +73,21 @@ export const Route = createFileRoute("/api/admin/audit-logs")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
-        const { page, limit, userId, action, resource, result, startDate, endDate, sortOrder } = validation.data;
+        const {
+          page,
+          limit,
+          userId,
+          action,
+          resource,
+          result,
+          startDate,
+          endDate,
+          sortOrder,
+        } = validation.data;
         const offset = (page - 1) * limit;
 
         // Build where conditions
@@ -104,13 +117,20 @@ export const Route = createFileRoute("/api/admin/audit-logs")({
           conditions.push(lte(auditLog.timestamp, new Date(endDate)));
         }
 
-        const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+        const whereClause =
+          conditions.length > 0 ? and(...conditions) : undefined;
 
         // Build sort
-        const orderBy = sortOrder === "asc" ? asc(auditLog.timestamp) : desc(auditLog.timestamp);
+        const orderBy =
+          sortOrder === "asc"
+            ? asc(auditLog.timestamp)
+            : desc(auditLog.timestamp);
 
         // Get total count
-        const [countResult] = await db.select({ count: count() }).from(auditLog).where(whereClause);
+        const [countResult] = await db
+          .select({ count: count() })
+          .from(auditLog)
+          .where(whereClause);
 
         const totalCount = countResult?.count || 0;
 
@@ -174,7 +194,7 @@ export const Route = createFileRoute("/api/admin/audit-logs")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

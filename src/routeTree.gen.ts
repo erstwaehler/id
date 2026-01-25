@@ -10,24 +10,66 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OauthUserinfoRouteImport } from './routes/oauth/userinfo'
+import { Route as OauthTokenRouteImport } from './routes/oauth/token'
+import { Route as OauthRevokeRouteImport } from './routes/oauth/revoke'
+import { Route as OauthAuthorizeRouteImport } from './routes/oauth/authorize'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoStorybookRouteImport } from './routes/demo/storybook'
 import { Route as DemoI18nRouteImport } from './routes/demo.i18n'
 import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiTqTodosRouteImport } from './routes/demo/api.tq-todos'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
+import { Route as ApiUsersMeRouteImport } from './routes/api/users/me'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
+import { Route as ApiAdminSchoolsRouteImport } from './routes/api/admin/schools'
+import { Route as ApiAdminOidcClientsRouteImport } from './routes/api/admin/oidc-clients'
+import { Route as ApiAdminAuditLogsRouteImport } from './routes/api/admin/audit-logs'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
+import { Route as ApiUsersMeSessionsRouteImport } from './routes/api/users/me.sessions'
+import { Route as ApiUsersMeExportRouteImport } from './routes/api/users/me.export'
+import { Route as ApiUsersMeDeleteRouteImport } from './routes/api/users/me.delete'
+import { Route as ApiUsersMeApiKeysRouteImport } from './routes/api/users/me.api-keys'
+import { Route as ApiAdminUsersUserIdRouteImport } from './routes/api/admin/users.$userId'
+import { Route as ApiAdminSchoolsSchoolIdRouteImport } from './routes/api/admin/schools.$schoolId'
+import { Route as ApiAdminAnalyticsOverviewRouteImport } from './routes/api/admin/analytics.overview'
+import { Route as ApiUsersMeSessionsSessionIdRouteImport } from './routes/api/users/me.sessions.$sessionId'
+import { Route as ApiUsersMeApiKeysKeyIdRouteImport } from './routes/api/users/me.api-keys.$keyId'
+import { Route as ApiAdminUsersUserIdUnsuspendRouteImport } from './routes/api/admin/users.$userId.unsuspend'
+import { Route as ApiAdminUsersUserIdSuspendRouteImport } from './routes/api/admin/users.$userId.suspend'
+import { Route as ApiAdminUsersUserIdRolesRouteImport } from './routes/api/admin/users.$userId.roles'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthUserinfoRoute = OauthUserinfoRouteImport.update({
+  id: '/oauth/userinfo',
+  path: '/oauth/userinfo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthTokenRoute = OauthTokenRouteImport.update({
+  id: '/oauth/token',
+  path: '/oauth/token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthRevokeRoute = OauthRevokeRouteImport.update({
+  id: '/oauth/revoke',
+  path: '/oauth/revoke',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthAuthorizeRoute = OauthAuthorizeRouteImport.update({
+  id: '/oauth/authorize',
+  path: '/oauth/authorize',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
@@ -55,6 +97,11 @@ const DemoBetterAuthRoute = DemoBetterAuthRouteImport.update({
   path: '/demo/better-auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
   path: '/demo/start/server-funcs',
@@ -75,9 +122,34 @@ const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
   path: '/demo/api/names',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUsersMeRoute = ApiUsersMeRouteImport.update({
+  id: '/api/users/me',
+  path: '/api/users/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
+  id: '/api/admin/users',
+  path: '/api/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSchoolsRoute = ApiAdminSchoolsRouteImport.update({
+  id: '/api/admin/schools',
+  path: '/api/admin/schools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminOidcClientsRoute = ApiAdminOidcClientsRouteImport.update({
+  id: '/api/admin/oidc-clients',
+  path: '/api/admin/oidc-clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminAuditLogsRoute = ApiAdminAuditLogsRouteImport.update({
+  id: '/api/admin/audit-logs',
+  path: '/api/admin/audit-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
@@ -100,125 +172,333 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
   path: '/demo/start/ssr/data-only',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUsersMeSessionsRoute = ApiUsersMeSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => ApiUsersMeRoute,
+} as any)
+const ApiUsersMeExportRoute = ApiUsersMeExportRouteImport.update({
+  id: '/export',
+  path: '/export',
+  getParentRoute: () => ApiUsersMeRoute,
+} as any)
+const ApiUsersMeDeleteRoute = ApiUsersMeDeleteRouteImport.update({
+  id: '/delete',
+  path: '/delete',
+  getParentRoute: () => ApiUsersMeRoute,
+} as any)
+const ApiUsersMeApiKeysRoute = ApiUsersMeApiKeysRouteImport.update({
+  id: '/api-keys',
+  path: '/api-keys',
+  getParentRoute: () => ApiUsersMeRoute,
+} as any)
+const ApiAdminUsersUserIdRoute = ApiAdminUsersUserIdRouteImport.update({
+  id: '/$userId',
+  path: '/$userId',
+  getParentRoute: () => ApiAdminUsersRoute,
+} as any)
+const ApiAdminSchoolsSchoolIdRoute = ApiAdminSchoolsSchoolIdRouteImport.update({
+  id: '/$schoolId',
+  path: '/$schoolId',
+  getParentRoute: () => ApiAdminSchoolsRoute,
+} as any)
+const ApiAdminAnalyticsOverviewRoute =
+  ApiAdminAnalyticsOverviewRouteImport.update({
+    id: '/api/admin/analytics/overview',
+    path: '/api/admin/analytics/overview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiUsersMeSessionsSessionIdRoute =
+  ApiUsersMeSessionsSessionIdRouteImport.update({
+    id: '/$sessionId',
+    path: '/$sessionId',
+    getParentRoute: () => ApiUsersMeSessionsRoute,
+  } as any)
+const ApiUsersMeApiKeysKeyIdRoute = ApiUsersMeApiKeysKeyIdRouteImport.update({
+  id: '/$keyId',
+  path: '/$keyId',
+  getParentRoute: () => ApiUsersMeApiKeysRoute,
+} as any)
+const ApiAdminUsersUserIdUnsuspendRoute =
+  ApiAdminUsersUserIdUnsuspendRouteImport.update({
+    id: '/unsuspend',
+    path: '/unsuspend',
+    getParentRoute: () => ApiAdminUsersUserIdRoute,
+  } as any)
+const ApiAdminUsersUserIdSuspendRoute =
+  ApiAdminUsersUserIdSuspendRouteImport.update({
+    id: '/suspend',
+    path: '/suspend',
+    getParentRoute: () => ApiAdminUsersUserIdRoute,
+  } as any)
+const ApiAdminUsersUserIdRolesRoute =
+  ApiAdminUsersUserIdRolesRouteImport.update({
+    id: '/roles',
+    path: '/roles',
+    getParentRoute: () => ApiAdminUsersUserIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/storybook': typeof DemoStorybookRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/oauth/authorize': typeof OauthAuthorizeRoute
+  '/oauth/revoke': typeof OauthRevokeRoute
+  '/oauth/token': typeof OauthTokenRoute
+  '/oauth/userinfo': typeof OauthUserinfoRoute
+  '/api/admin/audit-logs': typeof ApiAdminAuditLogsRoute
+  '/api/admin/oidc-clients': typeof ApiAdminOidcClientsRoute
+  '/api/admin/schools': typeof ApiAdminSchoolsRouteWithChildren
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/users/me': typeof ApiUsersMeRouteWithChildren
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
+  '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
+  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
+  '/api/users/me/api-keys': typeof ApiUsersMeApiKeysRouteWithChildren
+  '/api/users/me/delete': typeof ApiUsersMeDeleteRoute
+  '/api/users/me/export': typeof ApiUsersMeExportRoute
+  '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
+  '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
+  '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
+  '/api/users/me/api-keys/$keyId': typeof ApiUsersMeApiKeysKeyIdRoute
+  '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/storybook': typeof DemoStorybookRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/oauth/authorize': typeof OauthAuthorizeRoute
+  '/oauth/revoke': typeof OauthRevokeRoute
+  '/oauth/token': typeof OauthTokenRoute
+  '/oauth/userinfo': typeof OauthUserinfoRoute
+  '/api/admin/audit-logs': typeof ApiAdminAuditLogsRoute
+  '/api/admin/oidc-clients': typeof ApiAdminOidcClientsRoute
+  '/api/admin/schools': typeof ApiAdminSchoolsRouteWithChildren
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/users/me': typeof ApiUsersMeRouteWithChildren
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
+  '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
+  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
+  '/api/users/me/api-keys': typeof ApiUsersMeApiKeysRouteWithChildren
+  '/api/users/me/delete': typeof ApiUsersMeDeleteRoute
+  '/api/users/me/export': typeof ApiUsersMeExportRoute
+  '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
+  '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
+  '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
+  '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
+  '/api/users/me/api-keys/$keyId': typeof ApiUsersMeApiKeysKeyIdRoute
+  '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/health': typeof ApiHealthRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/storybook': typeof DemoStorybookRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/oauth/authorize': typeof OauthAuthorizeRoute
+  '/oauth/revoke': typeof OauthRevokeRoute
+  '/oauth/token': typeof OauthTokenRoute
+  '/oauth/userinfo': typeof OauthUserinfoRoute
+  '/api/admin/audit-logs': typeof ApiAdminAuditLogsRoute
+  '/api/admin/oidc-clients': typeof ApiAdminOidcClientsRoute
+  '/api/admin/schools': typeof ApiAdminSchoolsRouteWithChildren
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/users/me': typeof ApiUsersMeRouteWithChildren
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
+  '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
+  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
+  '/api/users/me/api-keys': typeof ApiUsersMeApiKeysRouteWithChildren
+  '/api/users/me/delete': typeof ApiUsersMeDeleteRoute
+  '/api/users/me/export': typeof ApiUsersMeExportRoute
+  '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
+  '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
+  '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
+  '/api/users/me/api-keys/$keyId': typeof ApiUsersMeApiKeysKeyIdRoute
+  '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/api/health'
     | '/demo/better-auth'
     | '/demo/drizzle'
     | '/demo/i18n'
     | '/demo/storybook'
     | '/demo/tanstack-query'
+    | '/oauth/authorize'
+    | '/oauth/revoke'
+    | '/oauth/token'
+    | '/oauth/userinfo'
+    | '/api/admin/audit-logs'
+    | '/api/admin/oidc-clients'
+    | '/api/admin/schools'
+    | '/api/admin/users'
     | '/api/auth/$'
+    | '/api/users/me'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/api/admin/analytics/overview'
+    | '/api/admin/schools/$schoolId'
+    | '/api/admin/users/$userId'
+    | '/api/users/me/api-keys'
+    | '/api/users/me/delete'
+    | '/api/users/me/export'
+    | '/api/users/me/sessions'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
     | '/demo/start/ssr/'
+    | '/api/admin/users/$userId/roles'
+    | '/api/admin/users/$userId/suspend'
+    | '/api/admin/users/$userId/unsuspend'
+    | '/api/users/me/api-keys/$keyId'
+    | '/api/users/me/sessions/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/api/health'
     | '/demo/better-auth'
     | '/demo/drizzle'
     | '/demo/i18n'
     | '/demo/storybook'
     | '/demo/tanstack-query'
+    | '/oauth/authorize'
+    | '/oauth/revoke'
+    | '/oauth/token'
+    | '/oauth/userinfo'
+    | '/api/admin/audit-logs'
+    | '/api/admin/oidc-clients'
+    | '/api/admin/schools'
+    | '/api/admin/users'
     | '/api/auth/$'
+    | '/api/users/me'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/api/admin/analytics/overview'
+    | '/api/admin/schools/$schoolId'
+    | '/api/admin/users/$userId'
+    | '/api/users/me/api-keys'
+    | '/api/users/me/delete'
+    | '/api/users/me/export'
+    | '/api/users/me/sessions'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
     | '/demo/start/ssr'
+    | '/api/admin/users/$userId/roles'
+    | '/api/admin/users/$userId/suspend'
+    | '/api/admin/users/$userId/unsuspend'
+    | '/api/users/me/api-keys/$keyId'
+    | '/api/users/me/sessions/$sessionId'
   id:
     | '__root__'
     | '/'
+    | '/api/health'
     | '/demo/better-auth'
     | '/demo/drizzle'
     | '/demo/i18n'
     | '/demo/storybook'
     | '/demo/tanstack-query'
+    | '/oauth/authorize'
+    | '/oauth/revoke'
+    | '/oauth/token'
+    | '/oauth/userinfo'
+    | '/api/admin/audit-logs'
+    | '/api/admin/oidc-clients'
+    | '/api/admin/schools'
+    | '/api/admin/users'
     | '/api/auth/$'
+    | '/api/users/me'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/api/admin/analytics/overview'
+    | '/api/admin/schools/$schoolId'
+    | '/api/admin/users/$userId'
+    | '/api/users/me/api-keys'
+    | '/api/users/me/delete'
+    | '/api/users/me/export'
+    | '/api/users/me/sessions'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
     | '/demo/start/ssr/'
+    | '/api/admin/users/$userId/roles'
+    | '/api/admin/users/$userId/suspend'
+    | '/api/admin/users/$userId/unsuspend'
+    | '/api/users/me/api-keys/$keyId'
+    | '/api/users/me/sessions/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
   DemoDrizzleRoute: typeof DemoDrizzleRoute
   DemoI18nRoute: typeof DemoI18nRoute
   DemoStorybookRoute: typeof DemoStorybookRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
+  OauthAuthorizeRoute: typeof OauthAuthorizeRoute
+  OauthRevokeRoute: typeof OauthRevokeRoute
+  OauthTokenRoute: typeof OauthTokenRoute
+  OauthUserinfoRoute: typeof OauthUserinfoRoute
+  ApiAdminAuditLogsRoute: typeof ApiAdminAuditLogsRoute
+  ApiAdminOidcClientsRoute: typeof ApiAdminOidcClientsRoute
+  ApiAdminSchoolsRoute: typeof ApiAdminSchoolsRouteWithChildren
+  ApiAdminUsersRoute: typeof ApiAdminUsersRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiUsersMeRoute: typeof ApiUsersMeRouteWithChildren
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoApiTqTodosRoute: typeof DemoApiTqTodosRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
+  ApiAdminAnalyticsOverviewRoute: typeof ApiAdminAnalyticsOverviewRoute
   DemoStartSsrDataOnlyRoute: typeof DemoStartSsrDataOnlyRoute
   DemoStartSsrFullSsrRoute: typeof DemoStartSsrFullSsrRoute
   DemoStartSsrSpaModeRoute: typeof DemoStartSsrSpaModeRoute
@@ -232,6 +512,34 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/userinfo': {
+      id: '/oauth/userinfo'
+      path: '/oauth/userinfo'
+      fullPath: '/oauth/userinfo'
+      preLoaderRoute: typeof OauthUserinfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/token': {
+      id: '/oauth/token'
+      path: '/oauth/token'
+      fullPath: '/oauth/token'
+      preLoaderRoute: typeof OauthTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/revoke': {
+      id: '/oauth/revoke'
+      path: '/oauth/revoke'
+      fullPath: '/oauth/revoke'
+      preLoaderRoute: typeof OauthRevokeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/authorize': {
+      id: '/oauth/authorize'
+      path: '/oauth/authorize'
+      fullPath: '/oauth/authorize'
+      preLoaderRoute: typeof OauthAuthorizeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/tanstack-query': {
@@ -269,6 +577,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoBetterAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
       path: '/demo/start/server-funcs'
@@ -297,11 +612,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoApiNamesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/users/me': {
+      id: '/api/users/me'
+      path: '/api/users/me'
+      fullPath: '/api/users/me'
+      preLoaderRoute: typeof ApiUsersMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/users': {
+      id: '/api/admin/users'
+      path: '/api/admin/users'
+      fullPath: '/api/admin/users'
+      preLoaderRoute: typeof ApiAdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/schools': {
+      id: '/api/admin/schools'
+      path: '/api/admin/schools'
+      fullPath: '/api/admin/schools'
+      preLoaderRoute: typeof ApiAdminSchoolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/oidc-clients': {
+      id: '/api/admin/oidc-clients'
+      path: '/api/admin/oidc-clients'
+      fullPath: '/api/admin/oidc-clients'
+      preLoaderRoute: typeof ApiAdminOidcClientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/audit-logs': {
+      id: '/api/admin/audit-logs'
+      path: '/api/admin/audit-logs'
+      fullPath: '/api/admin/audit-logs'
+      preLoaderRoute: typeof ApiAdminAuditLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/ssr/': {
@@ -332,21 +682,195 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoStartSsrDataOnlyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/users/me/sessions': {
+      id: '/api/users/me/sessions'
+      path: '/sessions'
+      fullPath: '/api/users/me/sessions'
+      preLoaderRoute: typeof ApiUsersMeSessionsRouteImport
+      parentRoute: typeof ApiUsersMeRoute
+    }
+    '/api/users/me/export': {
+      id: '/api/users/me/export'
+      path: '/export'
+      fullPath: '/api/users/me/export'
+      preLoaderRoute: typeof ApiUsersMeExportRouteImport
+      parentRoute: typeof ApiUsersMeRoute
+    }
+    '/api/users/me/delete': {
+      id: '/api/users/me/delete'
+      path: '/delete'
+      fullPath: '/api/users/me/delete'
+      preLoaderRoute: typeof ApiUsersMeDeleteRouteImport
+      parentRoute: typeof ApiUsersMeRoute
+    }
+    '/api/users/me/api-keys': {
+      id: '/api/users/me/api-keys'
+      path: '/api-keys'
+      fullPath: '/api/users/me/api-keys'
+      preLoaderRoute: typeof ApiUsersMeApiKeysRouteImport
+      parentRoute: typeof ApiUsersMeRoute
+    }
+    '/api/admin/users/$userId': {
+      id: '/api/admin/users/$userId'
+      path: '/$userId'
+      fullPath: '/api/admin/users/$userId'
+      preLoaderRoute: typeof ApiAdminUsersUserIdRouteImport
+      parentRoute: typeof ApiAdminUsersRoute
+    }
+    '/api/admin/schools/$schoolId': {
+      id: '/api/admin/schools/$schoolId'
+      path: '/$schoolId'
+      fullPath: '/api/admin/schools/$schoolId'
+      preLoaderRoute: typeof ApiAdminSchoolsSchoolIdRouteImport
+      parentRoute: typeof ApiAdminSchoolsRoute
+    }
+    '/api/admin/analytics/overview': {
+      id: '/api/admin/analytics/overview'
+      path: '/api/admin/analytics/overview'
+      fullPath: '/api/admin/analytics/overview'
+      preLoaderRoute: typeof ApiAdminAnalyticsOverviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/users/me/sessions/$sessionId': {
+      id: '/api/users/me/sessions/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/api/users/me/sessions/$sessionId'
+      preLoaderRoute: typeof ApiUsersMeSessionsSessionIdRouteImport
+      parentRoute: typeof ApiUsersMeSessionsRoute
+    }
+    '/api/users/me/api-keys/$keyId': {
+      id: '/api/users/me/api-keys/$keyId'
+      path: '/$keyId'
+      fullPath: '/api/users/me/api-keys/$keyId'
+      preLoaderRoute: typeof ApiUsersMeApiKeysKeyIdRouteImport
+      parentRoute: typeof ApiUsersMeApiKeysRoute
+    }
+    '/api/admin/users/$userId/unsuspend': {
+      id: '/api/admin/users/$userId/unsuspend'
+      path: '/unsuspend'
+      fullPath: '/api/admin/users/$userId/unsuspend'
+      preLoaderRoute: typeof ApiAdminUsersUserIdUnsuspendRouteImport
+      parentRoute: typeof ApiAdminUsersUserIdRoute
+    }
+    '/api/admin/users/$userId/suspend': {
+      id: '/api/admin/users/$userId/suspend'
+      path: '/suspend'
+      fullPath: '/api/admin/users/$userId/suspend'
+      preLoaderRoute: typeof ApiAdminUsersUserIdSuspendRouteImport
+      parentRoute: typeof ApiAdminUsersUserIdRoute
+    }
+    '/api/admin/users/$userId/roles': {
+      id: '/api/admin/users/$userId/roles'
+      path: '/roles'
+      fullPath: '/api/admin/users/$userId/roles'
+      preLoaderRoute: typeof ApiAdminUsersUserIdRolesRouteImport
+      parentRoute: typeof ApiAdminUsersUserIdRoute
+    }
   }
 }
 
+interface ApiAdminSchoolsRouteChildren {
+  ApiAdminSchoolsSchoolIdRoute: typeof ApiAdminSchoolsSchoolIdRoute
+}
+
+const ApiAdminSchoolsRouteChildren: ApiAdminSchoolsRouteChildren = {
+  ApiAdminSchoolsSchoolIdRoute: ApiAdminSchoolsSchoolIdRoute,
+}
+
+const ApiAdminSchoolsRouteWithChildren = ApiAdminSchoolsRoute._addFileChildren(
+  ApiAdminSchoolsRouteChildren,
+)
+
+interface ApiAdminUsersUserIdRouteChildren {
+  ApiAdminUsersUserIdRolesRoute: typeof ApiAdminUsersUserIdRolesRoute
+  ApiAdminUsersUserIdSuspendRoute: typeof ApiAdminUsersUserIdSuspendRoute
+  ApiAdminUsersUserIdUnsuspendRoute: typeof ApiAdminUsersUserIdUnsuspendRoute
+}
+
+const ApiAdminUsersUserIdRouteChildren: ApiAdminUsersUserIdRouteChildren = {
+  ApiAdminUsersUserIdRolesRoute: ApiAdminUsersUserIdRolesRoute,
+  ApiAdminUsersUserIdSuspendRoute: ApiAdminUsersUserIdSuspendRoute,
+  ApiAdminUsersUserIdUnsuspendRoute: ApiAdminUsersUserIdUnsuspendRoute,
+}
+
+const ApiAdminUsersUserIdRouteWithChildren =
+  ApiAdminUsersUserIdRoute._addFileChildren(ApiAdminUsersUserIdRouteChildren)
+
+interface ApiAdminUsersRouteChildren {
+  ApiAdminUsersUserIdRoute: typeof ApiAdminUsersUserIdRouteWithChildren
+}
+
+const ApiAdminUsersRouteChildren: ApiAdminUsersRouteChildren = {
+  ApiAdminUsersUserIdRoute: ApiAdminUsersUserIdRouteWithChildren,
+}
+
+const ApiAdminUsersRouteWithChildren = ApiAdminUsersRoute._addFileChildren(
+  ApiAdminUsersRouteChildren,
+)
+
+interface ApiUsersMeApiKeysRouteChildren {
+  ApiUsersMeApiKeysKeyIdRoute: typeof ApiUsersMeApiKeysKeyIdRoute
+}
+
+const ApiUsersMeApiKeysRouteChildren: ApiUsersMeApiKeysRouteChildren = {
+  ApiUsersMeApiKeysKeyIdRoute: ApiUsersMeApiKeysKeyIdRoute,
+}
+
+const ApiUsersMeApiKeysRouteWithChildren =
+  ApiUsersMeApiKeysRoute._addFileChildren(ApiUsersMeApiKeysRouteChildren)
+
+interface ApiUsersMeSessionsRouteChildren {
+  ApiUsersMeSessionsSessionIdRoute: typeof ApiUsersMeSessionsSessionIdRoute
+}
+
+const ApiUsersMeSessionsRouteChildren: ApiUsersMeSessionsRouteChildren = {
+  ApiUsersMeSessionsSessionIdRoute: ApiUsersMeSessionsSessionIdRoute,
+}
+
+const ApiUsersMeSessionsRouteWithChildren =
+  ApiUsersMeSessionsRoute._addFileChildren(ApiUsersMeSessionsRouteChildren)
+
+interface ApiUsersMeRouteChildren {
+  ApiUsersMeApiKeysRoute: typeof ApiUsersMeApiKeysRouteWithChildren
+  ApiUsersMeDeleteRoute: typeof ApiUsersMeDeleteRoute
+  ApiUsersMeExportRoute: typeof ApiUsersMeExportRoute
+  ApiUsersMeSessionsRoute: typeof ApiUsersMeSessionsRouteWithChildren
+}
+
+const ApiUsersMeRouteChildren: ApiUsersMeRouteChildren = {
+  ApiUsersMeApiKeysRoute: ApiUsersMeApiKeysRouteWithChildren,
+  ApiUsersMeDeleteRoute: ApiUsersMeDeleteRoute,
+  ApiUsersMeExportRoute: ApiUsersMeExportRoute,
+  ApiUsersMeSessionsRoute: ApiUsersMeSessionsRouteWithChildren,
+}
+
+const ApiUsersMeRouteWithChildren = ApiUsersMeRoute._addFileChildren(
+  ApiUsersMeRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiHealthRoute: ApiHealthRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,
   DemoDrizzleRoute: DemoDrizzleRoute,
   DemoI18nRoute: DemoI18nRoute,
   DemoStorybookRoute: DemoStorybookRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
+  OauthAuthorizeRoute: OauthAuthorizeRoute,
+  OauthRevokeRoute: OauthRevokeRoute,
+  OauthTokenRoute: OauthTokenRoute,
+  OauthUserinfoRoute: OauthUserinfoRoute,
+  ApiAdminAuditLogsRoute: ApiAdminAuditLogsRoute,
+  ApiAdminOidcClientsRoute: ApiAdminOidcClientsRoute,
+  ApiAdminSchoolsRoute: ApiAdminSchoolsRouteWithChildren,
+  ApiAdminUsersRoute: ApiAdminUsersRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiUsersMeRoute: ApiUsersMeRouteWithChildren,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoApiTqTodosRoute: DemoApiTqTodosRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
+  ApiAdminAnalyticsOverviewRoute: ApiAdminAnalyticsOverviewRoute,
   DemoStartSsrDataOnlyRoute: DemoStartSsrDataOnlyRoute,
   DemoStartSsrFullSsrRoute: DemoStartSsrFullSsrRoute,
   DemoStartSsrSpaModeRoute: DemoStartSsrSpaModeRoute,

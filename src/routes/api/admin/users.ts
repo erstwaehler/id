@@ -5,10 +5,10 @@
  * GET /api/admin/users - List all users (paginated, filtered)
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable } from "@/lib/auth/schema/betterauth";
-import { auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import { auditLog } from "~/lib/auth/schema/audit";
 import { eq, desc, asc, ilike, or, and, sql, count } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -21,7 +21,9 @@ const listUsersQuerySchema = z.object({
   school: z.string().optional(),
   emailVerified: z.coerce.boolean().optional(),
   banned: z.coerce.boolean().optional(),
-  sortBy: z.enum(["createdAt", "name", "email", "lastLoginAt"]).default("createdAt"),
+  sortBy: z
+    .enum(["createdAt", "name", "email", "lastLoginAt"])
+    .default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
@@ -43,7 +45,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -53,7 +55,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -78,10 +83,13 @@ export const Route = createFileRoute("/api/admin/users")({
 
         // Check team/admin permission
         if (!isTeamOrAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - team role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - team role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Parse query params
@@ -98,11 +106,21 @@ export const Route = createFileRoute("/api/admin/users")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
-        const { page, limit, search, role, school, emailVerified, banned, sortBy, sortOrder } = validation.data;
+        const {
+          page,
+          limit,
+          search,
+          role,
+          school,
+          emailVerified,
+          banned,
+          sortBy,
+          sortOrder,
+        } = validation.data;
         const offset = (page - 1) * limit;
 
         // Build where conditions
@@ -114,8 +132,8 @@ export const Route = createFileRoute("/api/admin/users")({
               ilike(userTable.email, `%${search}%`),
               ilike(userTable.name, `%${search}%`),
               ilike(userTable.firstName, `%${search}%`),
-              ilike(userTable.lastName, `%${search}%`)
-            )
+              ilike(userTable.lastName, `%${search}%`),
+            ),
           );
         }
 
@@ -135,7 +153,8 @@ export const Route = createFileRoute("/api/admin/users")({
           conditions.push(eq(userTable.banned, banned));
         }
 
-        const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+        const whereClause =
+          conditions.length > 0 ? and(...conditions) : undefined;
 
         // Build sort
         const sortColumn = {
@@ -145,7 +164,8 @@ export const Route = createFileRoute("/api/admin/users")({
           lastLoginAt: userTable.lastLoginAt,
         }[sortBy];
 
-        const orderBy = sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
+        const orderBy =
+          sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
 
         // Get total count
         const [countResult] = await db
@@ -188,8 +208,12 @@ export const Route = createFileRoute("/api/admin/users")({
           "admin.users.list",
           "user",
           null,
-          { filters: { search, role, school, emailVerified, banned }, page, limit },
-          request
+          {
+            filters: { search, role, school, emailVerified, banned },
+            page,
+            limit,
+          },
+          request,
         );
 
         return new Response(
@@ -206,7 +230,7 @@ export const Route = createFileRoute("/api/admin/users")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

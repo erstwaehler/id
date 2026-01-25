@@ -5,10 +5,14 @@
  * GET /api/admin/analytics/overview - Get dashboard stats
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable, session as sessionTable, account as accountTable } from "@/lib/auth/schema/betterauth";
-import { auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import {
+  user as userTable,
+  session as sessionTable,
+  account as accountTable,
+} from "~/lib/auth/schema/betterauth";
+import { auditLog } from "~/lib/auth/schema/audit";
 import { eq, count, sql, gte, and } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
@@ -30,7 +34,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -40,7 +44,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -64,19 +71,26 @@ export const Route = createFileRoute("/api/admin/analytics/overview")({
         }
 
         if (!isTeamOrAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - team role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - team role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Calculate date ranges
         const now = new Date();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = new Date(
+          now.getTime() - 30 * 24 * 60 * 60 * 1000,
+        );
 
         // Total users
-        const [totalUsers] = await db.select({ count: count() }).from(userTable);
+        const [totalUsers] = await db
+          .select({ count: count() })
+          .from(userTable);
 
         // New users this week
         const [newUsersWeek] = await db
@@ -161,7 +175,14 @@ export const Route = createFileRoute("/api/admin/analytics/overview")({
           .where(sql`${userTable.lastLoginMethod} IS NOT NULL`)
           .groupBy(userTable.lastLoginMethod);
 
-        await createAuditLogEntry(session.user.id, "admin.analytics.view", "analytics", "overview", {}, request);
+        await createAuditLogEntry(
+          session.user.id,
+          "admin.analytics.view",
+          "analytics",
+          "overview",
+          {},
+          request,
+        );
 
         return new Response(
           JSON.stringify({
@@ -178,14 +199,14 @@ export const Route = createFileRoute("/api/admin/analytics/overview")({
                   acc[r.role || "unknown"] = r.count;
                   return acc;
                 },
-                {} as Record<string, number>
+                {} as Record<string, number>,
               ),
               bySchool: usersBySchool.reduce(
                 (acc, s) => {
                   acc[s.school || "unknown"] = s.count;
                   return acc;
                 },
-                {} as Record<string, number>
+                {} as Record<string, number>,
               ),
             },
             sessions: {
@@ -197,7 +218,7 @@ export const Route = createFileRoute("/api/admin/analytics/overview")({
                   acc[a.provider] = a.count;
                   return acc;
                 },
-                {} as Record<string, number>
+                {} as Record<string, number>,
               ),
             },
             authentication: {
@@ -206,7 +227,7 @@ export const Route = createFileRoute("/api/admin/analytics/overview")({
                   acc[m.method || "unknown"] = m.count;
                   return acc;
                 },
-                {} as Record<string, number>
+                {} as Record<string, number>,
               ),
             },
             trends: {
@@ -219,7 +240,7 @@ export const Route = createFileRoute("/api/admin/analytics/overview")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

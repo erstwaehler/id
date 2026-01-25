@@ -7,9 +7,9 @@
  * DELETE /api/admin/schools/$schoolId - Delete school (admin only)
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { school, userSchool, auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { school, userSchool, auditLog } from "~/lib/auth/schema/audit";
 import { eq, and, count } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -24,7 +24,11 @@ const updateSchoolSchema = z.object({
   oidcClientSecret: z.string().optional().nullable(),
   oidcScopes: z.string().optional(),
   logoUrl: z.string().url().optional().nullable(),
-  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().nullable(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/)
+    .optional()
+    .nullable(),
   enabled: z.boolean().optional(),
 });
 
@@ -50,7 +54,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -60,7 +64,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -84,15 +91,22 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
         }
 
         if (!isTeamOrAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - team role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - team role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const { schoolId } = params;
 
-        const [schoolData] = await db.select().from(school).where(eq(school.id, schoolId)).limit(1);
+        const [schoolData] = await db
+          .select()
+          .from(school)
+          .where(eq(school.id, schoolId))
+          .limit(1);
 
         if (!schoolData) {
           return new Response(JSON.stringify({ error: "School not found" }), {
@@ -110,7 +124,12 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
         const [verifiedStudents] = await db
           .select({ count: count() })
           .from(userSchool)
-          .where(and(eq(userSchool.schoolId, schoolId), eq(userSchool.verified, true)));
+          .where(
+            and(
+              eq(userSchool.schoolId, schoolId),
+              eq(userSchool.verified, true),
+            ),
+          );
 
         // Don't expose OIDC secrets to non-admins
         const isAdminUser = isAdmin(session.user.role);
@@ -131,7 +150,8 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
               enabled: schoolData.enabled,
               createdAt: schoolData.createdAt,
               updatedAt: schoolData.updatedAt,
-              hasOidcConfigured: !!schoolData.oidcIssuer && !!schoolData.oidcClientId,
+              hasOidcConfigured:
+                !!schoolData.oidcIssuer && !!schoolData.oidcClientId,
             },
             stats: {
               totalStudents: totalStudents?.count || 0,
@@ -141,7 +161,7 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -157,16 +177,23 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const { schoolId } = params;
 
         // Check school exists
-        const [existingSchool] = await db.select().from(school).where(eq(school.id, schoolId)).limit(1);
+        const [existingSchool] = await db
+          .select()
+          .from(school)
+          .where(eq(school.id, schoolId))
+          .limit(1);
 
         if (!existingSchool) {
           return new Response(JSON.stringify({ error: "School not found" }), {
@@ -195,7 +222,7 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -210,10 +237,13 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
         }
 
         if (changedFields.length === 0) {
-          return new Response(JSON.stringify({ error: "No fields to update" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "No fields to update" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         await db.update(school).set(updates).where(eq(school.id, schoolId));
@@ -224,7 +254,7 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
           "school",
           schoolId,
           { fields: changedFields },
-          request
+          request,
         );
 
         return new Response(
@@ -235,7 +265,7 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -251,16 +281,23 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const { schoolId } = params;
 
         // Check school exists
-        const [existingSchool] = await db.select().from(school).where(eq(school.id, schoolId)).limit(1);
+        const [existingSchool] = await db
+          .select()
+          .from(school)
+          .where(eq(school.id, schoolId))
+          .limit(1);
 
         if (!existingSchool) {
           return new Response(JSON.stringify({ error: "School not found" }), {
@@ -284,7 +321,7 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -297,7 +334,7 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
           "school",
           schoolId,
           { name: existingSchool.name },
-          request
+          request,
         );
 
         return new Response(
@@ -308,7 +345,7 @@ export const Route = createFileRoute("/api/admin/schools/$schoolId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

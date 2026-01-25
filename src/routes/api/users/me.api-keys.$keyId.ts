@@ -6,9 +6,9 @@
  * DELETE /api/users/me/api-keys/$keyId - Revoke API key
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { apiKey, auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { apiKey, auditLog } from "~/lib/auth/schema/audit";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
@@ -26,7 +26,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -36,7 +36,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -94,7 +97,7 @@ export const Route = createFileRoute("/api/users/me/api-keys/$keyId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -126,9 +129,19 @@ export const Route = createFileRoute("/api/users/me/api-keys/$keyId")({
         }
 
         // Disable the key (soft delete for audit purposes)
-        await db.update(apiKey).set({ enabled: false }).where(eq(apiKey.id, keyId));
+        await db
+          .update(apiKey)
+          .set({ enabled: false })
+          .where(eq(apiKey.id, keyId));
 
-        await createAuditLogEntry(userId, "api_key.revoke", "api_key", keyId, { name: key.name }, request);
+        await createAuditLogEntry(
+          userId,
+          "api_key.revoke",
+          "api_key",
+          keyId,
+          { name: key.name },
+          request,
+        );
 
         return new Response(
           JSON.stringify({
@@ -138,7 +151,7 @@ export const Route = createFileRoute("/api/users/me/api-keys/$keyId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

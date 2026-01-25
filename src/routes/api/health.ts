@@ -5,7 +5,7 @@
  * GET /api/health - Returns system health status
  */
 import { createFileRoute, json } from "@tanstack/react-router";
-import { db } from "@/lib/auth-db";
+import { db } from "~/lib/auth-db";
 import { sql } from "drizzle-orm";
 import env from "#env";
 
@@ -39,7 +39,8 @@ async function checkDatabase(): Promise<HealthStatus> {
     return {
       status: "unhealthy",
       latency: Date.now() - start,
-      message: error instanceof Error ? error.message : "Database connection failed",
+      message:
+        error instanceof Error ? error.message : "Database connection failed",
     };
   }
 }
@@ -70,7 +71,9 @@ async function checkPosthog(): Promise<HealthStatus> {
   };
 }
 
-function getOverallStatus(checks: HealthCheck["checks"]): HealthCheck["status"] {
+function getOverallStatus(
+  checks: HealthCheck["checks"],
+): HealthCheck["status"] {
   const statuses = Object.values(checks).map((c) => c.status);
 
   if (statuses.some((s) => s === "unhealthy")) {
@@ -100,7 +103,12 @@ export const Route = createFileRoute("/api/health")({
           environment: env.NODE_ENV,
         };
 
-        const statusCode = health.status === "healthy" ? 200 : health.status === "degraded" ? 200 : 503;
+        const statusCode =
+          health.status === "healthy"
+            ? 200
+            : health.status === "degraded"
+              ? 200
+              : 503;
 
         return new Response(JSON.stringify(health), {
           status: statusCode,

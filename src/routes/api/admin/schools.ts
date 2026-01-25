@@ -6,9 +6,9 @@
  * POST /api/admin/schools - Create school (admin only)
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { school, userSchool, auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { school, userSchool, auditLog } from "~/lib/auth/schema/audit";
 import { eq, desc, count, and } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -24,7 +24,10 @@ const createSchoolSchema = z.object({
   oidcClientSecret: z.string().optional(),
   oidcScopes: z.string().default("openid email profile"),
   logoUrl: z.string().url().optional(),
-  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/)
+    .optional(),
   enabled: z.boolean().default(true),
 });
 
@@ -50,7 +53,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -60,7 +63,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -84,10 +90,13 @@ export const Route = createFileRoute("/api/admin/schools")({
         }
 
         if (!isTeamOrAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - team role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - team role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Get schools with student counts
@@ -115,14 +124,19 @@ export const Route = createFileRoute("/api/admin/schools")({
             const [verifiedCount] = await db
               .select({ count: count() })
               .from(userSchool)
-              .where(and(eq(userSchool.schoolId, s.id), eq(userSchool.verified, true)));
+              .where(
+                and(
+                  eq(userSchool.schoolId, s.id),
+                  eq(userSchool.verified, true),
+                ),
+              );
 
             return {
               ...s,
               verifiedStudents: verifiedCount?.count || 0,
               hasOidc: !!s.oidcIssuer,
             };
-          })
+          }),
         );
 
         return new Response(
@@ -133,7 +147,7 @@ export const Route = createFileRoute("/api/admin/schools")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -149,10 +163,13 @@ export const Route = createFileRoute("/api/admin/schools")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         let body: unknown;
@@ -175,12 +192,16 @@ export const Route = createFileRoute("/api/admin/schools")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
         // Check if school ID already exists
-        const [existingSchool] = await db.select().from(school).where(eq(school.id, validation.data.id)).limit(1);
+        const [existingSchool] = await db
+          .select()
+          .from(school)
+          .where(eq(school.id, validation.data.id))
+          .limit(1);
 
         if (existingSchool) {
           return new Response(
@@ -190,7 +211,7 @@ export const Route = createFileRoute("/api/admin/schools")({
             {
               status: 409,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -203,7 +224,7 @@ export const Route = createFileRoute("/api/admin/schools")({
           "school",
           validation.data.id,
           { name: validation.data.name },
-          request
+          request,
         );
 
         return new Response(
@@ -218,7 +239,7 @@ export const Route = createFileRoute("/api/admin/schools")({
           {
             status: 201,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

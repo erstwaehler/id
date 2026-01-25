@@ -5,7 +5,7 @@
  * GET /.well-known/jwks.json
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { getJWKS } from "@/lib/jwt";
+import { getJWKS } from "~/lib/jwt";
 
 export const Route = createFileRoute("/.well-known/jwks")({
   server: {

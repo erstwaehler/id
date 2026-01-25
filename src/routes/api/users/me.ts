@@ -6,10 +6,13 @@
  * PUT /api/users/me - Update current user profile
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable, session as sessionTable } from "@/lib/auth/schema/betterauth";
-import { userSchool, school, apiKey, auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import {
+  user as userTable,
+  session as sessionTable,
+} from "~/lib/auth/schema/betterauth";
+import { userSchool, school, apiKey, auditLog } from "~/lib/auth/schema/audit";
 import { eq, desc, and } from "drizzle-orm";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -42,7 +45,7 @@ async function createAuditLog(
   metadata: Record<string, unknown>,
   request: Request,
   result: "success" | "failure" = "success",
-  errorMessage?: string
+  errorMessage?: string,
 ) {
   try {
     await db.insert(auditLog).values({
@@ -52,7 +55,10 @@ async function createAuditLog(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
       errorMessage,
@@ -146,7 +152,14 @@ export const Route = createFileRoute("/api/users/me")({
           },
         };
 
-        await createAuditLog(userId, "profile.view", "user", userId, {}, request);
+        await createAuditLog(
+          userId,
+          "profile.view",
+          "user",
+          userId,
+          {},
+          request,
+        );
 
         return new Response(JSON.stringify(profile), {
           status: 200,
@@ -187,32 +200,53 @@ export const Route = createFileRoute("/api/users/me")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
         const updates: Partial<UpdateProfileInput> = {};
 
-        if (validation.data.name !== undefined) updates.name = validation.data.name;
-        if (validation.data.firstName !== undefined) updates.firstName = validation.data.firstName;
-        if (validation.data.lastName !== undefined) updates.lastName = validation.data.lastName;
-        if (validation.data.displayName !== undefined) updates.displayName = validation.data.displayName;
-        if (validation.data.bio !== undefined) updates.bio = validation.data.bio;
-        if (validation.data.locale !== undefined) updates.locale = validation.data.locale;
-        if (validation.data.image !== undefined) updates.image = validation.data.image;
+        if (validation.data.name !== undefined)
+          updates.name = validation.data.name;
+        if (validation.data.firstName !== undefined)
+          updates.firstName = validation.data.firstName;
+        if (validation.data.lastName !== undefined)
+          updates.lastName = validation.data.lastName;
+        if (validation.data.displayName !== undefined)
+          updates.displayName = validation.data.displayName;
+        if (validation.data.bio !== undefined)
+          updates.bio = validation.data.bio;
+        if (validation.data.locale !== undefined)
+          updates.locale = validation.data.locale;
+        if (validation.data.image !== undefined)
+          updates.image = validation.data.image;
 
         if (Object.keys(updates).length === 0) {
-          return new Response(JSON.stringify({ error: "No fields to update" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "No fields to update" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         await db.update(userTable).set(updates).where(eq(userTable.id, userId));
 
-        const [updatedUser] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [updatedUser] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
-        await createAuditLog(userId, "profile.update", "user", userId, { fields: Object.keys(updates) }, request);
+        await createAuditLog(
+          userId,
+          "profile.update",
+          "user",
+          userId,
+          { fields: Object.keys(updates) },
+          request,
+        );
 
         return new Response(
           JSON.stringify({
@@ -229,7 +263,7 @@ export const Route = createFileRoute("/api/users/me")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

@@ -6,10 +6,10 @@
  * DELETE /api/users/me/delete - Cancel deletion request
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable } from "@/lib/auth/schema/betterauth";
-import { auditLog, accountDeletionRequest } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import { auditLog, accountDeletionRequest } from "~/lib/auth/schema/audit";
 import { eq, and, isNull } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -33,7 +33,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -43,7 +43,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -72,7 +75,12 @@ export const Route = createFileRoute("/api/users/me/delete")({
         const [existingRequest] = await db
           .select()
           .from(accountDeletionRequest)
-          .where(and(eq(accountDeletionRequest.userId, userId), eq(accountDeletionRequest.status, "pending")))
+          .where(
+            and(
+              eq(accountDeletionRequest.userId, userId),
+              eq(accountDeletionRequest.status, "pending"),
+            ),
+          )
           .limit(1);
 
         if (!existingRequest) {
@@ -83,7 +91,7 @@ export const Route = createFileRoute("/api/users/me/delete")({
             {
               status: 200,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -98,7 +106,7 @@ export const Route = createFileRoute("/api/users/me/delete")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -135,14 +143,21 @@ export const Route = createFileRoute("/api/users/me/delete")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
         // Verify email matches
-        const [userData] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [userData] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
-        if (userData.email.toLowerCase() !== validation.data.confirmEmail.toLowerCase()) {
+        if (
+          userData.email.toLowerCase() !==
+          validation.data.confirmEmail.toLowerCase()
+        ) {
           return new Response(
             JSON.stringify({
               error: "Email confirmation does not match",
@@ -150,7 +165,7 @@ export const Route = createFileRoute("/api/users/me/delete")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -158,7 +173,12 @@ export const Route = createFileRoute("/api/users/me/delete")({
         const [existingRequest] = await db
           .select()
           .from(accountDeletionRequest)
-          .where(and(eq(accountDeletionRequest.userId, userId), eq(accountDeletionRequest.status, "pending")))
+          .where(
+            and(
+              eq(accountDeletionRequest.userId, userId),
+              eq(accountDeletionRequest.status, "pending"),
+            ),
+          )
           .limit(1);
 
         if (existingRequest) {
@@ -171,7 +191,7 @@ export const Route = createFileRoute("/api/users/me/delete")({
             {
               status: 409,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -194,18 +214,24 @@ export const Route = createFileRoute("/api/users/me/delete")({
         });
 
         // Update user record
-        await db.update(userTable).set({
-          deletionRequestedAt: new Date(),
-          deletionScheduledAt: scheduledAt,
-        }).where(eq(userTable.id, userId));
+        await db
+          .update(userTable)
+          .set({
+            deletionRequestedAt: new Date(),
+            deletionScheduledAt: scheduledAt,
+          })
+          .where(eq(userTable.id, userId));
 
         await createAuditLogEntry(
           userId,
           "account_deletion.request",
           "user",
           userId,
-          { reason: validation.data.reason, scheduledAt: scheduledAt.toISOString() },
-          request
+          {
+            reason: validation.data.reason,
+            scheduledAt: scheduledAt.toISOString(),
+          },
+          request,
         );
 
         // TODO: Send confirmation email with cancellation link
@@ -222,7 +248,7 @@ export const Route = createFileRoute("/api/users/me/delete")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -243,7 +269,12 @@ export const Route = createFileRoute("/api/users/me/delete")({
         const [existingRequest] = await db
           .select()
           .from(accountDeletionRequest)
-          .where(and(eq(accountDeletionRequest.userId, userId), eq(accountDeletionRequest.status, "pending")))
+          .where(
+            and(
+              eq(accountDeletionRequest.userId, userId),
+              eq(accountDeletionRequest.status, "pending"),
+            ),
+          )
           .limit(1);
 
         if (!existingRequest) {
@@ -254,7 +285,7 @@ export const Route = createFileRoute("/api/users/me/delete")({
             {
               status: 404,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -268,12 +299,22 @@ export const Route = createFileRoute("/api/users/me/delete")({
           .where(eq(accountDeletionRequest.id, existingRequest.id));
 
         // Clear user deletion fields
-        await db.update(userTable).set({
-          deletionRequestedAt: null,
-          deletionScheduledAt: null,
-        }).where(eq(userTable.id, userId));
+        await db
+          .update(userTable)
+          .set({
+            deletionRequestedAt: null,
+            deletionScheduledAt: null,
+          })
+          .where(eq(userTable.id, userId));
 
-        await createAuditLogEntry(userId, "account_deletion.cancel", "user", userId, {}, request);
+        await createAuditLogEntry(
+          userId,
+          "account_deletion.cancel",
+          "user",
+          userId,
+          {},
+          request,
+        );
 
         return new Response(
           JSON.stringify({
@@ -283,7 +324,7 @@ export const Route = createFileRoute("/api/users/me/delete")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

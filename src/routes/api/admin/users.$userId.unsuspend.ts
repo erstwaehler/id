@@ -5,10 +5,10 @@
  * POST /api/admin/users/$userId/unsuspend - Unsuspend account
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable } from "@/lib/auth/schema/betterauth";
-import { auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import { auditLog } from "~/lib/auth/schema/audit";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
@@ -30,7 +30,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -40,7 +40,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -64,16 +67,23 @@ export const Route = createFileRoute("/api/admin/users/$userId/unsuspend")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const { userId } = params;
 
         // Check user exists
-        const [existingUser] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [existingUser] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
         if (!existingUser) {
           return new Response(JSON.stringify({ error: "User not found" }), {
@@ -83,10 +93,13 @@ export const Route = createFileRoute("/api/admin/users/$userId/unsuspend")({
         }
 
         if (!existingUser.banned) {
-          return new Response(JSON.stringify({ error: "User is not suspended" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "User is not suspended" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Unsuspend user
@@ -104,8 +117,11 @@ export const Route = createFileRoute("/api/admin/users/$userId/unsuspend")({
           "admin.user.unsuspend",
           "user",
           userId,
-          { previousBanReason: existingUser.banReason, targetEmail: existingUser.email },
-          request
+          {
+            previousBanReason: existingUser.banReason,
+            targetEmail: existingUser.email,
+          },
+          request,
         );
 
         return new Response(
@@ -116,7 +132,7 @@ export const Route = createFileRoute("/api/admin/users/$userId/unsuspend")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

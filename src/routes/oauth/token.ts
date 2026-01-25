@@ -5,10 +5,23 @@
  * POST /oauth/token - Token exchange
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "@/lib/auth-db";
-import { user as userTable } from "@/lib/auth/schema/betterauth";
-import { oidcClient, oidcAuthorizationCode, oidcToken, auditLog, userSchool, school } from "@/lib/auth/schema/audit";
-import { signIdToken, signAccessToken, generateTokenId, type IdTokenPayload, type AccessTokenPayload } from "@/lib/jwt";
+import { db } from "~/lib/auth-db";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import {
+  oidcClient,
+  oidcAuthorizationCode,
+  oidcToken,
+  auditLog,
+  userSchool,
+  school,
+} from "~/lib/auth/schema/audit";
+import {
+  signIdToken,
+  signAccessToken,
+  generateTokenId,
+  type IdTokenPayload,
+  type AccessTokenPayload,
+} from "~/lib/jwt";
 import { eq, and } from "drizzle-orm";
 import { randomUUID, createHash, timingSafeEqual } from "node:crypto";
 import argon2 from "argon2";
@@ -46,7 +59,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -56,7 +69,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -65,7 +81,11 @@ async function createAuditLogEntry(
   }
 }
 
-function verifyCodeChallenge(verifier: string, challenge: string, method: string | null): boolean {
+function verifyCodeChallenge(
+  verifier: string,
+  challenge: string,
+  method: string | null,
+): boolean {
   if (!method || method === "plain") {
     return verifier === challenge;
   }
@@ -76,7 +96,10 @@ function verifyCodeChallenge(verifier: string, challenge: string, method: string
   return false;
 }
 
-async function verifyClientSecret(clientSecretHash: string, providedSecret: string): Promise<boolean> {
+async function verifyClientSecret(
+  clientSecretHash: string,
+  providedSecret: string,
+): Promise<boolean> {
   try {
     return await argon2.verify(clientSecretHash, providedSecret);
   } catch {
@@ -84,7 +107,9 @@ async function verifyClientSecret(clientSecretHash: string, providedSecret: stri
   }
 }
 
-function parseBasicAuth(authHeader: string | null): { clientId: string; clientSecret: string } | null {
+function parseBasicAuth(
+  authHeader: string | null,
+): { clientId: string; clientSecret: string } | null {
   if (!authHeader?.startsWith("Basic ")) {
     return null;
   }
@@ -118,7 +143,10 @@ export const Route = createFileRoute("/oauth/token")({
           body = await request.json();
         } else if (contentType.includes("application/x-www-form-urlencoded")) {
           const formData = await request.formData();
-          body = Object.fromEntries(formData.entries()) as Record<string, string>;
+          body = Object.fromEntries(formData.entries()) as Record<
+            string,
+            string
+          >;
         } else {
           return new Response(
             JSON.stringify({
@@ -128,7 +156,7 @@ export const Route = createFileRoute("/oauth/token")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -149,14 +177,18 @@ export const Route = createFileRoute("/oauth/token")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
         const data = validation.data;
 
         // Validate client
-        const [client] = await db.select().from(oidcClient).where(eq(oidcClient.clientId, data.client_id)).limit(1);
+        const [client] = await db
+          .select()
+          .from(oidcClient)
+          .where(eq(oidcClient.clientId, data.client_id))
+          .limit(1);
 
         if (!client || !client.enabled) {
           return new Response(
@@ -167,7 +199,7 @@ export const Route = createFileRoute("/oauth/token")({
             {
               status: 401,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -183,10 +215,13 @@ export const Route = createFileRoute("/oauth/token")({
               {
                 status: 401,
                 headers: { "Content-Type": "application/json" },
-              }
+              },
             );
           }
-          const validSecret = await verifyClientSecret(client.clientSecretHash, data.client_secret);
+          const validSecret = await verifyClientSecret(
+            client.clientSecretHash,
+            data.client_secret,
+          );
           if (!validSecret) {
             return new Response(
               JSON.stringify({
@@ -196,7 +231,7 @@ export const Route = createFileRoute("/oauth/token")({
               {
                 status: 401,
                 headers: { "Content-Type": "application/json" },
-              }
+              },
             );
           }
         }
@@ -218,7 +253,7 @@ export const Route = createFileRoute("/oauth/token")({
           {
             status: 400,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },
@@ -226,15 +261,25 @@ export const Route = createFileRoute("/oauth/token")({
 });
 
 async function handleAuthorizationCodeGrant(
-  data: { code: string; redirect_uri: string; client_id: string; code_verifier?: string },
+  data: {
+    code: string;
+    redirect_uri: string;
+    client_id: string;
+    code_verifier?: string;
+  },
   client: typeof oidcClient.$inferSelect,
-  request: Request
+  request: Request,
 ) {
   // Find authorization code
   const [authCode] = await db
     .select()
     .from(oidcAuthorizationCode)
-    .where(and(eq(oidcAuthorizationCode.code, data.code), eq(oidcAuthorizationCode.clientId, data.client_id)))
+    .where(
+      and(
+        eq(oidcAuthorizationCode.code, data.code),
+        eq(oidcAuthorizationCode.clientId, data.client_id),
+      ),
+    )
     .limit(1);
 
   if (!authCode) {
@@ -246,13 +291,15 @@ async function handleAuthorizationCodeGrant(
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
   // Check if code is expired
   if (authCode.expiresAt < new Date()) {
-    await db.delete(oidcAuthorizationCode).where(eq(oidcAuthorizationCode.id, authCode.id));
+    await db
+      .delete(oidcAuthorizationCode)
+      .where(eq(oidcAuthorizationCode.id, authCode.id));
     return new Response(
       JSON.stringify({
         error: "invalid_grant",
@@ -261,7 +308,7 @@ async function handleAuthorizationCodeGrant(
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -277,7 +324,7 @@ async function handleAuthorizationCodeGrant(
       authCode.id,
       { clientId: data.client_id },
       request,
-      "failure"
+      "failure",
     );
     return new Response(
       JSON.stringify({
@@ -287,7 +334,7 @@ async function handleAuthorizationCodeGrant(
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -301,7 +348,7 @@ async function handleAuthorizationCodeGrant(
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -316,10 +363,16 @@ async function handleAuthorizationCodeGrant(
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
-    if (!verifyCodeChallenge(data.code_verifier, authCode.codeChallenge, authCode.codeChallengeMethod)) {
+    if (
+      !verifyCodeChallenge(
+        data.code_verifier,
+        authCode.codeChallenge,
+        authCode.codeChallengeMethod,
+      )
+    ) {
       return new Response(
         JSON.stringify({
           error: "invalid_grant",
@@ -328,16 +381,23 @@ async function handleAuthorizationCodeGrant(
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
   }
 
   // Mark code as used
-  await db.update(oidcAuthorizationCode).set({ usedAt: new Date() }).where(eq(oidcAuthorizationCode.id, authCode.id));
+  await db
+    .update(oidcAuthorizationCode)
+    .set({ usedAt: new Date() })
+    .where(eq(oidcAuthorizationCode.id, authCode.id));
 
   // Get user data
-  const [userData] = await db.select().from(userTable).where(eq(userTable.id, authCode.userId)).limit(1);
+  const [userData] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.id, authCode.userId))
+    .limit(1);
 
   if (!userData) {
     return new Response(
@@ -348,12 +408,16 @@ async function handleAuthorizationCodeGrant(
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
   // Get school info if available
-  let schoolInfo;
+  let schoolInfo: {
+    id: string;
+    name: string;
+    student_id: string;
+  } = { id: "", name: "", student_id: "" };
   if (userData.school) {
     const [userSchoolData] = await db
       .select({
@@ -363,7 +427,9 @@ async function handleAuthorizationCodeGrant(
       })
       .from(userSchool)
       .leftJoin(school, eq(userSchool.schoolId, school.id))
-      .where(and(eq(userSchool.userId, userData.id), eq(userSchool.isPrimary, true)))
+      .where(
+        and(eq(userSchool.userId, userData.id), eq(userSchool.isPrimary, true)),
+      )
       .limit(1);
 
     if (userSchoolData) {
@@ -412,7 +478,7 @@ async function handleAuthorizationCodeGrant(
   // Add permissions if requested
   if (scopes.includes("permissions")) {
     // Get permissions based on role
-    const { getPermissionsForRole } = await import("@/lib/permissions");
+    const { getPermissionsForRole } = await import("~/lib/permissions");
     idTokenPayload.permissions = getPermissionsForRole(userData.role || "user");
   }
 
@@ -446,7 +512,9 @@ async function handleAuthorizationCodeGrant(
       clientId: data.client_id,
       userId: userData.id,
       scope: authCode.scope,
-      expiresAt: new Date(Date.now() + (client.refreshTokenTtl || 2592000) * 1000),
+      expiresAt: new Date(
+        Date.now() + (client.refreshTokenTtl || 2592000) * 1000,
+      ),
     });
   }
 
@@ -466,8 +534,12 @@ async function handleAuthorizationCodeGrant(
     "oidc.token.issue",
     "oidc_token",
     null,
-    { clientId: data.client_id, grantType: "authorization_code", scope: authCode.scope },
-    request
+    {
+      clientId: data.client_id,
+      grantType: "authorization_code",
+      scope: authCode.scope,
+    },
+    request,
   );
 
   const response: Record<string, unknown> = {
@@ -495,17 +567,27 @@ async function handleAuthorizationCodeGrant(
 async function handleRefreshTokenGrant(
   data: { refresh_token: string; client_id: string; scope?: string },
   client: typeof oidcClient.$inferSelect,
-  request: Request
+  request: Request,
 ) {
   const tokenHash = await hashToken(data.refresh_token);
 
   const [storedToken] = await db
     .select()
     .from(oidcToken)
-    .where(and(eq(oidcToken.tokenHash, tokenHash), eq(oidcToken.type, "refresh_token"), eq(oidcToken.clientId, data.client_id)))
+    .where(
+      and(
+        eq(oidcToken.tokenHash, tokenHash),
+        eq(oidcToken.type, "refresh_token"),
+        eq(oidcToken.clientId, data.client_id),
+      ),
+    )
     .limit(1);
 
-  if (!storedToken || storedToken.revokedAt || storedToken.expiresAt < new Date()) {
+  if (
+    !storedToken ||
+    storedToken.revokedAt ||
+    storedToken.expiresAt < new Date()
+  ) {
     return new Response(
       JSON.stringify({
         error: "invalid_grant",
@@ -514,12 +596,16 @@ async function handleRefreshTokenGrant(
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
   // Get user data
-  const [userData] = await db.select().from(userTable).where(eq(userTable.id, storedToken.userId)).limit(1);
+  const [userData] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.id, storedToken.userId))
+    .limit(1);
 
   if (!userData || userData.banned) {
     return new Response(
@@ -530,7 +616,7 @@ async function handleRefreshTokenGrant(
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -557,7 +643,10 @@ async function handleRefreshTokenGrant(
   const newRefreshToken = generateRefreshToken();
 
   // Revoke old refresh token
-  await db.update(oidcToken).set({ revokedAt: new Date() }).where(eq(oidcToken.id, storedToken.id));
+  await db
+    .update(oidcToken)
+    .set({ revokedAt: new Date() })
+    .where(eq(oidcToken.id, storedToken.id));
 
   // Store new refresh token
   await db.insert(oidcToken).values({
@@ -567,7 +656,9 @@ async function handleRefreshTokenGrant(
     clientId: data.client_id,
     userId: userData.id,
     scope,
-    expiresAt: new Date(Date.now() + (client.refreshTokenTtl || 2592000) * 1000),
+    expiresAt: new Date(
+      Date.now() + (client.refreshTokenTtl || 2592000) * 1000,
+    ),
   });
 
   // Store access token reference
@@ -587,7 +678,7 @@ async function handleRefreshTokenGrant(
     "oidc_token",
     null,
     { clientId: data.client_id, grantType: "refresh_token" },
-    request
+    request,
   );
 
   return new Response(
@@ -605,11 +696,15 @@ async function handleRefreshTokenGrant(
         "Cache-Control": "no-store",
         Pragma: "no-cache",
       },
-    }
+    },
   );
 }
 
-async function handleClientCredentialsGrant(data: { client_id: string; scope?: string }, client: typeof oidcClient.$inferSelect, request: Request) {
+async function handleClientCredentialsGrant(
+  data: { client_id: string; scope?: string },
+  client: typeof oidcClient.$inferSelect,
+  request: Request,
+) {
   // Client credentials only for machine-to-machine
   const scope = data.scope || "openid";
   const now = Math.floor(Date.now() / 1000);
@@ -633,7 +728,7 @@ async function handleClientCredentialsGrant(data: { client_id: string; scope?: s
     "oidc_token",
     null,
     { clientId: data.client_id, grantType: "client_credentials", scope },
-    request
+    request,
   );
 
   return new Response(
@@ -650,6 +745,6 @@ async function handleClientCredentialsGrant(data: { client_id: string; scope?: s
         "Cache-Control": "no-store",
         Pragma: "no-cache",
       },
-    }
+    },
   );
 }

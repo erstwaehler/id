@@ -5,10 +5,15 @@
  * GET/POST /oauth/userinfo - Get user claims
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "@/lib/auth-db";
-import { user as userTable } from "@/lib/auth/schema/betterauth";
-import { userSchool, school, oidcToken, auditLog } from "@/lib/auth/schema/audit";
-import { verifyToken } from "@/lib/jwt";
+import { db } from "~/lib/auth-db";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import {
+  userSchool,
+  school,
+  oidcToken,
+  auditLog,
+} from "~/lib/auth/schema/audit";
+import { verifyToken } from "~/lib/jwt";
 import { eq, and } from "drizzle-orm";
 import { randomUUID, createHash } from "node:crypto";
 import env from "#env";
@@ -20,7 +25,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -30,7 +35,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -66,7 +74,7 @@ async function getUserInfo(request: Request) {
           "Content-Type": "application/json",
           "WWW-Authenticate": 'Bearer error="invalid_token"',
         },
-      }
+      },
     );
   }
 
@@ -86,7 +94,7 @@ async function getUserInfo(request: Request) {
           "Content-Type": "application/json",
           "WWW-Authenticate": 'Bearer error="invalid_token"',
         },
-      }
+      },
     );
   }
 
@@ -95,7 +103,12 @@ async function getUserInfo(request: Request) {
   const [storedToken] = await db
     .select()
     .from(oidcToken)
-    .where(and(eq(oidcToken.tokenHash, tokenHash), eq(oidcToken.type, "access_token")))
+    .where(
+      and(
+        eq(oidcToken.tokenHash, tokenHash),
+        eq(oidcToken.type, "access_token"),
+      ),
+    )
     .limit(1);
 
   if (storedToken?.revokedAt) {
@@ -110,12 +123,16 @@ async function getUserInfo(request: Request) {
           "Content-Type": "application/json",
           "WWW-Authenticate": 'Bearer error="invalid_token"',
         },
-      }
+      },
     );
   }
 
   // Get user data
-  const [userData] = await db.select().from(userTable).where(eq(userTable.id, payload.sub)).limit(1);
+  const [userData] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.id, payload.sub))
+    .limit(1);
 
   if (!userData) {
     return new Response(
@@ -129,7 +146,7 @@ async function getUserInfo(request: Request) {
           "Content-Type": "application/json",
           "WWW-Authenticate": 'Bearer error="invalid_token"',
         },
-      }
+      },
     );
   }
 
@@ -144,7 +161,7 @@ async function getUserInfo(request: Request) {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
 
@@ -185,7 +202,9 @@ async function getUserInfo(request: Request) {
       })
       .from(userSchool)
       .leftJoin(school, eq(userSchool.schoolId, school.id))
-      .where(and(eq(userSchool.userId, userData.id), eq(userSchool.isPrimary, true)))
+      .where(
+        and(eq(userSchool.userId, userData.id), eq(userSchool.isPrimary, true)),
+      )
       .limit(1);
 
     if (userSchoolData) {
@@ -208,7 +227,14 @@ async function getUserInfo(request: Request) {
     claims.permissions = getPermissionsForRole(userData.role || "user");
   }
 
-  await createAuditLogEntry(userData.id, "oidc.userinfo", "oidc_userinfo", null, { clientId: payload.client_id }, request);
+  await createAuditLogEntry(
+    userData.id,
+    "oidc.userinfo",
+    "oidc_userinfo",
+    null,
+    { clientId: payload.client_id },
+    request,
+  );
 
   return new Response(JSON.stringify(claims), {
     status: 200,

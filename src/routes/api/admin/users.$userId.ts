@@ -7,10 +7,15 @@
  * DELETE /api/admin/users/$userId - Delete user (admin only)
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { user as userTable, session as sessionTable, account as accountTable, passkey as passkeyTable } from "@/lib/auth/schema/betterauth";
-import { auditLog, userSchool, school, apiKey } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import {
+  user as userTable,
+  session as sessionTable,
+  account as accountTable,
+  passkey as passkeyTable,
+} from "~/lib/auth/schema/betterauth";
+import { auditLog, userSchool, school, apiKey } from "~/lib/auth/schema/audit";
 import { eq, desc, and, count } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -49,7 +54,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -59,7 +64,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -83,16 +91,23 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
         }
 
         if (!isTeamOrAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - team role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - team role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const { userId } = params;
 
         // Get user
-        const [userData] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [userData] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
         if (!userData) {
           return new Response(JSON.stringify({ error: "User not found" }), {
@@ -150,7 +165,14 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
           .orderBy(desc(auditLog.timestamp))
           .limit(20);
 
-        await createAuditLogEntry(session.user.id, "admin.user.view", "user", userId, {}, request);
+        await createAuditLogEntry(
+          session.user.id,
+          "admin.user.view",
+          "user",
+          userId,
+          {},
+          request,
+        );
 
         return new Response(
           JSON.stringify({
@@ -190,7 +212,7 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -206,16 +228,23 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const { userId } = params;
 
         // Check user exists
-        const [existingUser] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [existingUser] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
         if (!existingUser) {
           return new Response(JSON.stringify({ error: "User not found" }), {
@@ -244,16 +273,23 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
         // Prevent self-demotion
-        if (userId === session.user.id && validation.data.role && validation.data.role !== "admin") {
-          return new Response(JSON.stringify({ error: "Cannot demote yourself" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+        if (
+          userId === session.user.id &&
+          validation.data.role &&
+          validation.data.role !== "admin"
+        ) {
+          return new Response(
+            JSON.stringify({ error: "Cannot demote yourself" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Build updates
@@ -262,29 +298,41 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
 
         for (const [key, value] of Object.entries(validation.data)) {
           if (value !== undefined) {
-            updates[key] = key === "banExpires" && value ? new Date(value) : value;
+            updates[key] =
+              key === "banExpires" && value ? new Date(value) : value;
             changedFields.push(key);
           }
         }
 
         if (changedFields.length === 0) {
-          return new Response(JSON.stringify({ error: "No fields to update" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "No fields to update" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         await db.update(userTable).set(updates).where(eq(userTable.id, userId));
 
-        const [updatedUser] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [updatedUser] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
         await createAuditLogEntry(
           session.user.id,
           "admin.user.update",
           "user",
           userId,
-          { fields: changedFields, before: existingUser, after: validation.data },
-          request
+          {
+            fields: changedFields,
+            before: existingUser,
+            after: validation.data,
+          },
+          request,
         );
 
         return new Response(
@@ -301,7 +349,7 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
 
@@ -317,24 +365,36 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
         }
 
         if (!isAdmin(session.user.role)) {
-          return new Response(JSON.stringify({ error: "Forbidden - admin role required" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Forbidden - admin role required" }),
+            {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         const { userId } = params;
 
         // Prevent self-deletion
         if (userId === session.user.id) {
-          return new Response(JSON.stringify({ error: "Cannot delete your own account via admin API" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({
+              error: "Cannot delete your own account via admin API",
+            }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Check user exists
-        const [existingUser] = await db.select().from(userTable).where(eq(userTable.id, userId)).limit(1);
+        const [existingUser] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
 
         if (!existingUser) {
           return new Response(JSON.stringify({ error: "User not found" }), {
@@ -352,7 +412,7 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
           "user",
           userId,
           { deletedUser: { id: existingUser.id, email: existingUser.email } },
-          request
+          request,
         );
 
         return new Response(
@@ -363,7 +423,7 @@ export const Route = createFileRoute("/api/admin/users/$userId")({
           {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       },
     },

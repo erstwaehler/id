@@ -5,10 +5,10 @@
  * DELETE /api/users/me/sessions/$sessionId - Revoke a specific session
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { session as sessionTable } from "@/lib/auth/schema/betterauth";
-import { auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import { session as sessionTable } from "~/lib/auth/schema/betterauth";
+import { auditLog } from "~/lib/auth/schema/audit";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
@@ -26,7 +26,7 @@ async function createAuditLog(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -36,7 +36,10 @@ async function createAuditLog(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -66,7 +69,12 @@ export const Route = createFileRoute("/api/users/me/sessions/$sessionId")({
         const [targetSession] = await db
           .select()
           .from(sessionTable)
-          .where(and(eq(sessionTable.id, sessionId), eq(sessionTable.userId, userId)))
+          .where(
+            and(
+              eq(sessionTable.id, sessionId),
+              eq(sessionTable.userId, userId),
+            ),
+          )
           .limit(1);
 
         if (!targetSession) {
@@ -78,10 +86,13 @@ export const Route = createFileRoute("/api/users/me/sessions/$sessionId")({
 
         // Prevent revoking current session
         if (sessionId === currentSession.session.id) {
-          return new Response(JSON.stringify({ error: "Cannot revoke current session" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Cannot revoke current session" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
 
         // Delete the session
@@ -96,13 +107,16 @@ export const Route = createFileRoute("/api/users/me/sessions/$sessionId")({
             ipAddress: targetSession.ipAddress,
             userAgent: targetSession.userAgent,
           },
-          request
+          request,
         );
 
-        return new Response(JSON.stringify({ success: true, message: "Session revoked" }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ success: true, message: "Session revoked" }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       },
     },
   },

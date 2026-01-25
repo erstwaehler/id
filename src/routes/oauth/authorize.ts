@@ -6,9 +6,14 @@
  * POST /oauth/authorize - Process authorization decision
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/auth-db";
-import { oidcClient, oidcAuthorizationCode, oidcConsent, auditLog } from "@/lib/auth/schema/audit";
+import { auth } from "#auth";
+import { db } from "~/lib/auth-db";
+import {
+  oidcClient,
+  oidcAuthorizationCode,
+  oidcConsent,
+  auditLog,
+} from "~/lib/auth/schema/audit";
 import { eq, and } from "drizzle-orm";
 import { randomUUID, createHash } from "node:crypto";
 import { z } from "zod";
@@ -16,7 +21,7 @@ import env from "#env";
 
 const authorizeQuerySchema = z.object({
   client_id: z.string().min(1),
-  redirect_uri: z.string().url(),
+  redirect_uri: z.url(),
   response_type: z.string().default("code"),
   scope: z.string().default("openid"),
   state: z.string().optional(),
@@ -42,7 +47,7 @@ async function createAuditLogEntry(
   resourceId: string | null,
   metadata: Record<string, unknown>,
   request: Request,
-  result: "success" | "failure" = "success"
+  result: "success" | "failure" = "success",
 ) {
   try {
     await db.insert(auditLog).values({
@@ -52,7 +57,10 @@ async function createAuditLogEntry(
       resource,
       resourceId,
       metadata,
-      ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+      ipAddress:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
       userAgent: request.headers.get("user-agent") || "unknown",
       result,
     });
@@ -65,7 +73,11 @@ function generateAuthorizationCode(): string {
   return randomUUID() + randomUUID().replace(/-/g, "");
 }
 
-function verifyCodeChallenge(verifier: string, challenge: string, method: string): boolean {
+function verifyCodeChallenge(
+  verifier: string,
+  challenge: string,
+  method: string,
+): boolean {
   if (method === "plain") {
     return verifier === challenge;
   }
@@ -95,14 +107,28 @@ export const Route = createFileRoute("/oauth/authorize")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
-        const { client_id, redirect_uri, response_type, scope, state, nonce, code_challenge, code_challenge_method, prompt } = validation.data;
+        const {
+          client_id,
+          redirect_uri,
+          response_type,
+          scope,
+          state,
+          nonce,
+          code_challenge,
+          code_challenge_method,
+          prompt,
+        } = validation.data;
 
         // Validate client
-        const [client] = await db.select().from(oidcClient).where(eq(oidcClient.clientId, client_id)).limit(1);
+        const [client] = await db
+          .select()
+          .from(oidcClient)
+          .where(eq(oidcClient.clientId, client_id))
+          .limit(1);
 
         if (!client || !client.enabled) {
           return new Response(
@@ -113,7 +139,7 @@ export const Route = createFileRoute("/oauth/authorize")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -128,7 +154,7 @@ export const Route = createFileRoute("/oauth/authorize")({
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
-            }
+            },
           );
         }
 
@@ -145,7 +171,10 @@ export const Route = createFileRoute("/oauth/authorize")({
         if (client.requirePkce && !code_challenge) {
           const errorUrl = new URL(redirect_uri);
           errorUrl.searchParams.set("error", "invalid_request");
-          errorUrl.searchParams.set("error_description", "PKCE code_challenge required");
+          errorUrl.searchParams.set(
+            "error_description",
+            "PKCE code_challenge required",
+          );
           if (state) errorUrl.searchParams.set("state", state);
           return Response.redirect(errorUrl.toString(), 302);
         }
@@ -174,11 +203,20 @@ export const Route = createFileRoute("/oauth/authorize")({
         const [existingConsent] = await db
           .select()
           .from(oidcConsent)
-          .where(and(eq(oidcConsent.userId, session.user.id), eq(oidcConsent.clientId, client_id)))
+          .where(
+            and(
+              eq(oidcConsent.userId, session.user.id),
+              eq(oidcConsent.clientId, client_id),
+            ),
+          )
           .limit(1);
 
-        const grantedScopes = (existingConsent?.grantedScopes as string[]) || [];
-        const needsNewConsent = !client.firstParty && (prompt === "consent" || requestedScopes.some((s) => !grantedScopes.includes(s)));
+        const grantedScopes =
+          (existingConsent?.grantedScopes as string[]) || [];
+        const needsNewConsent =
+          !client.firstParty &&
+          (prompt === "consent" ||
+            requestedScopes.some((s) => !grantedScopes.includes(s)));
 
         if (needsNewConsent) {
           // Redirect to consent screen
@@ -189,8 +227,13 @@ export const Route = createFileRoute("/oauth/authorize")({
           consentUrl.searchParams.set("scope", scope);
           if (state) consentUrl.searchParams.set("state", state);
           if (nonce) consentUrl.searchParams.set("nonce", nonce);
-          if (code_challenge) consentUrl.searchParams.set("code_challenge", code_challenge);
-          if (code_challenge_method) consentUrl.searchParams.set("code_challenge_method", code_challenge_method);
+          if (code_challenge)
+            consentUrl.searchParams.set("code_challenge", code_challenge);
+          if (code_challenge_method)
+            consentUrl.searchParams.set(
+              "code_challenge_method",
+              code_challenge_method,
+            );
           return Response.redirect(consentUrl.toString(), 302);
         }
 
@@ -218,7 +261,7 @@ export const Route = createFileRoute("/oauth/authorize")({
           "oidc_authorization",
           null,
           { clientId: client_id, scope, responseType: response_type },
-          request
+          request,
         );
 
         // Redirect back with code
