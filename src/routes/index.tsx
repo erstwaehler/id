@@ -1,118 +1,211 @@
-import { createFileRoute } from "@tanstack/react-router";
-import {
-	Route as RouteIcon,
-	Server,
-	Shield,
-	Sparkles,
-	Waves,
-	Zap,
+/**
+ * EWF-ID Landing Page
+ * SPEC.md Phase 6 - Task 6.3: Public Pages
+ */
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
+import { 
+  Shield, 
+  Key, 
+  School, 
+  Vote, 
+  Calendar, 
+  Radio, 
+  Monitor,
+  Globe,
+  Lock,
+  Users,
+  ArrowRight
 } from "lucide-react";
 
-export const Route = createFileRoute("/")({ component: App });
+export const Route = createFileRoute("/")({
+  component: LandingPage,
+});
 
-function App() {
-	const features = [
-		{
-			icon: <Zap className="w-12 h-12 text-cyan-400" />,
-			title: "Powerful Server Functions",
-			description:
-				"Write server-side code that seamlessly integrates with your client components. Type-safe, secure, and simple.",
-		},
-		{
-			icon: <Server className="w-12 h-12 text-cyan-400" />,
-			title: "Flexible Server Side Rendering",
-			description:
-				"Full-document SSR, streaming, and progressive enhancement out of the box. Control exactly what renders where.",
-		},
-		{
-			icon: <RouteIcon className="w-12 h-12 text-cyan-400" />,
-			title: "API Routes",
-			description:
-				"Build type-safe API endpoints alongside your application. No separate backend needed.",
-		},
-		{
-			icon: <Shield className="w-12 h-12 text-cyan-400" />,
-			title: "Strongly Typed Everything",
-			description:
-				"End-to-end type safety from server to client. Catch errors before they reach production.",
-		},
-		{
-			icon: <Waves className="w-12 h-12 text-cyan-400" />,
-			title: "Full Streaming Support",
-			description:
-				"Stream data from server to client progressively. Perfect for AI applications and real-time updates.",
-		},
-		{
-			icon: <Sparkles className="w-12 h-12 text-cyan-400" />,
-			title: "Next Generation Ready",
-			description:
-				"Built from the ground up for modern web applications. Deploy anywhere JavaScript runs.",
-		},
-	];
+function LandingPage() {
+  const features = [
+    {
+      icon: Shield,
+      title: "Secure Authentication",
+      description: "Industry-standard security with OIDC, 2FA, and passkeys",
+    },
+    {
+      icon: School,
+      title: "School Integration",
+      description: "Sign in with your school account from Athenaeum, VLG, or IGS",
+    },
+    {
+      icon: Key,
+      title: "Single Sign-On",
+      description: "One account for all EWF applications",
+    },
+    {
+      icon: Lock,
+      title: "Privacy First",
+      description: "GDPR compliant with full data portability and deletion rights",
+    },
+    {
+      icon: Globe,
+      title: "Multilingual",
+      description: "Available in German, English, and Ukrainian",
+    },
+    {
+      icon: Users,
+      title: "Role-Based Access",
+      description: "Different permissions for students, teachers, and team members",
+    },
+  ];
 
-	return (
-		<div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-			<section className="relative py-20 px-6 text-center overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10"></div>
-				<div className="relative max-w-5xl mx-auto">
-					<div className="flex items-center justify-center gap-6 mb-6">
-						<img
-							src="/tanstack-circle-logo.png"
-							alt="TanStack Logo"
-							className="w-24 h-24 md:w-32 md:h-32"
-						/>
-						<h1 className="text-6xl md:text-7xl font-black text-white [letter-spacing:-0.08em]">
-							<span className="text-gray-300">TANSTACK</span>{" "}
-							<span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-								START
-							</span>
-						</h1>
-					</div>
-					<p className="text-2xl md:text-3xl text-gray-300 mb-4 font-light">
-						The framework for next generation AI applications
-					</p>
-					<p className="text-lg text-gray-400 max-w-3xl mx-auto mb-8">
-						Full-stack framework powered by TanStack Router for React and Solid.
-						Build modern applications with server functions, streaming, and type
-						safety.
-					</p>
-					<div className="flex flex-col items-center gap-4">
-						<a
-							href="https://tanstack.com/start"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-cyan-500/50"
-						>
-							Documentation
-						</a>
-						<p className="text-gray-400 text-sm mt-2">
-							Begin your TanStack Start journey by editing{" "}
-							<code className="px-2 py-1 bg-slate-700 rounded text-cyan-400">
-								/src/routes/index.tsx
-							</code>
-						</p>
-					</div>
-				</div>
-			</section>
+  const apps = [
+    {
+      icon: Calendar,
+      name: "Schedule",
+      description: "Event planning and management",
+      href: "https://schedule.ewf-stade.de",
+    },
+    {
+      icon: Vote,
+      name: "Vote",
+      description: "Democratic decision making",
+      href: "https://vote.ewf-stade.de",
+    },
+    {
+      icon: Radio,
+      name: "Live",
+      description: "Interactive Q&A sessions",
+      href: "https://live.ewf-stade.de",
+    },
+    {
+      icon: Monitor,
+      name: "Screens",
+      description: "Digital signage management",
+      href: "https://screens.ewf-stade.de",
+    },
+  ];
 
-			<section className="py-16 px-6 max-w-7xl mx-auto">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{features.map((feature, index) => (
-						<div
-							key={index}
-							className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10"
-						>
-							<div className="mb-4">{feature.icon}</div>
-							<h3 className="text-xl font-semibold text-white mb-3">
-								{feature.title}
-							</h3>
-							<p className="text-gray-400 leading-relaxed">
-								{feature.description}
-							</p>
-						</div>
-					))}
-				</div>
-			</section>
-		</div>
-	);
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-16 max-w-6xl">
+        <div className="text-center mb-16">
+          <Badge variant="secondary" className="mb-4">
+            Erstwähler Foundation
+          </Badge>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            EWF-ID
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Your single identity for all Erstwähler Forum applications. 
+            Secure, private, and easy to use.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/login">
+              <Button size="lg" className="w-full sm:w-auto">
+                Sign In
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                Create Account
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white text-center mb-8">
+            Why EWF-ID?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature) => (
+              <Card key={feature.title}>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-full bg-cyan-500/10 p-2">
+                      <feature.icon className="h-5 w-5 text-cyan-500" />
+                    </div>
+                    <CardTitle className="text-lg">{feature.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{feature.description}</CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Connected Apps */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white text-center mb-8">
+            Connected Applications
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {apps.map((app) => (
+              <a
+                key={app.name}
+                href={app.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <Card className="hover:border-cyan-500 transition-colors h-full">
+                  <CardContent className="flex flex-col items-center text-center p-6">
+                    <div className="rounded-full bg-cyan-500/10 p-4 mb-4">
+                      <app.icon className="h-8 w-8 text-cyan-500" />
+                    </div>
+                    <h3 className="font-semibold mb-2">{app.name}</h3>
+                    <p className="text-sm text-gray-400">{app.description}</p>
+                  </CardContent>
+                </Card>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* School Partners */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white text-center mb-8">
+            Participating Schools
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { name: "Athenaeum Stade", type: "Gymnasium" },
+              { name: "Vincent-Lübeck-Gymnasium", type: "Gymnasium" },
+              { name: "IGS Stade", type: "Integrierte Gesamtschule" },
+            ].map((school) => (
+              <Card key={school.name}>
+                <CardContent className="flex items-center gap-4 p-6">
+                  <div className="rounded-full bg-blue-500/10 p-3">
+                    <School className="h-6 w-6 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">{school.name}</p>
+                    <p className="text-sm text-gray-400">{school.type}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-700 pt-8">
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400 mb-4">
+            <Link to="/privacy-policy" className="hover:text-white hover:underline">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white hover:underline">Terms of Service</Link>
+            <Link to="/cookies" className="hover:text-white hover:underline">Cookie Policy</Link>
+            <Link to="/impressum" className="hover:text-white hover:underline">Impressum</Link>
+          </div>
+          <p className="text-center text-sm text-gray-500">
+            © {new Date().getFullYear()} Erstwähler Forum e.V. All rights reserved.
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
 }
