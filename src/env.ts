@@ -49,10 +49,7 @@ export const env = createEnv({
 
     // Email (Resend)
     RESEND_API_KEY: z.string().min(1),
-    RESEND_FROM_EMAIL: z
-      .string()
-      .email()
-      .default("EWF-ID <noreply@id.ewf-stade.de>"),
+    RESEND_FROM_EMAIL: z.string().default("EWF-ID <noreply@id.ewf-stade.de>"),
 
     // Analytics & Feature Flags (PostHog)
     POSTHOG_API_KEY: z.string().optional(),
@@ -67,19 +64,19 @@ export const env = createEnv({
 
     // School OIDC Providers
     // Athenaeum (IServ)
-    OIDC_ATHENAEUM_CLIENT_ID: z.string().min(1),
-    OIDC_ATHENAEUM_CLIENT_SECRET: z.string().min(1),
-    OIDC_ATHENAEUM_ISSUER: z.string().url(),
+    OIDC_ATHENAEUM_CLIENT_ID: z.string().min(1).default("placeholder"),
+    OIDC_ATHENAEUM_CLIENT_SECRET: z.string().min(1).default("placeholder"),
+    OIDC_ATHENAEUM_ISSUER: z.url().default("https://placeholder.com"),
 
     // VLG (Moodle)
-    OIDC_VLG_CLIENT_ID: z.string().min(1),
-    OIDC_VLG_CLIENT_SECRET: z.string().min(1),
-    OIDC_VLG_ISSUER: z.string().url(),
+    OIDC_VLG_CLIENT_ID: z.string().min(1).default("placeholder"),
+    OIDC_VLG_CLIENT_SECRET: z.string().min(1).default("placeholder"),
+    OIDC_VLG_ISSUER: z.url().default("https://placeholder.com"),
 
     // IGS (IServ)
-    OIDC_IGS_CLIENT_ID: z.string().min(1),
-    OIDC_IGS_CLIENT_SECRET: z.string().min(1),
-    OIDC_IGS_ISSUER: z.string().url(),
+    OIDC_IGS_CLIENT_ID: z.string().min(1).default("placeholder"),
+    OIDC_IGS_CLIENT_SECRET: z.string().min(1).default("placeholder"),
+    OIDC_IGS_ISSUER: z.url().default("https://placeholder.com"),
 
     // OpenTelemetry (optional for development)
     OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
@@ -98,27 +95,26 @@ export const env = createEnv({
   clientPrefix: "VITE_",
 
   client: {
-    VITE_HOST_URL: z.string().url(),
+    VITE_HOST_URL: z.url(),
 
     // PostHog (client-side)
     VITE_POSTHOG_KEY: z.string().optional(),
-    VITE_POSTHOG_HOST: z.string().url().default("https://eu.posthog.com"),
+    VITE_POSTHOG_HOST: z.url().default("https://eu.posthog.com"),
 
     // Cloudflare Turnstile (site key)
     VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: z.string().min(1),
-
-    // Feature Flags
-    VITE_ENABLE_MULTI_SESSION: z.string().optional(),
-    VITE_ENABLE_BULK_OPERATIONS: z.string().optional(),
-    VITE_ENABLE_CREATE_ADMIN: z.string().optional(),
-    VITE_ENABLE_DEVICE_AUTH: z.string().optional(),
   },
 
   /**
    * What object holds the environment variables at runtime. This is usually
    * `process.env` or `import.meta.env`.
    */
-  runtimeEnv: import.meta.env,
+  runtimeEnv: {
+    // Server-side env vars from process.env
+    ...process.env,
+    // Client-side env vars from import.meta.env (with VITE_ prefix)
+    ...import.meta.env,
+  },
 
   /**
    * By default, this library will feed the environment variables directly to

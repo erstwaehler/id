@@ -5,7 +5,7 @@ const createConnectionString = (host: string) =>
   `postgres://${env.AUTHDB_USER}:${env.AUTHDB_PASSWORD}@${host}/${env.AUTHDB_DATABASE}?sslmode=require`;
 
 export default defineConfig({
-  schema: "./src/lib/auth/schema.ts",
+  schema: "./src/lib/auth/schema",
   out: "./src/lib/auth/migrations",
   dialect: "postgresql",
   dbCredentials: {
