@@ -3,15 +3,17 @@
  * SPEC.md Phase 5 - Task 5.3
  *
  * GET /api/admin/users - List all users (paginated, filtered)
+ *
+ * Supports authentication via session cookie or API key
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
 import { db } from "~/lib/auth-db";
 import { user as userTable } from "~/lib/auth/schema/betterauth";
 import { auditLog } from "~/lib/auth/schema/audit";
 import { eq, desc, asc, ilike, or, and, sql, count } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import { authenticateRequest, unauthorizedResponse, forbiddenResponse, hasRole } from "~/lib/api-auth";
 
 const listUsersQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -26,17 +28,6 @@ const listUsersQuerySchema = z.object({
     .default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
-
-async function getSession(request: Request) {
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-  return session;
-}
-
-function isTeamOrAdmin(role: string | null): boolean {
-  return role === "team" || role === "admin";
-}
 
 async function createAuditLogEntry(
   userId: string | null,
@@ -72,24 +63,16 @@ export const Route = createFileRoute("/api/admin/users")({
     handlers: {
       // GET /api/admin/users - List users (team+ required)
       GET: async ({ request }) => {
-        const session = await getSession(request);
+        // Authenticate via session or API key
+        const authResult = await authenticateRequest(request);
 
-        if (!session?.user) {
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-          });
+        if (!authResult.authenticated || !authResult.user) {
+          return unauthorizedResponse(authResult.error);
         }
 
         // Check team/admin permission
-        if (!isTeamOrAdmin(session.user.role)) {
-          return new Response(
-            JSON.stringify({ error: "Forbidden - team role required" }),
-            {
-              status: 403,
-              headers: { "Content-Type": "application/json" },
-            },
-          );
+        if (!hasRole(authResult.user.role, "team")) {
+          return forbiddenResponse("Team role required");
         }
 
         // Parse query params

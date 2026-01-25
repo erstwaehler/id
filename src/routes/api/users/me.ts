@@ -4,18 +4,20 @@
  *
  * GET /api/users/me - Get current user profile
  * PUT /api/users/me - Update current user profile
+ *
+ * Supports authentication via session cookie or API key
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
 import { db } from "~/lib/auth-db";
 import {
   user as userTable,
   session as sessionTable,
 } from "~/lib/auth/schema/betterauth";
 import { userSchool, school, apiKey, auditLog } from "~/lib/auth/schema/audit";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
+import { authenticateRequest, unauthorizedResponse } from "~/lib/api-auth";
 
 // Profile update schema
 const updateProfileSchema = z.object({
@@ -29,13 +31,6 @@ const updateProfileSchema = z.object({
 });
 
 type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
-
-async function getSession(request: Request) {
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-  return session;
-}
 
 async function createAuditLog(
   userId: string | null,
@@ -73,16 +68,14 @@ export const Route = createFileRoute("/api/users/me")({
     handlers: {
       // GET /api/users/me - Get current user profile
       GET: async ({ request }) => {
-        const session = await getSession(request);
+        // Authenticate via session or API key
+        const authResult = await authenticateRequest(request);
 
-        if (!session?.user) {
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-          });
+        if (!authResult.authenticated || !authResult.user) {
+          return unauthorizedResponse(authResult.error);
         }
 
-        const userId = session.user.id;
+        const userId = authResult.user.id;
 
         // Get user with schools
         const [userData] = await db
@@ -169,16 +162,14 @@ export const Route = createFileRoute("/api/users/me")({
 
       // PUT /api/users/me - Update current user profile
       PUT: async ({ request }) => {
-        const session = await getSession(request);
+        // Authenticate via session or API key
+        const authResult = await authenticateRequest(request);
 
-        if (!session?.user) {
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-          });
+        if (!authResult.authenticated || !authResult.user) {
+          return unauthorizedResponse(authResult.error);
         }
 
-        const userId = session.user.id;
+        const userId = authResult.user.id;
 
         let body: unknown;
         try {
