@@ -138,14 +138,63 @@ export function hasPermission(
 }
 
 /**
- * Get all permissions for a role
+ * Get all permissions for a role as flat strings (app:action format)
  */
 export function getPermissionsForRole(role: string): string[] {
 	const perms: string[] = [];
-	for (const [key, allowedRoles] of Object.entries(statement)) {
-		if ((allowedRoles as readonly string[]).includes(role)) {
-			perms.push(key);
+
+	// Get role definition
+	const roleDefinition = (() => {
+		switch (role) {
+			case "admin":
+				return admin.statements;
+			case "team":
+				return team.statements;
+			case "teacher":
+				return teacher.statements;
+			case "student":
+				return student.statements;
+			case "user":
+			default:
+				return user.statements;
+		}
+	})();
+
+	// Convert statements to flat permission strings
+	for (const [app, actions] of Object.entries(roleDefinition)) {
+		if (Array.isArray(actions)) {
+			for (const action of actions) {
+				perms.push(`${app}:${action}`);
+			}
 		}
 	}
+
 	return perms;
+}
+
+/**
+ * Check if a role has a specific permission
+ */
+export function roleHasPermission(role: string, permission: string): boolean {
+	const permissions = getPermissionsForRole(role);
+	
+	// Check exact match
+	if (permissions.includes(permission)) {
+		return true;
+	}
+
+	// Check wildcard patterns
+	const [app, resource, action] = permission.split(":");
+	
+	// app:* pattern
+	if (permissions.includes(`${app}:*`)) {
+		return true;
+	}
+
+	// app:resource:* pattern
+	if (resource && permissions.includes(`${app}:${resource}:*`)) {
+		return true;
+	}
+
+	return false;
 }
