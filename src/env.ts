@@ -32,7 +32,9 @@ process.env.HOST_URL = hostUrl;
 // test
 process.env.VITE_HOST_URL = hostUrl;
 
-export const env = createEnv({
+// Create simplified aliases for common access patterns
+const createEnvWithAliases = () => {
+	const baseEnv = createEnv({
 	server: {
 		// Database (Neon.tech)
 		AUTHDB_DATABASE: z.string().min(1),
@@ -131,5 +133,16 @@ export const env = createEnv({
 	 */
 	emptyStringAsUndefined: true,
 });
+
+	// Add aliases for common patterns
+	return {
+		...baseEnv,
+		// PostHog aliases
+		POSTHOG_KEY: baseEnv.VITE_POSTHOG_KEY,
+		POSTHOG_HOST: baseEnv.VITE_POSTHOG_HOST,
+	};
+};
+
+export const env = createEnvWithAliases();
 
 export default env;
