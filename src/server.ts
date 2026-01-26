@@ -1,5 +1,5 @@
 import handler from "@tanstack/react-start/server-entry";
-import { paraglideMiddleware } from "./paraglide/server";
+import { paraglideMiddleware } from "../paraglide/server";
 
 // Server-side URL localization/redirects for Paraglide
 export default {

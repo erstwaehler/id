@@ -14,10 +14,11 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { AlertCircle, Loader2, Mail, Lock, School, Key } from "lucide-react";
+import { m } from "@/paraglide/messages";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  email: z.string().email(m.auth_invalid_email()),
+  password: z.string().min(1, m.auth_password_required()),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -56,13 +57,13 @@ function LoginPage() {
         if (result.error.message?.includes("2FA")) {
           setRequires2FA(true);
         } else {
-          setError(result.error.message || "Login failed");
+          setError(result.error.message || m.auth_login_failed());
         }
       } else {
         navigate({ to: "/dashboard" });
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError(m.auth_unexpected_error());
     } finally {
       setIsLoading(false);
     }
@@ -79,12 +80,12 @@ function LoginPage() {
       });
 
       if (result.error) {
-        setError(result.error.message || "Invalid 2FA code");
+        setError(result.error.message || m.auth_invalid_2fa());
       } else {
         navigate({ to: "/dashboard" });
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError(m.auth_unexpected_error());
     } finally {
       setIsLoading(false);
     }
@@ -103,12 +104,12 @@ function LoginPage() {
       const result = await authClient.passkey.signIn();
 
       if (result?.error) {
-        setError(result.error.message || "Passkey authentication failed");
+        setError(result.error.message || m.auth_passkey_failed());
       } else {
         navigate({ to: "/dashboard" });
       }
     } catch (err) {
-      setError("Passkey authentication failed");
+      setError(m.auth_passkey_failed());
     } finally {
       setIsLoading(false);
     }
@@ -119,9 +120,9 @@ function LoginPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Two-Factor Authentication</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">{m.auth_2fa_title()}</CardTitle>
             <CardDescription className="text-center">
-              Enter the 6-digit code from your authenticator app
+              {m.auth_2fa_subtitle()}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -132,13 +133,13 @@ function LoginPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="totp">Verification Code</Label>
+              <Label htmlFor="totp">{m.auth_2fa_code_label()}</Label>
               <Input
                 id="totp"
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
-                placeholder="000000"
+                placeholder={m.auth_2fa_code_placeholder()}
                 value={totpCode}
                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))}
                 className="text-center text-2xl tracking-widest"
@@ -146,12 +147,12 @@ function LoginPage() {
             </div>
             <Button onClick={handleTOTPSubmit} className="w-full" disabled={isLoading || totpCode.length !== 6}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Verify
+              {m.auth_2fa_verify()}
             </Button>
           </CardContent>
           <CardFooter className="flex justify-center">
             <Button variant="link" onClick={() => setRequires2FA(false)}>
-              Back to login
+              {m.auth_2fa_back()}
             </Button>
           </CardFooter>
         </Card>
@@ -166,9 +167,9 @@ function LoginPage() {
           <div className="flex justify-center mb-4">
             <img src="/logo.svg" alt="EWF-ID" className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{m.auth_welcome_back()}</CardTitle>
           <CardDescription className="text-center">
-            Sign in to your Erstwähler Foundation account
+            {m.auth_signin_subtitle()}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -181,13 +182,13 @@ function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{m.common_email()}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={m.auth_email_placeholder()}
                   className="pl-10"
                   {...register("email")}
                 />
@@ -199,9 +200,9 @@ function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{m.common_password()}</Label>
                 <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
+                  {m.auth_forgot_password()}
                 </Link>
               </div>
               <div className="relative">
@@ -209,7 +210,7 @@ function LoginPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={m.auth_password_placeholder()}
                   className="pl-10"
                   {...register("password")}
                 />
@@ -221,7 +222,7 @@ function LoginPage() {
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign in
+              {m.auth_signin_button()}
             </Button>
           </form>
 
@@ -230,14 +231,14 @@ function LoginPage() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">{m.auth_or_continue()}</span>
             </div>
           </div>
 
           <div className="grid gap-2">
             <Button variant="outline" onClick={handlePasskeyLogin} disabled={isLoading}>
               <Key className="mr-2 h-4 w-4" />
-              Passkey
+              {m.auth_passkey()}
             </Button>
           </div>
 
@@ -246,7 +247,7 @@ function LoginPage() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">School Login</span>
+              <span className="bg-card px-2 text-muted-foreground">{m.auth_school_login()}</span>
             </div>
           </div>
 
@@ -267,9 +268,9 @@ function LoginPage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
-            Don't have an account?{" "}
+            {m.auth_no_account()}{" "}
             <Link to="/register" className="text-primary hover:underline">
-              Sign up
+              {m.auth_signup()}
             </Link>
           </div>
         </CardFooter>

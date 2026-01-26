@@ -223,7 +223,7 @@ async function getUserInfo(request: Request) {
 
   // Permissions
   if (scopes.includes("permissions")) {
-    const { getPermissionsForRole } = await import("@/lib/permissions");
+    const { getPermissionsForRole } = await import("~/lib/permissions");
     claims.permissions = getPermissionsForRole(userData.role || "user");
   }
 

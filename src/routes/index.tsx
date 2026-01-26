@@ -6,6 +6,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
+import { m } from "@/paraglide/messages";
 import { 
   Shield, 
   Key, 
@@ -28,33 +29,33 @@ function LandingPage() {
   const features = [
     {
       icon: Shield,
-      title: "Secure Authentication",
-      description: "Industry-standard security with OIDC, 2FA, and passkeys",
+      title: m.landing_feature_security_title(),
+      description: m.landing_feature_security_desc(),
     },
     {
       icon: School,
-      title: "School Integration",
-      description: "Sign in with your school account from Athenaeum, VLG, or IGS",
+      title: m.landing_feature_school_title(),
+      description: m.landing_feature_school_desc(),
     },
     {
       icon: Key,
-      title: "Single Sign-On",
-      description: "One account for all EWF applications",
+      title: m.landing_feature_sso_title(),
+      description: m.landing_feature_sso_desc(),
     },
     {
       icon: Lock,
-      title: "Privacy First",
-      description: "GDPR compliant with full data portability and deletion rights",
+      title: m.landing_feature_privacy_title(),
+      description: m.landing_feature_privacy_desc(),
     },
     {
       icon: Globe,
-      title: "Multilingual",
-      description: "Available in German, English, and Ukrainian",
+      title: m.landing_feature_multilingual_title(),
+      description: m.landing_feature_multilingual_desc(),
     },
     {
       icon: Users,
-      title: "Role-Based Access",
-      description: "Different permissions for students, teachers, and team members",
+      title: m.landing_feature_roles_title(),
+      description: m.landing_feature_roles_desc(),
     },
   ];
 
@@ -62,25 +63,25 @@ function LandingPage() {
     {
       icon: Calendar,
       name: "Schedule",
-      description: "Event planning and management",
+      description: m.landing_app_schedule(),
       href: "https://schedule.ewf-stade.de",
     },
     {
       icon: Vote,
       name: "Vote",
-      description: "Democratic decision making",
+      description: m.landing_app_vote(),
       href: "https://vote.ewf-stade.de",
     },
     {
       icon: Radio,
       name: "Live",
-      description: "Interactive Q&A sessions",
+      description: m.landing_app_live(),
       href: "https://live.ewf-stade.de",
     },
     {
       icon: Monitor,
       name: "Screens",
-      description: "Digital signage management",
+      description: m.landing_app_screens(),
       href: "https://screens.ewf-stade.de",
     },
   ];
@@ -91,25 +92,24 @@ function LandingPage() {
       <div className="container mx-auto px-4 py-16 max-w-6xl">
         <div className="text-center mb-16">
           <Badge variant="secondary" className="mb-4">
-            Erstwähler Foundation
+            {m.landing_badge()}
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            EWF-ID
+            {m.landing_title()}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Your single identity for all Erstwähler Forum applications. 
-            Secure, private, and easy to use.
+            {m.landing_subtitle()}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/login">
               <Button size="lg" className="w-full sm:w-auto">
-                Sign In
+                {m.landing_signin()}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Link to="/register">
               <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Create Account
+                {m.landing_create_account()}
               </Button>
             </Link>
           </div>
@@ -118,7 +118,7 @@ function LandingPage() {
         {/* Features Grid */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white text-center mb-8">
-            Why EWF-ID?
+            {m.landing_why_ewf()}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature) => (
@@ -142,7 +142,7 @@ function LandingPage() {
         {/* Connected Apps */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white text-center mb-8">
-            Connected Applications
+            {m.landing_connected_apps()}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {apps.map((app) => (
@@ -170,13 +170,13 @@ function LandingPage() {
         {/* School Partners */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white text-center mb-8">
-            Participating Schools
+            {m.landing_schools()}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "Athenaeum Stade", type: "Gymnasium" },
-              { name: "Vincent-Lübeck-Gymnasium", type: "Gymnasium" },
-              { name: "IGS Stade", type: "Integrierte Gesamtschule" },
+              { name: "Athenaeum Stade", type: m.landing_school_type_gymnasium() },
+              { name: "Vincent-Lübeck-Gymnasium", type: m.landing_school_type_gymnasium() },
+              { name: "IGS Stade", type: m.landing_school_type_igs() },
             ].map((school) => (
               <Card key={school.name}>
                 <CardContent className="flex items-center gap-4 p-6">
@@ -196,13 +196,13 @@ function LandingPage() {
         {/* Footer */}
         <footer className="border-t border-slate-700 pt-8">
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400 mb-4">
-            <Link to="/privacy-policy" className="hover:text-white hover:underline">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-white hover:underline">Terms of Service</Link>
-            <Link to="/cookies" className="hover:text-white hover:underline">Cookie Policy</Link>
-            <Link to="/impressum" className="hover:text-white hover:underline">Impressum</Link>
+            <Link to="/privacy-policy" className="hover:text-white hover:underline">{m.legal_privacy_title()}</Link>
+            <Link to="/terms" className="hover:text-white hover:underline">{m.legal_terms_title()}</Link>
+            <Link to="/cookies" className="hover:text-white hover:underline">{m.legal_cookies_title()}</Link>
+            <Link to="/impressum" className="hover:text-white hover:underline">{m.legal_impressum_title()}</Link>
           </div>
           <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} Erstwähler Forum e.V. All rights reserved.
+            {m.landing_footer_copyright({ year: new Date().getFullYear().toString() })}
           </p>
         </footer>
       </div>

@@ -16,10 +16,10 @@ export default function ParaglideLocaleSwitcher() {
 				alignItems: "center",
 				color: "inherit",
 			}}
-			aria-label={m.language_label()}
+			aria-label={m.common_language()}
 		>
 			<span style={{ opacity: 0.85 }}>
-				{m.current_locale({ locale: currentLocale })}
+				{currentLocale === "de" ? m.common_german() : m.common_english()}
 			</span>
 			<div style={{ display: "flex", gap: "0.25rem" }}>
 				{locales.map((locale) => (

@@ -21,10 +21,10 @@ const config = defineConfig(({ mode }) => {
       alias: {
         "#env": fileURLToPath(new URL("./src/env.ts", import.meta.url)),
         "#flags": fileURLToPath(new URL("./src/lib/flags.ts", import.meta.url)),
-        "#auth": fileURLToPath(new URL("./src/lib/auth.ts", import.meta.url)),
         "#auth/client": fileURLToPath(
           new URL("./src/lib/auth-client.ts", import.meta.url),
         ),
+        "#auth": fileURLToPath(new URL("./src/lib/auth.ts", import.meta.url)),
         "#logger": fileURLToPath(
           new URL("./src/lib/logging.ts", import.meta.url),
         ),
