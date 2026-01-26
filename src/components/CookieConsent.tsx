@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Cookie, X, Settings } from "lucide-react";
+import { m } from "@/paraglide/messages";
 
 export type CookieConsent = {
   essential: boolean; // Always true
@@ -85,34 +86,32 @@ export function CookieConsentBanner() {
                   <Cookie className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Cookie Notice</h3>
+                  <h3 className="font-semibold mb-1">{m.cookie_banner_title()}</h3>
                   <p className="text-sm text-muted-foreground">
-                    We use cookies to ensure you get the best experience on our website. 
-                    Essential cookies are necessary for the site to function. You can 
-                    choose to enable additional cookies for analytics.
+                    {m.cookie_banner_message()}
                   </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Button onClick={handleAcceptAll}>
-                  Accept All
+                  {m.cookie_banner_accept_all()}
                 </Button>
                 <Button variant="outline" onClick={handleRejectAll}>
-                  Essential Only
+                  {m.cookie_banner_reject_all()}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowSettings(true)}>
                   <Settings className="mr-2 h-4 w-4" />
-                  Customize
+                  {m.cookie_banner_customize()}
                 </Button>
                 <Link to="/cookies" className="text-sm text-muted-foreground hover:underline ml-auto">
-                  Cookie Policy
+                  {m.legal_cookies_title()}
                 </Link>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Cookie Preferences</h3>
+                <h3 className="font-semibold">{m.cookie_banner_customize()}</h3>
                 <Button variant="ghost" size="icon" onClick={() => setShowSettings(false)}>
                   <X className="h-4 w-4" />
                 </Button>
@@ -121,9 +120,9 @@ export function CookieConsentBanner() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
-                    <p className="font-medium">Essential Cookies</p>
+                    <p className="font-medium">{m.cookie_essential()}</p>
                     <p className="text-sm text-muted-foreground">
-                      Required for authentication and security
+                      {m.cookie_essential_desc()}
                     </p>
                   </div>
                   <input
@@ -136,9 +135,9 @@ export function CookieConsentBanner() {
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
-                    <p className="font-medium">Preference Cookies</p>
+                    <p className="font-medium">{m.cookie_preferences()}</p>
                     <p className="text-sm text-muted-foreground">
-                      Remember your language and theme preferences
+                      {m.cookie_preferences_desc()}
                     </p>
                   </div>
                   <input
@@ -151,9 +150,9 @@ export function CookieConsentBanner() {
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
-                    <p className="font-medium">Analytics Cookies</p>
+                    <p className="font-medium">{m.cookie_analytics()}</p>
                     <p className="text-sm text-muted-foreground">
-                      Help us understand how you use the site
+                      {m.cookie_analytics_desc()}
                     </p>
                   </div>
                   <input
@@ -167,10 +166,10 @@ export function CookieConsentBanner() {
 
               <div className="flex gap-2">
                 <Button onClick={handleSavePreferences}>
-                  Save Preferences
+                  {m.cookie_save_preferences()}
                 </Button>
                 <Button variant="outline" onClick={() => setShowSettings(false)}>
-                  Cancel
+                  {m.common_cancel()}
                 </Button>
               </div>
             </div>

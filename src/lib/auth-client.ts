@@ -11,12 +11,13 @@ import {
 	twoFactorClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
+import env from "#env";
 
 /**
  * Auth client with all required plugins
  */
 export const authClient = createAuthClient({
-	baseURL: typeof window !== "undefined" ? window.location.origin : "",
+	baseURL: env.VITE_HOST_URL,
 	plugins: [
 		twoFactorClient(),
 		adminClient(),

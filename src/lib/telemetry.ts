@@ -2,12 +2,16 @@
  * EWF-ID OpenTelemetry Integration
  * SPEC.md Phase 7 - Task 7.1: OpenTelemetry Setup
  * 
- * Provides distributed tracing with Axiom export
- * This module sets up OTEL for server-side tracing
+ * Provides distributed tracing with Axiom export.
+ * This module provides a stub implementation that can be enabled
+ * when @opentelemetry packages are installed.
+ * 
+ * Installation (when ready to enable):
+ * bun add @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/auto-instrumentations-node
  */
 import env from "#env";
 
-// Types for OTEL (will be populated when @opentelemetry packages are installed)
+// Types for OTEL
 export interface SpanContext {
   traceId: string;
   spanId: string;
@@ -20,44 +24,34 @@ export interface Span {
   end(): void;
 }
 
-// Placeholder for trace context - will be replaced by actual OTEL implementation
-let activeSpan: Span | null = null;
+// No-op implementations for when OTEL is not configured
+const noopSpan: Span = {
+  setAttribute: () => {},
+  setStatus: () => {},
+  recordException: () => {},
+  end: () => {},
+};
 
 /**
- * Get current trace context
- * When OTEL is configured, this extracts from the active span
+ * Get current trace context from OTEL (returns null when OTEL is not enabled)
  */
 export function getTraceContext(): SpanContext | null {
-  // TODO: When OTEL is implemented:
-  // import { trace } from '@opentelemetry/api'
+  // OTEL implementation: 
   // const span = trace.getActiveSpan()
-  // if (!span) return null
-  // const ctx = span.spanContext()
-  // return { traceId: ctx.traceId, spanId: ctx.spanId }
-  
+  // return span ? { traceId: span.spanContext().traceId, spanId: span.spanContext().spanId } : null
   return null;
 }
 
 /**
- * Create a child span for tracing an operation
+ * Create a span for tracing an operation (no-op when OTEL is not enabled)
  */
-export function createSpan(name: string, attributes?: Record<string, string | number | boolean>): Span {
-  // TODO: When OTEL is implemented:
-  // import { trace } from '@opentelemetry/api'
+export function createSpan(_name: string, _attributes?: Record<string, string | number | boolean>): Span {
+  // OTEL implementation:
   // const tracer = trace.getTracer('ewf-id')
   // const span = tracer.startSpan(name)
-  // if (attributes) {
-  //   Object.entries(attributes).forEach(([k, v]) => span.setAttribute(k, v))
-  // }
+  // if (attributes) Object.entries(attributes).forEach(([k, v]) => span.setAttribute(k, v))
   // return span
-
-  // Placeholder implementation
-  return {
-    setAttribute: () => {},
-    setStatus: () => {},
-    recordException: () => {},
-    end: () => {},
-  };
+  return noopSpan;
 }
 
 /**
@@ -75,7 +69,7 @@ export async function withSpan<T>(
     span.setStatus({ code: 0 }); // OK
     return result;
   } catch (error) {
-    span.setStatus({ code: 2, message: error instanceof Error ? error.message : "Unknown error" }); // ERROR
+    span.setStatus({ code: 2, message: error instanceof Error ? error.message : "Unknown error" });
     if (error instanceof Error) {
       span.recordException(error);
     }
@@ -87,59 +81,26 @@ export async function withSpan<T>(
 
 /**
  * Initialize OpenTelemetry SDK
- * Call this at server startup
+ * Call this at server startup when OTEL packages are installed
  */
 export async function initOpenTelemetry(): Promise<void> {
   if (env.NODE_ENV !== "production") {
-    console.debug("[OTEL] Skipping initialization in non-production environment");
+    console.debug("[OTEL] Skipping in non-production");
     return;
   }
 
   if (!env.AXIOM_TOKEN || !env.AXIOM_DATASET) {
-    console.debug("[OTEL] Missing Axiom configuration, skipping initialization");
+    console.debug("[OTEL] Missing Axiom config");
     return;
   }
 
-  // TODO: Full OTEL implementation when packages are installed:
-  /*
-  import { NodeSDK } from '@opentelemetry/sdk-node'
-  import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-  import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
-  import { Resource } from '@opentelemetry/resources'
-  import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
-
-  const traceExporter = new OTLPTraceExporter({
-    url: 'https://api.axiom.co/v1/traces',
-    headers: {
-      'Authorization': `Bearer ${env.AXIOM_TOKEN}`,
-      'X-Axiom-Dataset': env.AXIOM_DATASET,
-    },
-  })
-
-  const sdk = new NodeSDK({
-    resource: new Resource({
-      [SEMRESATTRS_SERVICE_NAME]: 'ewf-id',
-      [SEMRESATTRS_SERVICE_VERSION]: '1.0.0',
-    }),
-    traceExporter,
-    instrumentations: [
-      getNodeAutoInstrumentations({
-        '@opentelemetry/instrumentation-fs': { enabled: false },
-      }),
-    ],
-  })
-
-  sdk.start()
+  // Full implementation when packages are installed:
+  // 1. Import NodeSDK, OTLPTraceExporter, getNodeAutoInstrumentations, Resource
+  // 2. Create exporter with Axiom endpoint and auth
+  // 3. Create SDK with resource (service name: 'ewf-id')
+  // 4. Call sdk.start() and register SIGTERM handler for graceful shutdown
   
-  process.on('SIGTERM', () => {
-    sdk.shutdown()
-      .then(() => console.log('[OTEL] SDK shut down successfully'))
-      .catch((error) => console.error('[OTEL] Error shutting down SDK', error))
-      .finally(() => process.exit(0))
-  })
-  */
-
-  console.debug("[OTEL] Ready for configuration (packages not yet installed)");
+  console.debug("[OTEL] Ready (packages not installed)");
 }
 
 /**

@@ -6,7 +6,7 @@
  */
 import { db } from "~/lib/auth-db";
 import { auditLog } from "~/lib/auth/schema/audit";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 
 export interface AuditLogOptions {
   userId: string | null;
@@ -22,6 +22,14 @@ export interface AuditLogOptions {
 }
 
 /**
+ * Hash IP address for GDPR compliance
+ * We only need to identify unique IPs, not reverse them
+ */
+function hashIpAddress(ip: string): string {
+  return createHash("sha256").update(ip).digest("hex").substring(0, 16);
+}
+
+/**
  * Create an audit log entry
  *
  * @param options - Audit log options
@@ -32,11 +40,16 @@ export async function createAuditLog(
   request?: Request,
 ): Promise<void> {
   try {
-    const ipAddress = request
+    const rawIp = request
       ? request.headers.get("x-forwarded-for") ||
         request.headers.get("x-real-ip") ||
         "unknown"
       : "system";
+
+    // Hash IP address for GDPR compliance
+    const ipAddressHash = rawIp === "system" || rawIp === "unknown" 
+      ? rawIp 
+      : hashIpAddress(rawIp);
 
     const userAgent = request
       ? request.headers.get("user-agent") || "unknown"
@@ -49,7 +62,7 @@ export async function createAuditLog(
       resource: options.resource,
       resourceId: options.resourceId ?? null,
       metadata: options.metadata ?? {},
-      ipAddress,
+      ipAddressHash,
       userAgent,
       traceId: options.traceId ?? null,
       spanId: options.spanId ?? null,

@@ -6,21 +6,44 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
 	admin as adminPlugin,
+	apiKey,
 	bearer,
 	haveIBeenPwned,
 	multiSession,
 	oAuthProxy,
+	oidcProvider,
 	openAPI,
 	twoFactor,
 } from "better-auth/plugins";
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { tanstackStartCookies } from "better-auth/tanstack-start/solid";
 import ms from "ms";
+import { Resend } from "resend";
 import env from "#env";
 import { twoFactor as twoFactorTable } from "./auth/schema/audit";
 import * as schema from "./auth/schema/betterauth";
 import { db } from "./auth-db";
 import { ac, admin, student, teacher, team, user } from "./permissions";
+
+// Initialize Resend for email sending
+const resend = new Resend(env.RESEND_API_KEY);
+
+/**
+ * Send email using Resend
+ */
+async function sendEmail(to: string, subject: string, html: string, text?: string) {
+	try {
+		await resend.emails.send({
+			from: env.RESEND_FROM_EMAIL,
+			to,
+			subject,
+			html,
+			text,
+		});
+	} catch (error) {
+		console.error("[Email] Failed to send:", error);
+	}
+}
 
 /**
  * EWF-ID Better Auth Configuration
@@ -58,11 +81,18 @@ export const auth = betterAuth({
 	emailVerification: {
 		sendVerificationEmail: async (data) => {
 			const verificationUrl = `${env.HOST_URL}/verify-email?token=${data.token}`;
-			// await sendVerificationEmail(
-			//   data.user.email,
-			//   data.user.name || "Benutzer",
-			//   verificationUrl,
-			// );
+			const name = data.user.name || "Benutzer";
+			await sendEmail(
+				data.user.email,
+				"E-Mail-Adresse bestätigen | EWF-ID",
+				`
+					<h1>Hallo ${name},</h1>
+					<p>Bitte bestätige deine E-Mail-Adresse, um dein EWF-ID Konto zu aktivieren.</p>
+					<p><a href="${verificationUrl}" style="background:#0f172a;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;">E-Mail bestätigen</a></p>
+					<p><small>Dieser Link ist 24 Stunden gültig.</small></p>
+				`,
+				`Hallo ${name},\n\nBitte bestätige deine E-Mail-Adresse: ${verificationUrl}\n\nDieser Link ist 24 Stunden gültig.`
+			);
 		},
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
@@ -78,11 +108,18 @@ export const auth = betterAuth({
 		autoSignIn: false, // Require email verification first
 		sendResetPassword: async (data) => {
 			const resetUrl = `${env.HOST_URL}/reset-password?token=${data.token}`;
-			// await sendPasswordResetEmail(
-			//   data.user.email,
-			//   data.user.name || "Benutzer",
-			//   resetUrl,
-			// );
+			const name = data.user.name || "Benutzer";
+			await sendEmail(
+				data.user.email,
+				"Passwort zurücksetzen | EWF-ID",
+				`
+					<h1>Hallo ${name},</h1>
+					<p>Du hast eine Passwort-Zurücksetzung angefordert.</p>
+					<p><a href="${resetUrl}" style="background:#0f172a;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;">Passwort zurücksetzen</a></p>
+					<p><small>Dieser Link ist 1 Stunde gültig. Wenn du keine Zurücksetzung angefordert hast, ignoriere diese E-Mail.</small></p>
+				`,
+				`Hallo ${name},\n\nSetze dein Passwort hier zurück: ${resetUrl}\n\nDieser Link ist 1 Stunde gültig.`
+			);
 		},
 		resetPasswordTokenExpiresIn: ms("1h") / 1000, // 1 hour
 		password: {
@@ -180,6 +217,22 @@ export const auth = betterAuth({
 		// OAuth proxy for OIDC provider functionality
 		oAuthProxy(),
 
+		// OIDC Provider - allows EWF-ID to be an OIDC provider for other EWF apps
+		oidcProvider({
+			loginPage: "/login",
+			consentPage: "/consent",
+			errorPage: "/error",
+		}),
+
+		// API Key plugin for programmatic access
+		apiKey({
+			rateLimit: {
+				enabled: true,
+				window: 60, // 1 minute
+				max: 100,
+			},
+		}),
+
 		// OpenAPI documentation
 		openAPI({
 			path: "/api/auth/reference",
@@ -195,18 +248,7 @@ export const auth = betterAuth({
 			enabled: false, // GDPR: Email is immutable identifier
 		},
 		deleteUser: {
-			enabled: true, // GDPR: Right to erasure
-			sendDeleteAccountVerification: async (data) => {
-				const deletionDate = new Date();
-				deletionDate.setDate(deletionDate.getDate() + 14);
-				const cancelUrl = `${env.HOST_URL}/cancel-deletion?token=${data.token}`;
-				// await sendDeletionConfirmationEmail(
-				//   data.user.email,
-				//   data.user.name || "Benutzer",
-				//   deletionDate,
-				//   cancelUrl,
-				// );
-			},
+			enabled: false, // Manual deletion only via email due to multiple apps
 		},
 		additionalFields: {
 			firstName: {
@@ -214,14 +256,6 @@ export const auth = betterAuth({
 				required: false,
 			},
 			lastName: {
-				type: "string",
-				required: false,
-			},
-			displayName: {
-				type: "string",
-				required: false,
-			},
-			bio: {
 				type: "string",
 				required: false,
 			},

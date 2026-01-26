@@ -116,6 +116,8 @@ const createEnvWithAliases = () => {
 		...process.env,
 		// Client-side env vars from import.meta.env (with VITE_ prefix)
 		...import.meta.env,
+		POSTHOG_KEY: import.meta.env.VITE_POSTHOG_KEY,
+		POSTHOG_HOST: import.meta.env.VITE_POSTHOG_HOST,
 	},
 
 	/**
@@ -137,7 +139,7 @@ const createEnvWithAliases = () => {
 	// Add aliases for common patterns
 	return {
 		...baseEnv,
-		// PostHog aliases
+		// PostHog aliases - these come from runtimeEnv now
 		POSTHOG_KEY: baseEnv.VITE_POSTHOG_KEY,
 		POSTHOG_HOST: baseEnv.VITE_POSTHOG_HOST,
 	};

@@ -3,14 +3,9 @@
  * SPEC.md Phase 5 - Task 5.4: API Key Authentication
  *
  * Provides authentication for API routes via session or API key
+ * Uses Better Auth's built-in API key plugin
  */
 import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { apiKey, auditLog } from "~/lib/auth/schema/audit";
-import { user as userTable } from "~/lib/auth/schema/betterauth";
-import { eq, and } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
-import argon2 from "argon2";
 import logger from "#logger";
 
 export interface AuthResult {
@@ -38,9 +33,27 @@ export async function authenticateRequest(request: Request): Promise<AuthResult>
     if (authHeader.startsWith("Bearer ")) {
       const token = authHeader.slice(7);
 
-      // Check if it looks like an EWF API key
-      if (token.startsWith("ewf_")) {
-        return authenticateApiKey(token, request);
+      // Try Better Auth's API key verification
+      try {
+        const result = await auth.api.verifyApiKey({
+          headers: request.headers,
+        });
+
+        if (result?.valid && result.key) {
+          return {
+            authenticated: true,
+            user: {
+              id: result.key.userId,
+              email: result.key.userId, // API key doesn't have email directly
+              name: result.key.name || "API User",
+              role: null, // Would need to fetch user for role
+            },
+            method: "api_key",
+            apiKeyId: result.key.id,
+          };
+        }
+      } catch (error) {
+        logger.debug("API key verification failed", { error: String(error) });
       }
 
       // Try Better Auth bearer token
@@ -93,126 +106,6 @@ export async function authenticateRequest(request: Request): Promise<AuthResult>
     authenticated: false,
     method: "none",
     error: "No valid authentication provided",
-  };
-}
-
-/**
- * Authenticate using API key
- */
-async function authenticateApiKey(token: string, request: Request): Promise<AuthResult> {
-  // Extract prefix (ewf_xxxxxxxx)
-  const parts = token.split("_");
-  if (parts.length < 3) {
-    return {
-      authenticated: false,
-      method: "api_key",
-      error: "Invalid API key format",
-    };
-  }
-
-  const prefix = `${parts[0]}_${parts[1]}`;
-
-  // Find API key by prefix
-  const [apiKeyRecord] = await db
-    .select()
-    .from(apiKey)
-    .where(and(eq(apiKey.keyPrefix, prefix), eq(apiKey.enabled, true)))
-    .limit(1);
-
-  if (!apiKeyRecord) {
-    logger.warn("API key not found", { prefix });
-    return {
-      authenticated: false,
-      method: "api_key",
-      error: "Invalid API key",
-    };
-  }
-
-  // Check expiration
-  if (apiKeyRecord.expiresAt && apiKeyRecord.expiresAt < new Date()) {
-    logger.warn("API key expired", { apiKeyId: apiKeyRecord.id });
-    return {
-      authenticated: false,
-      method: "api_key",
-      error: "API key expired",
-    };
-  }
-
-  // Verify key hash
-  const isValid = await argon2.verify(apiKeyRecord.keyHash, token);
-  if (!isValid) {
-    logger.warn("API key hash mismatch", { apiKeyId: apiKeyRecord.id });
-    return {
-      authenticated: false,
-      method: "api_key",
-      error: "Invalid API key",
-    };
-  }
-
-  // Get user
-  const [userData] = await db
-    .select()
-    .from(userTable)
-    .where(eq(userTable.id, apiKeyRecord.userId))
-    .limit(1);
-
-  if (!userData) {
-    logger.error("API key user not found", { apiKeyId: apiKeyRecord.id, userId: apiKeyRecord.userId });
-    return {
-      authenticated: false,
-      method: "api_key",
-      error: "User not found",
-    };
-  }
-
-  if (userData.banned) {
-    logger.warn("API key user is banned", { apiKeyId: apiKeyRecord.id, userId: userData.id });
-    return {
-      authenticated: false,
-      method: "api_key",
-      error: "User is suspended",
-    };
-  }
-
-  // Update last used
-  const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-  await db
-    .update(apiKey)
-    .set({
-      lastUsedAt: new Date(),
-      lastUsedIp: ipAddress,
-    })
-    .where(eq(apiKey.id, apiKeyRecord.id));
-
-  // Log API key usage
-  await db.insert(auditLog).values({
-    id: randomUUID(),
-    userId: userData.id,
-    action: "api_key.use",
-    resource: "api_key",
-    resourceId: apiKeyRecord.id,
-    metadata: { keyName: apiKeyRecord.name },
-    ipAddress,
-    userAgent: request.headers.get("user-agent") || "unknown",
-    result: "success",
-  });
-
-  logger.info("API key authenticated", {
-    userId: userData.id,
-    apiKeyId: apiKeyRecord.id,
-    keyName: apiKeyRecord.name,
-  });
-
-  return {
-    authenticated: true,
-    user: {
-      id: userData.id,
-      email: userData.email,
-      name: userData.name,
-      role: userData.role,
-    },
-    method: "api_key",
-    apiKeyId: apiKeyRecord.id,
   };
 }
 

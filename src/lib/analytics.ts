@@ -106,7 +106,7 @@ export function trackEvent(
 }
 
 /**
- * Track an exception with optional trace context
+ * Track an exception with optional context
  */
 export function trackException(
   error: Error,
@@ -116,9 +116,7 @@ export function trackException(
   if (!isInitialized) return;
 
   try {
-    posthog.capture("$exception", {
-      error: error.message,
-      stack: error.stack,
+    posthog.captureException(error, {
       traceId,
       ...context,
     });

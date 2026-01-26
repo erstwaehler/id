@@ -39,14 +39,16 @@ function ImpressumPage() {
             <h3 className="text-lg font-medium">Anschrift</h3>
             <p>
               Erstwähler Forum e.V.<br />
-              c/o Athenaeum Stade<br />
-              Harsefelder Straße 40<br />
+              z.Hd. Jack Ruder<br />
+              c/o Athenaeum Stade (SV-Büro)<br />
+              Harsefelder Str. 40<br />
               21680 Stade<br />
               Deutschland
             </p>
 
             <h3 className="text-lg font-medium">Kontakt</h3>
             <p>
+              Telefon: <a href="tel:+4941412271009" className="text-primary hover:underline">0414152271009</a> (Athenaeum SV-Büro)<br />
               E-Mail: <a href="mailto:contact@ewf-stade.de" className="text-primary hover:underline">contact@ewf-stade.de</a><br />
               Website: <a href="https://ewf-stade.de" className="text-primary hover:underline">ewf-stade.de</a>
             </p>
@@ -66,8 +68,9 @@ function ImpressumPage() {
             <h2 className="text-xl font-semibold">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
             <p>
               Erstwähler Forum e.V.<br />
+              z.Hd. Jack Ruder<br />
               c/o Athenaeum Stade<br />
-              Harsefelder Straße 40<br />
+              Harsefelder Str. 40<br />
               21680 Stade
             </p>
 

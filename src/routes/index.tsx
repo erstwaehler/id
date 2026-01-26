@@ -1,6 +1,9 @@
 /**
  * EWF-ID Landing Page
  * SPEC.md Phase 6 - Task 6.3: Public Pages
+ * 
+ * This is a B2C page for students - they access apps directly via their URLs
+ * and are redirected here for authentication.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "~/components/ui/button";
@@ -11,10 +14,6 @@ import {
   Shield, 
   Key, 
   School, 
-  Vote, 
-  Calendar, 
-  Radio, 
-  Monitor,
   Globe,
   Lock,
   Users,
@@ -56,33 +55,6 @@ function LandingPage() {
       icon: Users,
       title: m.landing_feature_roles_title(),
       description: m.landing_feature_roles_desc(),
-    },
-  ];
-
-  const apps = [
-    {
-      icon: Calendar,
-      name: "Schedule",
-      description: m.landing_app_schedule(),
-      href: "https://schedule.ewf-stade.de",
-    },
-    {
-      icon: Vote,
-      name: "Vote",
-      description: m.landing_app_vote(),
-      href: "https://vote.ewf-stade.de",
-    },
-    {
-      icon: Radio,
-      name: "Live",
-      description: m.landing_app_live(),
-      href: "https://live.ewf-stade.de",
-    },
-    {
-      icon: Monitor,
-      name: "Screens",
-      description: m.landing_app_screens(),
-      href: "https://screens.ewf-stade.de",
     },
   ];
 
@@ -139,35 +111,7 @@ function LandingPage() {
           </div>
         </div>
 
-        {/* Connected Apps */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            {m.landing_connected_apps()}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {apps.map((app) => (
-              <a
-                key={app.name}
-                href={app.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <Card className="hover:border-cyan-500 transition-colors h-full">
-                  <CardContent className="flex flex-col items-center text-center p-6">
-                    <div className="rounded-full bg-cyan-500/10 p-4 mb-4">
-                      <app.icon className="h-8 w-8 text-cyan-500" />
-                    </div>
-                    <h3 className="font-semibold mb-2">{app.name}</h3>
-                    <p className="text-sm text-gray-400">{app.description}</p>
-                  </CardContent>
-                </Card>
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* School Partners */}
+        {/* School Cooperation */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white text-center mb-8">
             {m.landing_schools()}
