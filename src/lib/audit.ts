@@ -24,6 +24,7 @@ export interface AuditLogOptions {
 /**
  * Hash IP address for GDPR compliance
  * We only need to identify unique IPs, not reverse them
+ * Special values like 'system' and 'unknown' are also hashed for consistency
  */
 function hashIpAddress(ip: string): string {
   return createHash("sha256").update(ip).digest("hex").substring(0, 16);
@@ -46,10 +47,8 @@ export async function createAuditLog(
         "unknown"
       : "system";
 
-    // Hash IP address for GDPR compliance
-    const ipAddressHash = rawIp === "system" || rawIp === "unknown" 
-      ? rawIp 
-      : hashIpAddress(rawIp);
+    // Hash all IP values for GDPR compliance and consistency
+    const ipAddressHash = hashIpAddress(rawIp);
 
     const userAgent = request
       ? request.headers.get("user-agent") || "unknown"

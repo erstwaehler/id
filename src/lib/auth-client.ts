@@ -6,6 +6,7 @@
 import { passkeyClient } from "@better-auth/passkey/client";
 import {
 	adminClient,
+	apiKeyClient,
 	genericOAuthClient,
 	multiSessionClient,
 	twoFactorClient,
@@ -14,16 +15,28 @@ import { createAuthClient } from "better-auth/react";
 import env from "#env";
 
 /**
+ * Get base URL for auth client
+ * Uses window.location.origin on client, env.VITE_HOST_URL on server
+ */
+function getBaseURL(): string {
+	if (typeof window !== "undefined") {
+		return window.location.origin;
+	}
+	return env.VITE_HOST_URL;
+}
+
+/**
  * Auth client with all required plugins
  */
 export const authClient = createAuthClient({
-	baseURL: env.VITE_HOST_URL,
+	baseURL: getBaseURL(),
 	plugins: [
 		twoFactorClient(),
 		adminClient(),
 		passkeyClient(),
 		multiSessionClient(),
 		genericOAuthClient(),
+		apiKeyClient(),
 	],
 });
 

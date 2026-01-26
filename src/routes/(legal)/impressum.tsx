@@ -48,7 +48,7 @@ function ImpressumPage() {
 
             <h3 className="text-lg font-medium">Kontakt</h3>
             <p>
-              Telefon: <a href="tel:+4941412271009" className="text-primary hover:underline">0414152271009</a> (Athenaeum SV-Büro)<br />
+              Telefon: <a href="tel:+4941452271009" className="text-primary hover:underline">04141 52271009</a> (Athenaeum SV-Büro)<br />
               E-Mail: <a href="mailto:contact@ewf-stade.de" className="text-primary hover:underline">contact@ewf-stade.de</a><br />
               Website: <a href="https://ewf-stade.de" className="text-primary hover:underline">ewf-stade.de</a>
             </p>
