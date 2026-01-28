@@ -42,6 +42,9 @@ export function PasswordResetEmail({
 							Passwort zurücksetzen
 						</Button>
 						<Text style={smallText}>
+							Oder kopiere diesen Link: {resetUrl}
+						</Text>
+						<Text style={smallText}>
 							Dieser Link ist 1 Stunde gültig. Wenn du keine Zurücksetzung
 							angefordert hast, ignoriere diese E-Mail.
 						</Text>

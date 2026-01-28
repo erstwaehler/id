@@ -19,7 +19,7 @@ import {
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { tanstackStartCookies } from "better-auth/tanstack-start/solid";
 import ms from "ms";
-import posthog from "posthog-js";
+import { PostHog } from "posthog-node";
 import { Resend } from "resend";
 import env from "#env";
 import * as schema from "./auth/schema/betterauth";
@@ -29,6 +29,11 @@ import { ac, admin, student, teacher, team, user } from "./permissions";
 
 // Initialize Resend for email sending
 const resend = new Resend(env.RESEND_API_KEY);
+
+// Initialize PostHog for server-side error tracking
+const posthogServer = new PostHog(env.POSTHOG_KEY, {
+	host: env.POSTHOG_HOST,
+});
 
 /**
  * EWF-ID Better Auth Configuration
@@ -69,13 +74,20 @@ export const auth = betterAuth({
 			const html = await render(VerificationEmail({ name, verificationUrl }));
 			const text = `Hallo ${name},\n\nBitte bestätige deine E-Mail-Adresse: ${verificationUrl}\n\nDieser Link ist 24 Stunden gültig.`;
 
-			await resend.emails.send({
-				from: env.RESEND_FROM_EMAIL,
-				to: data.user.email,
-				subject: "E-Mail-Adresse bestätigen | EWF-ID",
-				html,
-				text,
-			});
+			try {
+				await resend.emails.send({
+					from: env.RESEND_FROM_EMAIL,
+					to: data.user.email,
+					subject: "E-Mail-Adresse bestätigen | EWF-ID",
+					html,
+					text,
+				});
+			} catch (error) {
+				posthogServer.captureException(error as Error, {
+					tags: { module: "email", type: "verification" },
+				});
+				throw new Error("E-Mail konnte nicht gesendet werden. Bitte versuche es später erneut.");
+			}
 		},
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
@@ -95,13 +107,20 @@ export const auth = betterAuth({
 			const html = await render(PasswordResetEmail({ name, resetUrl }));
 			const text = `Hallo ${name},\n\nSetze dein Passwort hier zurück: ${resetUrl}\n\nDieser Link ist 1 Stunde gültig.`;
 
-			await resend.emails.send({
-				from: env.RESEND_FROM_EMAIL,
-				to: data.user.email,
-				subject: "Passwort zurücksetzen | EWF-ID",
-				html,
-				text,
-			});
+			try {
+				await resend.emails.send({
+					from: env.RESEND_FROM_EMAIL,
+					to: data.user.email,
+					subject: "Passwort zurücksetzen | EWF-ID",
+					html,
+					text,
+				});
+			} catch (error) {
+				posthogServer.captureException(error as Error, {
+					tags: { module: "email", type: "password-reset" },
+				});
+				throw new Error("E-Mail konnte nicht gesendet werden. Bitte versuche es später erneut.");
+			}
 		},
 		resetPasswordTokenExpiresIn: ms("1h") / 1000, // 1 hour
 		password: {
@@ -306,35 +325,36 @@ export const auth = betterAuth({
 		user: {
 			create: {
 				before: async (user) => {
-					// Validate email domain - only allow partner school emails
-					const allowedDomains = [
-						"@iserv.athenaeum-stade.de",
-						"@iserv.vlg-stade.de",
-						"@iserv.igs-stade.de",
-					];
-					const isAllowed = allowedDomains.some((domain) =>
-						user.email.toLowerCase().endsWith(domain),
-					);
+					// Normalize and validate email
+					const email = user.email.trim().toLowerCase();
 
-					if (!isAllowed) {
+					// School domain mapping
+					const schoolDomains = {
+						athenaeum: "@iserv.athenaeum-stade.de",
+						vlg: "@iserv.vlg-stade.de",
+						igs: "@iserv.igs-stade.de",
+					} as const;
+
+					// Determine school from email domain
+					let school: keyof typeof schoolDomains | undefined;
+					for (const [schoolId, domain] of Object.entries(schoolDomains)) {
+						if (email.endsWith(domain)) {
+							school = schoolId as keyof typeof schoolDomains;
+							break;
+						}
+					}
+
+					// Reject if not from a partner school
+					if (!school) {
 						throw new Error(
 							"Nur E-Mail-Adressen von Partnerschulen sind erlaubt.",
 						);
 					}
 
-					// Auto-assign school based on email domain
-					let school: string | undefined;
-					if (user.email.includes("athenaeum")) {
-						school = "athenaeum";
-					} else if (user.email.includes("vlg")) {
-						school = "vlg";
-					} else if (user.email.includes("igs")) {
-						school = "igs";
-					}
-
 					return {
 						data: {
 							...user,
+							email, // Use normalized email
 							school,
 						},
 					};
@@ -347,7 +367,7 @@ export const auth = betterAuth({
 	onAPIError: {
 		throw: true,
 		onError(error, _ctx) {
-			posthog.captureException(error, {
+			posthogServer.captureException(error, {
 				tags: { module: "better-auth" },
 			});
 		},

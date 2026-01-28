@@ -42,6 +42,9 @@ export function VerificationEmail({
 							E-Mail bestätigen
 						</Button>
 						<Text style={smallText}>
+							Oder kopiere diesen Link: {verificationUrl}
+						</Text>
+						<Text style={smallText}>
 							Dieser Link ist 24 Stunden gültig. Falls du kein Konto erstellt
 							hast, kannst du diese E-Mail ignorieren.
 						</Text>
