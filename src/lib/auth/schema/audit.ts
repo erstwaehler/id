@@ -1,7 +1,6 @@
 /**
  * EWF-ID Custom Tables Schema
- * Only audit logs and two-factor table are needed.
- * Other tables (apiKey, oidc*, etc.) are managed by Better Auth plugins.
+ * Only audit logs are needed - other tables are managed by Better Auth plugins.
  */
 import { relations } from "drizzle-orm";
 import {
@@ -54,34 +53,10 @@ index("audit_log_trace_id_idx").on(table.traceId),
 ],
 );
 
-/**
- * Two Factor table (for Better Auth)
- */
-export const twoFactor = pgTable(
-"two_factor",
-{
-id: text("id").primaryKey(),
-userId: text("user_id")
-.notNull()
-.references(() => user.id, { onDelete: "cascade" }),
-secret: text("secret").notNull(),
-backupCodes: text("backup_codes").notNull(),
-createdAt: timestamp("created_at").defaultNow().notNull(),
-},
-(table) => [index("two_factor_user_id_idx").on(table.userId)],
-);
-
 // Relations
 export const auditLogRelations = relations(auditLog, ({ one }) => ({
 user: one(user, {
 fields: [auditLog.userId],
-references: [user.id],
-}),
-}));
-
-export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
-user: one(user, {
-fields: [twoFactor.userId],
 references: [user.id],
 }),
 }));

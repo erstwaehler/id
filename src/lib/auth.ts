@@ -1,5 +1,6 @@
 // removed server only, some bundle prerender keep spilling to client
 import { randomUUID } from "node:crypto";
+import { render } from "@react-email/render";
 import { passkey } from "@better-auth/passkey";
 import argon2 from "argon2";
 import { betterAuth } from "better-auth";
@@ -18,32 +19,16 @@ import {
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { tanstackStartCookies } from "better-auth/tanstack-start/solid";
 import ms from "ms";
+import posthog from "posthog-js";
 import { Resend } from "resend";
 import env from "#env";
-import { twoFactor as twoFactorTable } from "./auth/schema/audit";
 import * as schema from "./auth/schema/betterauth";
 import { db } from "./auth-db";
+import { PasswordResetEmail, VerificationEmail } from "./emails";
 import { ac, admin, student, teacher, team, user } from "./permissions";
 
 // Initialize Resend for email sending
 const resend = new Resend(env.RESEND_API_KEY);
-
-/**
- * Send email using Resend
- */
-async function sendEmail(to: string, subject: string, html: string, text?: string) {
-	try {
-		await resend.emails.send({
-			from: env.RESEND_FROM_EMAIL,
-			to,
-			subject,
-			html,
-			text,
-		});
-	} catch (error) {
-		console.error("[Email] Failed to send:", error);
-	}
-}
 
 /**
  * EWF-ID Better Auth Configuration
@@ -60,7 +45,6 @@ export const auth = betterAuth({
 			session: schema.session,
 			account: schema.account,
 			verification: schema.verification,
-			twoFactor: twoFactorTable,
 			passkey: schema.passkey,
 		},
 	}),
@@ -82,17 +66,16 @@ export const auth = betterAuth({
 		sendVerificationEmail: async (data) => {
 			const verificationUrl = `${env.HOST_URL}/verify-email?token=${data.token}`;
 			const name = data.user.name || "Benutzer";
-			await sendEmail(
-				data.user.email,
-				"E-Mail-Adresse bestätigen | EWF-ID",
-				`
-					<h1>Hallo ${name},</h1>
-					<p>Bitte bestätige deine E-Mail-Adresse, um dein EWF-ID Konto zu aktivieren.</p>
-					<p><a href="${verificationUrl}" style="background:#0f172a;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;">E-Mail bestätigen</a></p>
-					<p><small>Dieser Link ist 24 Stunden gültig.</small></p>
-				`,
-				`Hallo ${name},\n\nBitte bestätige deine E-Mail-Adresse: ${verificationUrl}\n\nDieser Link ist 24 Stunden gültig.`
-			);
+			const html = await render(VerificationEmail({ name, verificationUrl }));
+			const text = `Hallo ${name},\n\nBitte bestätige deine E-Mail-Adresse: ${verificationUrl}\n\nDieser Link ist 24 Stunden gültig.`;
+
+			await resend.emails.send({
+				from: env.RESEND_FROM_EMAIL,
+				to: data.user.email,
+				subject: "E-Mail-Adresse bestätigen | EWF-ID",
+				html,
+				text,
+			});
 		},
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
@@ -109,17 +92,16 @@ export const auth = betterAuth({
 		sendResetPassword: async (data) => {
 			const resetUrl = `${env.HOST_URL}/reset-password?token=${data.token}`;
 			const name = data.user.name || "Benutzer";
-			await sendEmail(
-				data.user.email,
-				"Passwort zurücksetzen | EWF-ID",
-				`
-					<h1>Hallo ${name},</h1>
-					<p>Du hast eine Passwort-Zurücksetzung angefordert.</p>
-					<p><a href="${resetUrl}" style="background:#0f172a;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;">Passwort zurücksetzen</a></p>
-					<p><small>Dieser Link ist 1 Stunde gültig. Wenn du keine Zurücksetzung angefordert hast, ignoriere diese E-Mail.</small></p>
-				`,
-				`Hallo ${name},\n\nSetze dein Passwort hier zurück: ${resetUrl}\n\nDieser Link ist 1 Stunde gültig.`
-			);
+			const html = await render(PasswordResetEmail({ name, resetUrl }));
+			const text = `Hallo ${name},\n\nSetze dein Passwort hier zurück: ${resetUrl}\n\nDieser Link ist 1 Stunde gültig.`;
+
+			await resend.emails.send({
+				from: env.RESEND_FROM_EMAIL,
+				to: data.user.email,
+				subject: "Passwort zurücksetzen | EWF-ID",
+				html,
+				text,
+			});
 		},
 		resetPasswordTokenExpiresIn: ms("1h") / 1000, // 1 hour
 		password: {
@@ -268,10 +250,6 @@ export const auth = betterAuth({
 				required: false,
 				defaultValue: "de",
 			},
-			lastLoginMethod: {
-				type: "string",
-				required: false,
-			},
 		},
 	},
 
@@ -328,37 +306,38 @@ export const auth = betterAuth({
 		user: {
 			create: {
 				before: async (user) => {
-					// Validate email domain
-					// if (!isAllowedEmailDomain(user.email)) {
-					//   throw new Error(
-					//     "Nur E-Mail-Adressen von Partnerschulen sind erlaubt.",
-					//   );
-					// }
+					// Validate email domain - only allow partner school emails
+					const allowedDomains = [
+						"@iserv.athenaeum-stade.de",
+						"@iserv.vlg-stade.de",
+						"@iserv.igs-stade.de",
+					];
+					const isAllowed = allowedDomains.some((domain) =>
+						user.email.toLowerCase().endsWith(domain),
+					);
+
+					if (!isAllowed) {
+						throw new Error(
+							"Nur E-Mail-Adressen von Partnerschulen sind erlaubt.",
+						);
+					}
 
 					// Auto-assign school based on email domain
-					// const school = getSchoolFromEmail(user.email);
-					// if (school) {
-					//   return {
-					//     data: {
-					//       ...user,
-					//       school: school.id,
-					//       role: school.defaultRole,
-					//     },
-					//   };
-					// }
+					let school: string | undefined;
+					if (user.email.includes("athenaeum")) {
+						school = "athenaeum";
+					} else if (user.email.includes("vlg")) {
+						school = "vlg";
+					} else if (user.email.includes("igs")) {
+						school = "igs";
+					}
 
-					return { data: user };
-				},
-			},
-		},
-		session: {
-			create: {
-				after: async (session) => {
-					// Track session creation for analytics
-					// posthog.capture("session_created", {
-					//   distinct_id: session.userId,
-					//   session_id: session.id,
-					// });
+					return {
+						data: {
+							...user,
+							school,
+						},
+					};
 				},
 			},
 		},
@@ -368,9 +347,9 @@ export const auth = betterAuth({
 	onAPIError: {
 		throw: true,
 		onError(error, _ctx) {
-			// posthog.captureException(error, {
-			//   tags: { module: "better-auth" },
-			// });
+			posthog.captureException(error, {
+				tags: { module: "better-auth" },
+			});
 		},
 	},
 });
