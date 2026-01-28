@@ -1,6 +1,6 @@
 /**
  * Password Reset Email Template
- * Built with React-Email for EWF-ID
+ * Built with React-Email + Tailwind for EWF-ID
  */
 import {
 	Body,
@@ -13,6 +13,7 @@ import {
 	Link,
 	Preview,
 	Section,
+	Tailwind,
 	Text,
 } from "@react-email/components";
 
@@ -29,99 +30,46 @@ export function PasswordResetEmail({
 		<Html>
 			<Head />
 			<Preview>Passwort zurücksetzen für EWF-ID</Preview>
-			<Body style={main}>
-				<Container style={container}>
-					<Heading style={heading}>EWF-ID</Heading>
-					<Section style={section}>
-						<Text style={text}>Hallo {name},</Text>
-						<Text style={text}>
-							Du hast eine Passwort-Zurücksetzung angefordert. Klicke auf den
-							Button unten, um ein neues Passwort zu setzen.
+			<Tailwind>
+				<Body className="bg-slate-100 font-sans">
+					<Container className="bg-white mx-auto py-5 pb-12 mb-16 max-w-[600px]">
+						<Heading className="text-slate-900 text-2xl font-bold text-center my-8">
+							EWF-ID
+						</Heading>
+						<Section className="px-6">
+							<Text className="text-slate-700 text-base leading-7 my-4">
+								Hallo {name},
+							</Text>
+							<Text className="text-slate-700 text-base leading-7 my-4">
+								Du hast eine Passwort-Zurücksetzung angefordert. Klicke auf den
+								Button unten, um ein neues Passwort zu setzen.
+							</Text>
+							<Button
+								className="bg-slate-900 rounded-md text-white block text-base font-semibold text-center no-underline py-3 px-6 mx-auto my-6"
+								href={resetUrl}
+							>
+								Passwort zurücksetzen
+							</Button>
+							<Text className="text-slate-500 text-sm leading-6 my-4">
+								Oder kopiere diesen Link: {resetUrl}
+							</Text>
+							<Text className="text-slate-500 text-sm leading-6 my-4">
+								Dieser Link ist 1 Stunde gültig. Wenn du keine Zurücksetzung
+								angefordert hast, ignoriere diese E-Mail.
+							</Text>
+						</Section>
+						<Hr className="border-slate-200 my-5" />
+						<Text className="text-slate-400 text-xs text-center">
+							Erstwähler Foundation |{" "}
+							<Link href="https://ewf-stade.de" className="text-slate-400">
+								ewf-stade.de
+							</Link>
 						</Text>
-						<Button style={button} href={resetUrl}>
-							Passwort zurücksetzen
-						</Button>
-						<Text style={smallText}>
-							Oder kopiere diesen Link: {resetUrl}
-						</Text>
-						<Text style={smallText}>
-							Dieser Link ist 1 Stunde gültig. Wenn du keine Zurücksetzung
-							angefordert hast, ignoriere diese E-Mail.
-						</Text>
-					</Section>
-					<Hr style={hr} />
-					<Text style={footer}>
-						Erstwähler Foundation | <Link href="https://ewf-stade.de">ewf-stade.de</Link>
-					</Text>
-				</Container>
-			</Body>
+					</Container>
+				</Body>
+			</Tailwind>
 		</Html>
 	);
 }
-
-// Styles
-const main = {
-	backgroundColor: "#f6f9fc",
-	fontFamily:
-		'-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif',
-};
-
-const container = {
-	backgroundColor: "#ffffff",
-	margin: "0 auto",
-	padding: "20px 0 48px",
-	marginBottom: "64px",
-	maxWidth: "600px",
-};
-
-const heading = {
-	color: "#0f172a",
-	fontSize: "24px",
-	fontWeight: "700",
-	textAlign: "center" as const,
-	margin: "30px 0",
-};
-
-const section = {
-	padding: "24px",
-};
-
-const text = {
-	color: "#334155",
-	fontSize: "16px",
-	lineHeight: "26px",
-	margin: "16px 0",
-};
-
-const smallText = {
-	color: "#64748b",
-	fontSize: "14px",
-	lineHeight: "22px",
-	margin: "16px 0",
-};
-
-const button = {
-	backgroundColor: "#0f172a",
-	borderRadius: "6px",
-	color: "#ffffff",
-	display: "block",
-	fontSize: "16px",
-	fontWeight: "600",
-	textAlign: "center" as const,
-	textDecoration: "none",
-	padding: "12px 24px",
-	margin: "24px auto",
-};
-
-const hr = {
-	borderColor: "#e2e8f0",
-	margin: "20px 0",
-};
-
-const footer = {
-	color: "#8898aa",
-	fontSize: "12px",
-	textAlign: "center" as const,
-};
 
 export default PasswordResetEmail;

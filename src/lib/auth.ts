@@ -1,6 +1,5 @@
 // removed server only, some bundle prerender keep spilling to client
 import { randomUUID } from "node:crypto";
-import { render } from "@react-email/render";
 import { passkey } from "@better-auth/passkey";
 import argon2 from "argon2";
 import { betterAuth } from "better-auth";
@@ -71,16 +70,14 @@ export const auth = betterAuth({
 		sendVerificationEmail: async (data) => {
 			const verificationUrl = `${env.HOST_URL}/verify-email?token=${data.token}`;
 			const name = data.user.name || "Benutzer";
-			const html = await render(VerificationEmail({ name, verificationUrl }));
-			const text = `Hallo ${name},\n\nBitte bestätige deine E-Mail-Adresse: ${verificationUrl}\n\nDieser Link ist 24 Stunden gültig.`;
 
 			try {
 				await resend.emails.send({
 					from: env.RESEND_FROM_EMAIL,
 					to: data.user.email,
 					subject: "E-Mail-Adresse bestätigen | EWF-ID",
-					html,
-					text,
+					react: VerificationEmail({ name, verificationUrl }),
+					text: `Hallo ${name},\n\nBitte bestätige deine E-Mail-Adresse: ${verificationUrl}\n\nDieser Link ist 24 Stunden gültig.`,
 				});
 			} catch (error) {
 				posthogServer.captureException(error as Error, {
@@ -104,16 +101,14 @@ export const auth = betterAuth({
 		sendResetPassword: async (data) => {
 			const resetUrl = `${env.HOST_URL}/reset-password?token=${data.token}`;
 			const name = data.user.name || "Benutzer";
-			const html = await render(PasswordResetEmail({ name, resetUrl }));
-			const text = `Hallo ${name},\n\nSetze dein Passwort hier zurück: ${resetUrl}\n\nDieser Link ist 1 Stunde gültig.`;
 
 			try {
 				await resend.emails.send({
 					from: env.RESEND_FROM_EMAIL,
 					to: data.user.email,
 					subject: "Passwort zurücksetzen | EWF-ID",
-					html,
-					text,
+					react: PasswordResetEmail({ name, resetUrl }),
+					text: `Hallo ${name},\n\nSetze dein Passwort hier zurück: ${resetUrl}\n\nDieser Link ist 1 Stunde gültig.`,
 				});
 			} catch (error) {
 				posthogServer.captureException(error as Error, {
