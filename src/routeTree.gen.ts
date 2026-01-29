@@ -10,10 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as OauthUserinfoRouteImport } from './routes/oauth/userinfo'
-import { Route as OauthTokenRouteImport } from './routes/oauth/token'
-import { Route as OauthRevokeRouteImport } from './routes/oauth/revoke'
-import { Route as OauthAuthorizeRouteImport } from './routes/oauth/authorize'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as legalTermsRouteImport } from './routes/(legal)/terms'
@@ -46,15 +42,11 @@ import { Route as appAdminUsersRouteImport } from './routes/(app)/admin/users'
 import { Route as appAdminSchoolsRouteImport } from './routes/(app)/admin/schools'
 import { Route as appAdminAuditLogsRouteImport } from './routes/(app)/admin/audit-logs'
 import { Route as ApiUsersMeSessionsRouteImport } from './routes/api/users/me.sessions'
-import { Route as ApiUsersMeExportRouteImport } from './routes/api/users/me.export'
-import { Route as ApiUsersMeDeleteRouteImport } from './routes/api/users/me.delete'
-import { Route as ApiUsersMeApiKeysRouteImport } from './routes/api/users/me.api-keys'
 import { Route as ApiAdminUsersUserIdRouteImport } from './routes/api/admin/users.$userId'
 import { Route as ApiAdminSchoolsSchoolIdRouteImport } from './routes/api/admin/schools.$schoolId'
 import { Route as ApiAdminAnalyticsOverviewRouteImport } from './routes/api/admin/analytics.overview'
 import { Route as appAdminUsersUserIdRouteImport } from './routes/(app)/admin/users.$userId'
 import { Route as ApiUsersMeSessionsSessionIdRouteImport } from './routes/api/users/me.sessions.$sessionId'
-import { Route as ApiUsersMeApiKeysKeyIdRouteImport } from './routes/api/users/me.api-keys.$keyId'
 import { Route as ApiAdminUsersUserIdUnsuspendRouteImport } from './routes/api/admin/users.$userId.unsuspend'
 import { Route as ApiAdminUsersUserIdSuspendRouteImport } from './routes/api/admin/users.$userId.suspend'
 import { Route as ApiAdminUsersUserIdRolesRouteImport } from './routes/api/admin/users.$userId.roles'
@@ -62,26 +54,6 @@ import { Route as ApiAdminUsersUserIdRolesRouteImport } from './routes/api/admin
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OauthUserinfoRoute = OauthUserinfoRouteImport.update({
-  id: '/oauth/userinfo',
-  path: '/oauth/userinfo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OauthTokenRoute = OauthTokenRouteImport.update({
-  id: '/oauth/token',
-  path: '/oauth/token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OauthRevokeRoute = OauthRevokeRouteImport.update({
-  id: '/oauth/revoke',
-  path: '/oauth/revoke',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OauthAuthorizeRoute = OauthAuthorizeRouteImport.update({
-  id: '/oauth/authorize',
-  path: '/oauth/authorize',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoBetterAuthRoute = DemoBetterAuthRouteImport.update({
@@ -245,21 +217,6 @@ const ApiUsersMeSessionsRoute = ApiUsersMeSessionsRouteImport.update({
   path: '/sessions',
   getParentRoute: () => ApiUsersMeRoute,
 } as any)
-const ApiUsersMeExportRoute = ApiUsersMeExportRouteImport.update({
-  id: '/export',
-  path: '/export',
-  getParentRoute: () => ApiUsersMeRoute,
-} as any)
-const ApiUsersMeDeleteRoute = ApiUsersMeDeleteRouteImport.update({
-  id: '/delete',
-  path: '/delete',
-  getParentRoute: () => ApiUsersMeRoute,
-} as any)
-const ApiUsersMeApiKeysRoute = ApiUsersMeApiKeysRouteImport.update({
-  id: '/api-keys',
-  path: '/api-keys',
-  getParentRoute: () => ApiUsersMeRoute,
-} as any)
 const ApiAdminUsersUserIdRoute = ApiAdminUsersUserIdRouteImport.update({
   id: '/$userId',
   path: '/$userId',
@@ -287,11 +244,6 @@ const ApiUsersMeSessionsSessionIdRoute =
     path: '/$sessionId',
     getParentRoute: () => ApiUsersMeSessionsRoute,
   } as any)
-const ApiUsersMeApiKeysKeyIdRoute = ApiUsersMeApiKeysKeyIdRouteImport.update({
-  id: '/$keyId',
-  path: '/$keyId',
-  getParentRoute: () => ApiUsersMeApiKeysRoute,
-} as any)
 const ApiAdminUsersUserIdUnsuspendRoute =
   ApiAdminUsersUserIdUnsuspendRouteImport.update({
     id: '/unsuspend',
@@ -333,10 +285,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
-  '/oauth/authorize': typeof OauthAuthorizeRoute
-  '/oauth/revoke': typeof OauthRevokeRoute
-  '/oauth/token': typeof OauthTokenRoute
-  '/oauth/userinfo': typeof OauthUserinfoRoute
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
   '/admin/users': typeof appAdminUsersRouteWithChildren
@@ -352,14 +300,10 @@ export interface FileRoutesByFullPath {
   '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
   '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
   '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
-  '/api/users/me/api-keys': typeof ApiUsersMeApiKeysRouteWithChildren
-  '/api/users/me/delete': typeof ApiUsersMeDeleteRoute
-  '/api/users/me/export': typeof ApiUsersMeExportRoute
   '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
   '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
   '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
   '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
-  '/api/users/me/api-keys/$keyId': typeof ApiUsersMeApiKeysKeyIdRoute
   '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRoutesByTo {
@@ -384,10 +328,6 @@ export interface FileRoutesByTo {
   '/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
-  '/oauth/authorize': typeof OauthAuthorizeRoute
-  '/oauth/revoke': typeof OauthRevokeRoute
-  '/oauth/token': typeof OauthTokenRoute
-  '/oauth/userinfo': typeof OauthUserinfoRoute
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
   '/admin/users': typeof appAdminUsersRouteWithChildren
@@ -403,14 +343,10 @@ export interface FileRoutesByTo {
   '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
   '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
   '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
-  '/api/users/me/api-keys': typeof ApiUsersMeApiKeysRouteWithChildren
-  '/api/users/me/delete': typeof ApiUsersMeDeleteRoute
-  '/api/users/me/export': typeof ApiUsersMeExportRoute
   '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
   '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
   '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
   '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
-  '/api/users/me/api-keys/$keyId': typeof ApiUsersMeApiKeysKeyIdRoute
   '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRoutesById {
@@ -436,10 +372,6 @@ export interface FileRoutesById {
   '/(legal)/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
-  '/oauth/authorize': typeof OauthAuthorizeRoute
-  '/oauth/revoke': typeof OauthRevokeRoute
-  '/oauth/token': typeof OauthTokenRoute
-  '/oauth/userinfo': typeof OauthUserinfoRoute
   '/(app)/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/(app)/admin/schools': typeof appAdminSchoolsRoute
   '/(app)/admin/users': typeof appAdminUsersRouteWithChildren
@@ -455,14 +387,10 @@ export interface FileRoutesById {
   '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
   '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
   '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
-  '/api/users/me/api-keys': typeof ApiUsersMeApiKeysRouteWithChildren
-  '/api/users/me/delete': typeof ApiUsersMeDeleteRoute
-  '/api/users/me/export': typeof ApiUsersMeExportRoute
   '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
   '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
   '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
   '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
-  '/api/users/me/api-keys/$keyId': typeof ApiUsersMeApiKeysKeyIdRoute
   '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRouteTypes {
@@ -489,10 +417,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/health'
     | '/demo/better-auth'
-    | '/oauth/authorize'
-    | '/oauth/revoke'
-    | '/oauth/token'
-    | '/oauth/userinfo'
     | '/admin/audit-logs'
     | '/admin/schools'
     | '/admin/users'
@@ -508,14 +432,10 @@ export interface FileRouteTypes {
     | '/api/admin/analytics/overview'
     | '/api/admin/schools/$schoolId'
     | '/api/admin/users/$userId'
-    | '/api/users/me/api-keys'
-    | '/api/users/me/delete'
-    | '/api/users/me/export'
     | '/api/users/me/sessions'
     | '/api/admin/users/$userId/roles'
     | '/api/admin/users/$userId/suspend'
     | '/api/admin/users/$userId/unsuspend'
-    | '/api/users/me/api-keys/$keyId'
     | '/api/users/me/sessions/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -540,10 +460,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/health'
     | '/demo/better-auth'
-    | '/oauth/authorize'
-    | '/oauth/revoke'
-    | '/oauth/token'
-    | '/oauth/userinfo'
     | '/admin/audit-logs'
     | '/admin/schools'
     | '/admin/users'
@@ -559,14 +475,10 @@ export interface FileRouteTypes {
     | '/api/admin/analytics/overview'
     | '/api/admin/schools/$schoolId'
     | '/api/admin/users/$userId'
-    | '/api/users/me/api-keys'
-    | '/api/users/me/delete'
-    | '/api/users/me/export'
     | '/api/users/me/sessions'
     | '/api/admin/users/$userId/roles'
     | '/api/admin/users/$userId/suspend'
     | '/api/admin/users/$userId/unsuspend'
-    | '/api/users/me/api-keys/$keyId'
     | '/api/users/me/sessions/$sessionId'
   id:
     | '__root__'
@@ -591,10 +503,6 @@ export interface FileRouteTypes {
     | '/(legal)/terms'
     | '/api/health'
     | '/demo/better-auth'
-    | '/oauth/authorize'
-    | '/oauth/revoke'
-    | '/oauth/token'
-    | '/oauth/userinfo'
     | '/(app)/admin/audit-logs'
     | '/(app)/admin/schools'
     | '/(app)/admin/users'
@@ -610,14 +518,10 @@ export interface FileRouteTypes {
     | '/api/admin/analytics/overview'
     | '/api/admin/schools/$schoolId'
     | '/api/admin/users/$userId'
-    | '/api/users/me/api-keys'
-    | '/api/users/me/delete'
-    | '/api/users/me/export'
     | '/api/users/me/sessions'
     | '/api/admin/users/$userId/roles'
     | '/api/admin/users/$userId/suspend'
     | '/api/admin/users/$userId/unsuspend'
-    | '/api/users/me/api-keys/$keyId'
     | '/api/users/me/sessions/$sessionId'
   fileRoutesById: FileRoutesById
 }
@@ -643,10 +547,6 @@ export interface RootRouteChildren {
   legalTermsRoute: typeof legalTermsRoute
   ApiHealthRoute: typeof ApiHealthRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
-  OauthAuthorizeRoute: typeof OauthAuthorizeRoute
-  OauthRevokeRoute: typeof OauthRevokeRoute
-  OauthTokenRoute: typeof OauthTokenRoute
-  OauthUserinfoRoute: typeof OauthUserinfoRoute
   appAdminAuditLogsRoute: typeof appAdminAuditLogsRoute
   appAdminSchoolsRoute: typeof appAdminSchoolsRoute
   appAdminUsersRoute: typeof appAdminUsersRouteWithChildren
@@ -668,34 +568,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/oauth/userinfo': {
-      id: '/oauth/userinfo'
-      path: '/oauth/userinfo'
-      fullPath: '/oauth/userinfo'
-      preLoaderRoute: typeof OauthUserinfoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/oauth/token': {
-      id: '/oauth/token'
-      path: '/oauth/token'
-      fullPath: '/oauth/token'
-      preLoaderRoute: typeof OauthTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/oauth/revoke': {
-      id: '/oauth/revoke'
-      path: '/oauth/revoke'
-      fullPath: '/oauth/revoke'
-      preLoaderRoute: typeof OauthRevokeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/oauth/authorize': {
-      id: '/oauth/authorize'
-      path: '/oauth/authorize'
-      fullPath: '/oauth/authorize'
-      preLoaderRoute: typeof OauthAuthorizeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/better-auth': {
@@ -922,27 +794,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUsersMeSessionsRouteImport
       parentRoute: typeof ApiUsersMeRoute
     }
-    '/api/users/me/export': {
-      id: '/api/users/me/export'
-      path: '/export'
-      fullPath: '/api/users/me/export'
-      preLoaderRoute: typeof ApiUsersMeExportRouteImport
-      parentRoute: typeof ApiUsersMeRoute
-    }
-    '/api/users/me/delete': {
-      id: '/api/users/me/delete'
-      path: '/delete'
-      fullPath: '/api/users/me/delete'
-      preLoaderRoute: typeof ApiUsersMeDeleteRouteImport
-      parentRoute: typeof ApiUsersMeRoute
-    }
-    '/api/users/me/api-keys': {
-      id: '/api/users/me/api-keys'
-      path: '/api-keys'
-      fullPath: '/api/users/me/api-keys'
-      preLoaderRoute: typeof ApiUsersMeApiKeysRouteImport
-      parentRoute: typeof ApiUsersMeRoute
-    }
     '/api/admin/users/$userId': {
       id: '/api/admin/users/$userId'
       path: '/$userId'
@@ -977,13 +828,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/users/me/sessions/$sessionId'
       preLoaderRoute: typeof ApiUsersMeSessionsSessionIdRouteImport
       parentRoute: typeof ApiUsersMeSessionsRoute
-    }
-    '/api/users/me/api-keys/$keyId': {
-      id: '/api/users/me/api-keys/$keyId'
-      path: '/$keyId'
-      fullPath: '/api/users/me/api-keys/$keyId'
-      preLoaderRoute: typeof ApiUsersMeApiKeysKeyIdRouteImport
-      parentRoute: typeof ApiUsersMeApiKeysRoute
     }
     '/api/admin/users/$userId/unsuspend': {
       id: '/api/admin/users/$userId/unsuspend'
@@ -1060,17 +904,6 @@ const ApiAdminUsersRouteWithChildren = ApiAdminUsersRoute._addFileChildren(
   ApiAdminUsersRouteChildren,
 )
 
-interface ApiUsersMeApiKeysRouteChildren {
-  ApiUsersMeApiKeysKeyIdRoute: typeof ApiUsersMeApiKeysKeyIdRoute
-}
-
-const ApiUsersMeApiKeysRouteChildren: ApiUsersMeApiKeysRouteChildren = {
-  ApiUsersMeApiKeysKeyIdRoute: ApiUsersMeApiKeysKeyIdRoute,
-}
-
-const ApiUsersMeApiKeysRouteWithChildren =
-  ApiUsersMeApiKeysRoute._addFileChildren(ApiUsersMeApiKeysRouteChildren)
-
 interface ApiUsersMeSessionsRouteChildren {
   ApiUsersMeSessionsSessionIdRoute: typeof ApiUsersMeSessionsSessionIdRoute
 }
@@ -1083,16 +916,10 @@ const ApiUsersMeSessionsRouteWithChildren =
   ApiUsersMeSessionsRoute._addFileChildren(ApiUsersMeSessionsRouteChildren)
 
 interface ApiUsersMeRouteChildren {
-  ApiUsersMeApiKeysRoute: typeof ApiUsersMeApiKeysRouteWithChildren
-  ApiUsersMeDeleteRoute: typeof ApiUsersMeDeleteRoute
-  ApiUsersMeExportRoute: typeof ApiUsersMeExportRoute
   ApiUsersMeSessionsRoute: typeof ApiUsersMeSessionsRouteWithChildren
 }
 
 const ApiUsersMeRouteChildren: ApiUsersMeRouteChildren = {
-  ApiUsersMeApiKeysRoute: ApiUsersMeApiKeysRouteWithChildren,
-  ApiUsersMeDeleteRoute: ApiUsersMeDeleteRoute,
-  ApiUsersMeExportRoute: ApiUsersMeExportRoute,
   ApiUsersMeSessionsRoute: ApiUsersMeSessionsRouteWithChildren,
 }
 
@@ -1122,10 +949,6 @@ const rootRouteChildren: RootRouteChildren = {
   legalTermsRoute: legalTermsRoute,
   ApiHealthRoute: ApiHealthRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,
-  OauthAuthorizeRoute: OauthAuthorizeRoute,
-  OauthRevokeRoute: OauthRevokeRoute,
-  OauthTokenRoute: OauthTokenRoute,
-  OauthUserinfoRoute: OauthUserinfoRoute,
   appAdminAuditLogsRoute: appAdminAuditLogsRoute,
   appAdminSchoolsRoute: appAdminSchoolsRoute,
   appAdminUsersRoute: appAdminUsersRouteWithChildren,

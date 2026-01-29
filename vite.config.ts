@@ -28,6 +28,13 @@ const config = defineConfig(({ mode }) => {
         "#logger": fileURLToPath(
           new URL("./src/lib/logging.ts", import.meta.url),
         ),
+        "'defective/*": fileURLToPath(
+          new URL("./src/lib/effective/defective/*", import.meta.url),
+        ),
+        "'services/*": fileURLToPath(
+          new URL("./src/lib/effective/services/*", import.meta.url),
+        ),
+        "'/*": fileURLToPath(new URL("./src/lib/effective/*", import.meta.url)),
         "~": fileURLToPath(new URL("./src", import.meta.url)),
         "@": fileURLToPath(new URL("./", import.meta.url)),
       },
