@@ -8,13 +8,14 @@ import {
   integer,
   index,
 } from "drizzle-orm/pg-core";
+import { encryptedText } from "~/lib/db/custom-types";
 
 const pgTable = pgSchema("betterauth").table;
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull().unique(),
+  email: encryptedText("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -27,8 +28,8 @@ export const user = pgTable("user", {
   banned: boolean("banned").default(false),
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
+  firstName: encryptedText("first_name"),
+  lastName: encryptedText("last_name"),
   school: text("school"),
   locale: text("locale").default("de"),
 });
@@ -43,7 +44,7 @@ export const session = pgTable(
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
-    ipAddress: text("ip_address"),
+    ipAddress: encryptedText("ip_address"),
     userAgent: text("user_agent"),
     userId: text("user_id")
       .notNull()
@@ -62,13 +63,13 @@ export const account = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    accessToken: text("access_token"),
-    refreshToken: text("refresh_token"),
-    idToken: text("id_token"),
+    accessToken: encryptedText("access_token"),
+    refreshToken: encryptedText("refresh_token"),
+    idToken: encryptedText("id_token"),
     accessTokenExpiresAt: timestamp("access_token_expires_at"),
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text("scope"),
-    password: text("password"),
+    password: encryptedText("password"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => /* @__PURE__ */ new Date())
@@ -97,8 +98,8 @@ export const twoFactor = pgTable(
   "two_factor",
   {
     id: text("id").primaryKey(),
-    secret: text("secret").notNull(),
-    backupCodes: text("backup_codes").notNull(),
+    secret: encryptedText("secret").notNull(),
+    backupCodes: encryptedText("backup_codes").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -140,7 +141,7 @@ export const oauthApplication = pgTable(
     icon: text("icon"),
     metadata: text("metadata"),
     clientId: text("client_id").unique(),
-    clientSecret: text("client_secret"),
+    clientSecret: encryptedText("client_secret"),
     redirectUrls: text("redirect_urls"),
     type: text("type"),
     disabled: boolean("disabled").default(false),
@@ -155,8 +156,8 @@ export const oauthAccessToken = pgTable(
   "oauth_access_token",
   {
     id: text("id").primaryKey(),
-    accessToken: text("access_token").unique(),
-    refreshToken: text("refresh_token").unique(),
+    accessToken: encryptedText("access_token").unique(),
+    refreshToken: encryptedText("refresh_token").unique(),
     accessTokenExpiresAt: timestamp("access_token_expires_at"),
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     clientId: text("client_id").references(() => oauthApplication.clientId, {
@@ -199,7 +200,7 @@ export const apikey = pgTable(
     name: text("name"),
     start: text("start"),
     prefix: text("prefix"),
-    key: text("key").notNull(),
+    key: encryptedText("key").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

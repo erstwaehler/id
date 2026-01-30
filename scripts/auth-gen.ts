@@ -23,7 +23,7 @@ async function fixSchemaImports() {
   console.log("\n🔍 Checking schema.ts for pgTable imports...");
 
   try {
-    const schemaContent = await readFile(SCHEMA_FILE_PATH, "utf-8");
+    let schemaContent = await readFile(SCHEMA_FILE_PATH, "utf-8");
 
     // Check if pgTable is imported and pgSchema is not
     const hasPgTableImport =
@@ -39,7 +39,7 @@ async function fixSchemaImports() {
       console.log("✏️ Replacing pgTable with pgSchema...");
 
       // Replace pgTable with pgSchema in the import
-      let updatedContent = schemaContent.replace(
+      schemaContent = schemaContent.replace(
         /import\s+\{([^}]*)\bpgTable\b([^}]*)\}\s+from\s+["']drizzle-orm\/pg-core["'];?/g,
         (_match, before, after) => {
           const cleanBefore = before.trim();
@@ -56,29 +56,94 @@ async function fixSchemaImports() {
       );
 
       // Find where the import block ends and inject the pgTable definition
-      const importBlockEnd = updatedContent.lastIndexOf(
+      const importBlockEnd = schemaContent.lastIndexOf(
         'from "drizzle-orm/pg-core";',
       );
       if (importBlockEnd !== -1) {
-        const insertPosition = updatedContent.indexOf("\n", importBlockEnd) + 1;
+        const insertPosition = schemaContent.indexOf("\n", importBlockEnd) + 1;
         const pgTableDefinition =
           '\nconst pgTable = pgSchema("betterauth").table;\n';
 
-        updatedContent =
-          updatedContent.slice(0, insertPosition) +
+        schemaContent =
+          schemaContent.slice(0, insertPosition) +
           pgTableDefinition +
-          updatedContent.slice(insertPosition);
+          schemaContent.slice(insertPosition);
 
-        await writeFile(SCHEMA_FILE_PATH, updatedContent);
-        console.log("✅ Schema imports fixed successfully.");
+        console.log("✅ pgSchema import fixed.");
       } else {
         console.warn("⚠️ Could not find import block end, skipping injection.");
       }
     } else if (hasPgSchemaImport) {
-      console.log("✅ pgSchema already imported, no changes needed.");
+      console.log("✅ pgSchema already imported.");
     } else {
       console.log("ℹ️ No pgTable import found, skipping.");
     }
+
+    // Add encryptedText import if not exists
+    console.log("\n🔒 Ensuring encryptedText import exists...");
+    const hasEncryptedTextImport = /import\s+\{[^}]*\bencryptedText\b[^}]*\}\s+from\s+["']~\/lib\/db\/custom-types["']/g.test(schemaContent);
+
+    if (!hasEncryptedTextImport) {
+      const pgCoreImportEnd = schemaContent.indexOf('from "drizzle-orm/pg-core";');
+      
+      if (pgCoreImportEnd !== -1) {
+        const insertPosition = schemaContent.indexOf("\n", pgCoreImportEnd) + 1;
+        const encryptedTextImport = 'import { encryptedText } from "~/lib/db/custom-types";\n';
+        
+        schemaContent =
+          schemaContent.slice(0, insertPosition) +
+          encryptedTextImport +
+          schemaContent.slice(insertPosition);
+        
+        console.log("✅ Added encryptedText import.");
+      }
+    } else {
+      console.log("✅ encryptedText import already exists.");
+    }
+
+    // Replace sensitive text fields with encryptedText
+    console.log("\n🔐 Encrypting sensitive fields...");
+    
+    const sensitiveFields = [
+      // User table
+      { field: 'email', table: 'user' },
+      { field: 'first_name', table: 'user' },
+      { field: 'last_name', table: 'user' },
+      // Session table
+      { field: 'ip_address', table: 'session' },
+      // Account table
+      { field: 'access_token', table: 'account' },
+      { field: 'refresh_token', table: 'account' },
+      { field: 'id_token', table: 'account' },
+      { field: 'password', table: 'account' },
+      // TwoFactor table
+      { field: 'secret', table: 'two_factor' },
+      { field: 'backup_codes', table: 'two_factor' },
+      // OAuth tables
+      { field: 'client_secret', table: 'oauth_application' },
+      { field: 'access_token', table: 'oauth_access_token' },
+      { field: 'refresh_token', table: 'oauth_access_token' },
+      // API Key table
+      { field: 'key', table: 'apikey' },
+    ];
+
+    let encryptedCount = 0;
+    for (const { field } of sensitiveFields) {
+      // Match text("field_name") and replace with encryptedText("field_name")
+      const regex = new RegExp(`\\btext\\(["']${field}["']\\)`, 'g');
+      const beforeReplace = schemaContent;
+      schemaContent = schemaContent.replace(regex, `encryptedText("${field}")`);
+      
+      if (beforeReplace !== schemaContent) {
+        encryptedCount++;
+      }
+    }
+
+    console.log(`✅ Encrypted ${encryptedCount} sensitive fields.`);
+
+    await writeFile(SCHEMA_FILE_PATH, schemaContent);
+    console.log("✅ Schema imports and encryption fixed successfully.");
+    
   } catch (error: any) {
     if (error.code === "ENOENT") {
       console.log("ℹ️ schema.ts not found, skipping import fix.");

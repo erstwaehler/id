@@ -8,6 +8,7 @@ import {
   admin as adminPlugin,
   apiKey,
   bearer,
+  createAuthMiddleware,
   haveIBeenPwned,
   multiSession,
   oAuthProxy,
@@ -342,7 +343,6 @@ export const auth = betterAuth({
       },
     },
   },
-
   // Error handling
   // onAPIError: {
   // 	throw: true,
