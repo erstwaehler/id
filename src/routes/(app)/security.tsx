@@ -73,7 +73,7 @@ function SecurityPage() {
     queryKey: ["passkeys"],
     queryFn: async () => {
       try {
-        const result = await authClient.passkey.listPasskeys();
+        const result = await authClient.passkey.listUserPasskeys();
         return result.data || [];
       } catch {
         return [];
@@ -132,7 +132,7 @@ function SecurityPage() {
 
   const verify2FAMutation = useMutation({
     mutationFn: async () => {
-      const result = await authClient.twoFactor.verifyTOTP({
+      const result = await authClient.twoFactor.verifyTotp({
         code: verifyCode,
       });
       if (result.error) {

@@ -212,7 +212,8 @@ function AdminAuditLogsPage() {
                         <td className="p-4">
                           {log.userId ? (
                             <Link
-                              to={`/admin/users/${log.userId}`}
+                              to="/admin/users/$userId"
+                              params={{ userId: log.userId }}
                               className="flex items-center gap-2 text-sm hover:underline"
                             >
                               <User className="h-4 w-4 text-muted-foreground" />

@@ -34,7 +34,7 @@ const schoolSchema = z.object({
   oidcIssuer: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   oidcClientId: z.string().optional(),
   oidcClientSecret: z.string().optional(),
-  enabled: z.boolean().default(true),
+  enabled: z.boolean(),
 });
 
 type SchoolFormData = z.infer<typeof schoolSchema>;
