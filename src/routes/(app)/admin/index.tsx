@@ -1,3 +1,4 @@
+// #! MESS
 /**
  * EWF-ID Admin Dashboard
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
@@ -6,12 +7,18 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { 
-  Users, 
-  Activity, 
+import {
+  Users,
+  Activity,
   School,
   Key,
   Shield,
@@ -20,7 +27,7 @@ import {
   TrendingUp,
   TrendingDown,
   Clock,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/admin/")({
@@ -39,7 +46,10 @@ function AdminDashboardPage() {
         return null;
       }
       // Check if user has admin access
-      if (result.data.user.role !== "admin" && result.data.user.role !== "team") {
+      if (
+        result.data.user.role !== "admin" &&
+        result.data.user.role !== "team"
+      ) {
         navigate({ to: "/dashboard" });
         return null;
       }
@@ -75,10 +85,30 @@ function AdminDashboardPage() {
   };
 
   const quickLinks = [
-    { name: "Users", href: "/admin/users", icon: Users, count: stats.users?.total || 0 },
-    { name: "Schools", href: "/admin/schools", icon: School, count: stats.schools?.total || 0 },
-    { name: "Audit Logs", href: "/admin/audit-logs", icon: FileText, count: null },
-    { name: "OIDC Clients", href: "/admin/oidc-clients", icon: Key, count: null },
+    {
+      name: "Users",
+      href: "/admin/users",
+      icon: Users,
+      count: stats.users?.total || 0,
+    },
+    {
+      name: "Schools",
+      href: "/admin/schools",
+      icon: School,
+      count: stats.schools?.total || 0,
+    },
+    {
+      name: "Audit Logs",
+      href: "/admin/audit-logs",
+      icon: FileText,
+      count: null,
+    },
+    {
+      name: "OIDC Clients",
+      href: "/admin/oidc-clients",
+      icon: Key,
+      count: null,
+    },
   ];
 
   return (
@@ -91,7 +121,11 @@ function AdminDashboardPage() {
             <p className="text-muted-foreground">Manage EWF-ID system</p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant={session.user.role === "admin" ? "destructive" : "default"}>
+            <Badge
+              variant={
+                session.user.role === "admin" ? "destructive" : "default"
+              }
+            >
               {session.user.role}
             </Badge>
             <Link to="/dashboard">
@@ -110,7 +144,9 @@ function AdminDashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.users?.total || 0}</div>
+              <div className="text-2xl font-bold">
+                {stats.users?.total || 0}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {stats.users?.verified || 0} verified
               </p>
@@ -119,11 +155,15 @@ function AdminDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Sessions
+              </CardTitle>
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.sessions?.active || 0}</div>
+              <div className="text-2xl font-bold">
+                {stats.sessions?.active || 0}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Currently logged in
               </p>
@@ -136,7 +176,9 @@ function AdminDashboardPage() {
               <School className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.schools?.total || 0}</div>
+              <div className="text-2xl font-bold">
+                {stats.schools?.total || 0}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Configured schools
               </p>
@@ -149,10 +191,10 @@ function AdminDashboardPage() {
               <Key className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.apiKeys?.total || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                Active keys
-              </p>
+              <div className="text-2xl font-bold">
+                {stats.apiKeys?.total || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Active keys</p>
             </CardContent>
           </Card>
         </div>
@@ -169,7 +211,9 @@ function AdminDashboardPage() {
                   <div>
                     <p className="font-medium">{link.name}</p>
                     {link.count !== null && (
-                      <p className="text-sm text-muted-foreground">{link.count} total</p>
+                      <p className="text-sm text-muted-foreground">
+                        {link.count} total
+                      </p>
                     )}
                   </div>
                 </CardContent>
@@ -192,14 +236,18 @@ function AdminDashboardPage() {
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                   <span>Verified Users</span>
                 </div>
-                <span className="font-medium">{stats.users?.verified || 0}</span>
+                <span className="font-medium">
+                  {stats.users?.verified || 0}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <span>Unverified Users</span>
                 </div>
-                <span className="font-medium">{stats.users?.unverified || 0}</span>
+                <span className="font-medium">
+                  {stats.users?.unverified || 0}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -268,13 +316,18 @@ function AdminDashboardPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Recent Admin Actions</CardTitle>
-            <CardDescription>Latest activity from the audit log</CardDescription>
+            <CardDescription>
+              Latest activity from the audit log
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {stats.recentActions?.length > 0 ? (
                 stats.recentActions.map((action: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0">
+                  <div
+                    key={`s${index}`}
+                    className="flex items-center justify-between border-b pb-2 last:border-0"
+                  >
                     <div className="flex items-center gap-3">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <div>

@@ -1,3 +1,4 @@
+// #! MESS
 /**
  * EWF-ID Sessions Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
@@ -6,21 +7,27 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { 
-  ArrowLeft, 
-  Laptop, 
-  Smartphone, 
-  Tablet, 
+import {
+  ArrowLeft,
+  Laptop,
+  Smartphone,
+  Tablet,
   Monitor,
   Loader2,
   Trash2,
   MapPin,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -83,10 +90,11 @@ function SessionsPage() {
   const revokeAllMutation = useMutation({
     mutationFn: async () => {
       // Revoke all sessions except current
-      const otherSessions = sessions?.sessions?.filter(
-        (s: any) => s.id !== currentSession?.session?.id
-      ) || [];
-      
+      const otherSessions =
+        sessions?.sessions?.filter(
+          (s: any) => s.id !== currentSession?.session?.id,
+        ) || [];
+
       for (const session of otherSessions) {
         await fetch(`/api/users/me/sessions/${session.id}`, {
           method: "DELETE",
@@ -106,7 +114,11 @@ function SessionsPage() {
 
   const getDeviceIcon = (userAgent: string) => {
     const ua = userAgent.toLowerCase();
-    if (ua.includes("mobile") || ua.includes("iphone") || ua.includes("android")) {
+    if (
+      ua.includes("mobile") ||
+      ua.includes("iphone") ||
+      ua.includes("android")
+    ) {
       return Smartphone;
     }
     if (ua.includes("tablet") || ua.includes("ipad")) {
@@ -147,7 +159,9 @@ function SessionsPage() {
 
   const currentSessionId = currentSession.session?.id;
   const sessionList = sessions?.sessions || [];
-  const otherSessionsCount = sessionList.filter((s: any) => s.id !== currentSessionId).length;
+  const otherSessionsCount = sessionList.filter(
+    (s: any) => s.id !== currentSessionId,
+  ).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -182,7 +196,13 @@ function SessionsPage() {
           <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-500 bg-red-500/10 rounded-md">
             <AlertCircle className="h-4 w-4" />
             {error}
-            <button onClick={() => setError(null)} className="ml-auto">×</button>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="ml-auto"
+            >
+              ×
+            </button>
           </div>
         )}
         {success && (
@@ -197,7 +217,8 @@ function SessionsPage() {
           <CardHeader>
             <CardTitle>Your Devices</CardTitle>
             <CardDescription>
-              {sessionList.length} active session{sessionList.length !== 1 ? "s" : ""}
+              {sessionList.length} active session
+              {sessionList.length !== 1 ? "s" : ""}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -245,13 +266,17 @@ function SessionsPage() {
                             )}
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {new Date(session.createdAt).toLocaleDateString()} at{" "}
+                              {new Date(
+                                session.createdAt,
+                              ).toLocaleDateString()}{" "}
+                              at{" "}
                               {new Date(session.createdAt).toLocaleTimeString()}
                             </span>
                           </div>
                           {session.lastActive && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              Last active: {new Date(session.lastActive).toLocaleString()}
+                              Last active:{" "}
+                              {new Date(session.lastActive).toLocaleString()}
                             </p>
                           )}
                         </div>
@@ -260,7 +285,9 @@ function SessionsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => revokeSessionMutation.mutate(session.id)}
+                          onClick={() =>
+                            revokeSessionMutation.mutate(session.id)
+                          }
                           disabled={revokeSessionMutation.isPending}
                         >
                           {revokeSessionMutation.isPending ? (
@@ -275,7 +302,9 @@ function SessionsPage() {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No active sessions found.</p>
+              <p className="text-sm text-muted-foreground">
+                No active sessions found.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -288,8 +317,9 @@ function SessionsPage() {
               <div>
                 <p className="font-medium">Security Tip</p>
                 <p className="text-sm text-muted-foreground">
-                  If you see a session you don't recognize, revoke it immediately and change your password.
-                  Consider enabling two-factor authentication for added security.
+                  If you see a session you don't recognize, revoke it
+                  immediately and change your password. Consider enabling
+                  two-factor authentication for added security.
                 </p>
               </div>
             </div>

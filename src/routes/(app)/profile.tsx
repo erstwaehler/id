@@ -1,3 +1,4 @@
+// #! MESS
 /**
  * EWF-ID Profile Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
@@ -12,12 +13,27 @@ import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Separator } from "~/components/ui/separator";
-import { AlertCircle, Loader2, Save, ArrowLeft, School, Mail, User, Globe } from "lucide-react";
+import {
+  AlertCircle,
+  Loader2,
+  Save,
+  ArrowLeft,
+  School,
+  Mail,
+  User,
+  Globe,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 const profileSchema = z.object({
@@ -124,11 +140,12 @@ function ProfilePage() {
   }
 
   const user = session.user;
-  const initials = user.name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase() || "U";
+  const initials =
+    user.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase() || "U";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -142,7 +159,9 @@ function ProfilePage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-white">Profile</h1>
-            <p className="text-muted-foreground">Manage your personal information</p>
+            <p className="text-muted-foreground">
+              Manage your personal information
+            </p>
           </div>
         </div>
 
@@ -157,7 +176,15 @@ function ProfilePage() {
               <h2 className="text-xl font-semibold">{user.name}</h2>
               <p className="text-muted-foreground">{user.email}</p>
               <div className="flex items-center gap-2 mt-2">
-                <Badge variant={user.role === "admin" ? "destructive" : user.role === "team" ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    user.role === "admin"
+                      ? "destructive"
+                      : user.role === "team"
+                        ? "default"
+                        : "secondary"
+                  }
+                >
                   {user.role || "user"}
                 </Badge>
                 {profile.emailVerified && (
@@ -192,11 +219,7 @@ function ProfilePage() {
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    className="pl-10"
-                    {...register("name")}
-                  />
+                  <Input id="name" className="pl-10" {...register("name")} />
                 </div>
                 {errors.name && (
                   <p className="text-sm text-red-500">{errors.name.message}</p>
@@ -252,8 +275,13 @@ function ProfilePage() {
                 </div>
               </div>
 
-              <Button type="submit" disabled={updateMutation.isPending || !isDirty}>
-                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button
+                type="submit"
+                disabled={updateMutation.isPending || !isDirty}
+              >
+                {updateMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 <Save className="mr-2 h-4 w-4" />
                 Save Changes
               </Button>
@@ -289,13 +317,18 @@ function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {profile.schools.map((school: any) => (
-                <div key={school.schoolId} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={school.schoolId}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex items-center gap-3">
                     <School className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="font-medium">{school.schoolName}</p>
                       {school.studentId && (
-                        <p className="text-sm text-muted-foreground">ID: {school.studentId}</p>
+                        <p className="text-sm text-muted-foreground">
+                          ID: {school.studentId}
+                        </p>
                       )}
                     </div>
                   </div>

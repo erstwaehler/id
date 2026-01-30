@@ -1,20 +1,32 @@
+// #! MESS
 /**
  * EWF-ID Admin User Detail Page
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
  */
-import { createFileRoute, useNavigate, Link, useParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  Link,
+  useParams,
+} from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
-import { 
+import {
   ArrowLeft,
   Ban,
   CheckCircle,
@@ -27,7 +39,7 @@ import {
   Activity,
   Key,
   School,
-  Save
+  Save,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/admin/users/$userId")({
@@ -50,7 +62,10 @@ function AdminUserDetailPage() {
         navigate({ to: "/login" });
         return null;
       }
-      if (result.data.user.role !== "admin" && result.data.user.role !== "team") {
+      if (
+        result.data.user.role !== "admin" &&
+        result.data.user.role !== "team"
+      ) {
         navigate({ to: "/dashboard" });
         return null;
       }
@@ -147,14 +162,16 @@ function AdminUserDetailPage() {
     return null;
   }
 
-  const initials = user.name
-    ?.split(" ")
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase() || "U";
+  const initials =
+    user.name
+      ?.split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .toUpperCase() || "U";
 
   const canEditRole = session.user.role === "admin";
-  const canDelete = session.user.role === "admin" && user.id !== session.user.id;
+  const canDelete =
+    session.user.role === "admin" && user.id !== session.user.id;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -176,7 +193,9 @@ function AdminUserDetailPage() {
           <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-500 bg-red-500/10 rounded-md">
             <AlertCircle className="h-4 w-4" />
             {error}
-            <button onClick={() => setError(null)} className="ml-auto">×</button>
+            <button onClick={() => setError(null)} className="ml-auto">
+              ×
+            </button>
           </div>
         )}
         {success && (
@@ -196,13 +215,23 @@ function AdminUserDetailPage() {
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-2xl font-bold">{user.name || "Unnamed User"}</h2>
+                  <h2 className="text-2xl font-bold">
+                    {user.name || "Unnamed User"}
+                  </h2>
                   {user.banned && (
                     <Badge variant="destructive">Suspended</Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Badge variant={user.role === "admin" ? "destructive" : user.role === "team" ? "default" : "secondary"}>
+                  <Badge
+                    variant={
+                      user.role === "admin"
+                        ? "destructive"
+                        : user.role === "team"
+                          ? "default"
+                          : "secondary"
+                    }
+                  >
                     {user.role || "user"}
                   </Badge>
                   {user.emailVerified ? (
@@ -242,7 +271,9 @@ function AdminUserDetailPage() {
                     variant="outline"
                     className="text-red-500 hover:text-red-600"
                     onClick={() => {
-                      if (confirm("Are you sure you want to delete this user?")) {
+                      if (
+                        confirm("Are you sure you want to delete this user?")
+                      ) {
                         deleteMutation.mutate();
                       }
                     }}
@@ -290,8 +321,16 @@ function AdminUserDetailPage() {
                   </select>
                 </div>
                 <Button
-                  onClick={() => updateRoleMutation.mutate(selectedRole || user.role || "user")}
-                  disabled={updateRoleMutation.isPending || (!selectedRole || selectedRole === user.role)}
+                  onClick={() =>
+                    updateRoleMutation.mutate(
+                      selectedRole || user.role || "user",
+                    )
+                  }
+                  disabled={
+                    updateRoleMutation.isPending ||
+                    !selectedRole ||
+                    selectedRole === user.role
+                  }
                 >
                   {updateRoleMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -317,7 +356,9 @@ function AdminUserDetailPage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Sessions</span>
-                <span className="font-medium">{user.sessions?.length || 0} active</span>
+                <span className="font-medium">
+                  {user.sessions?.length || 0} active
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">API Keys</span>
@@ -345,7 +386,10 @@ function AdminUserDetailPage() {
               {user.schools && user.schools.length > 0 ? (
                 <div className="space-y-2">
                   {user.schools.map((school: any) => (
-                    <div key={school.schoolId} className="flex items-center justify-between">
+                    <div
+                      key={school.schoolId}
+                      className="flex items-center justify-between"
+                    >
                       <span>{school.schoolName}</span>
                       <Badge variant={school.verified ? "success" : "outline"}>
                         {school.verified ? "Verified" : "Pending"}
@@ -354,7 +398,9 @@ function AdminUserDetailPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No school affiliations</p>
+                <p className="text-sm text-muted-foreground">
+                  No school affiliations
+                </p>
               )}
             </CardContent>
           </Card>

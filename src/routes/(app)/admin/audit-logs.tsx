@@ -1,18 +1,30 @@
+// #! MESS
 /**
  * EWF-ID Admin Audit Logs Page
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
  */
-import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  Link,
+  useSearch,
+} from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { 
+import {
   ArrowLeft,
   Search,
   ChevronLeft,
@@ -22,7 +34,7 @@ import {
   User,
   Shield,
   Download,
-  Filter
+  Filter,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/admin/audit-logs")({
@@ -50,7 +62,10 @@ function AdminAuditLogsPage() {
         navigate({ to: "/login" });
         return null;
       }
-      if (result.data.user.role !== "admin" && result.data.user.role !== "team") {
+      if (
+        result.data.user.role !== "admin" &&
+        result.data.user.role !== "team"
+      ) {
         navigate({ to: "/dashboard" });
         return null;
       }
@@ -59,7 +74,12 @@ function AdminAuditLogsPage() {
   });
 
   const { data: logsData, isLoading: logsLoading } = useQuery({
-    queryKey: ["admin-audit-logs", page, searchParams.action, searchParams.userId],
+    queryKey: [
+      "admin-audit-logs",
+      page,
+      searchParams.action,
+      searchParams.userId,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: String(page),
@@ -80,7 +100,11 @@ function AdminAuditLogsPage() {
   const handleFilter = () => {
     navigate({
       to: "/admin/audit-logs",
-      search: { page: 1, action: actionFilter || undefined, userId: searchParams.userId },
+      search: {
+        page: 1,
+        action: actionFilter || undefined,
+        userId: searchParams.userId,
+      },
     });
   };
 
@@ -92,7 +116,11 @@ function AdminAuditLogsPage() {
   };
 
   const getActionBadgeVariant = (action: string) => {
-    if (action.includes("delete") || action.includes("suspend") || action.includes("ban")) {
+    if (
+      action.includes("delete") ||
+      action.includes("suspend") ||
+      action.includes("ban")
+    ) {
       return "destructive";
     }
     if (action.includes("create") || action.includes("register")) {
@@ -158,7 +186,9 @@ function AdminAuditLogsPage() {
               {(searchParams.action || searchParams.userId) && (
                 <Button
                   variant="outline"
-                  onClick={() => navigate({ to: "/admin/audit-logs", search: { page: 1 } })}
+                  onClick={() =>
+                    navigate({ to: "/admin/audit-logs", search: { page: 1 } })
+                  }
                 >
                   Clear
                 </Button>
@@ -201,7 +231,9 @@ function AdminAuditLogsPage() {
                         <td className="p-4">
                           <div className="flex items-center gap-2 text-sm">
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>{new Date(log.timestamp).toLocaleString()}</span>
+                            <span>
+                              {new Date(log.timestamp).toLocaleString()}
+                            </span>
                           </div>
                         </td>
                         <td className="p-4">
@@ -217,20 +249,27 @@ function AdminAuditLogsPage() {
                               className="flex items-center gap-2 text-sm hover:underline"
                             >
                               <User className="h-4 w-4 text-muted-foreground" />
-                              <span>{log.userName || log.userId.slice(0, 8)}...</span>
+                              <span>
+                                {log.userName || log.userId.slice(0, 8)}...
+                              </span>
                             </Link>
                           ) : (
-                            <span className="text-muted-foreground text-sm">System</span>
+                            <span className="text-muted-foreground text-sm">
+                              System
+                            </span>
                           )}
                         </td>
                         <td className="p-4">
                           <span className="text-sm">
                             {log.resource}
-                            {log.resourceId && `:${log.resourceId.slice(0, 8)}...`}
+                            {log.resourceId &&
+                              `:${log.resourceId.slice(0, 8)}...`}
                           </span>
                         </td>
                         <td className="p-4">
-                          <span className="text-sm font-mono">{log.ipAddress || "-"}</span>
+                          <span className="text-sm font-mono">
+                            {log.ipAddress || "-"}
+                          </span>
                         </td>
                         <td className="p-4">
                           <Badge variant={getResultBadgeVariant(log.result)}>

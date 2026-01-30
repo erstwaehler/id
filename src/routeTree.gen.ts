@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
+import { Route as ApiTelemetryRouteImport } from './routes/api/telemetry'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as legalTermsRouteImport } from './routes/(legal)/terms'
 import { Route as legalPrivacyPolicyRouteImport } from './routes/(legal)/privacy-policy'
@@ -59,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
 const DemoBetterAuthRoute = DemoBetterAuthRouteImport.update({
   id: '/demo/better-auth',
   path: '/demo/better-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTelemetryRoute = ApiTelemetryRouteImport.update({
+  id: '/api/telemetry',
+  path: '/api/telemetry',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -284,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/privacy-policy': typeof legalPrivacyPolicyRoute
   '/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/telemetry': typeof ApiTelemetryRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
@@ -327,6 +334,7 @@ export interface FileRoutesByTo {
   '/privacy-policy': typeof legalPrivacyPolicyRoute
   '/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/telemetry': typeof ApiTelemetryRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
@@ -371,6 +379,7 @@ export interface FileRoutesById {
   '/(legal)/privacy-policy': typeof legalPrivacyPolicyRoute
   '/(legal)/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/telemetry': typeof ApiTelemetryRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/(app)/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/(app)/admin/schools': typeof appAdminSchoolsRoute
@@ -416,6 +425,7 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/terms'
     | '/api/health'
+    | '/api/telemetry'
     | '/demo/better-auth'
     | '/admin/audit-logs'
     | '/admin/schools'
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/terms'
     | '/api/health'
+    | '/api/telemetry'
     | '/demo/better-auth'
     | '/admin/audit-logs'
     | '/admin/schools'
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/(legal)/privacy-policy'
     | '/(legal)/terms'
     | '/api/health'
+    | '/api/telemetry'
     | '/demo/better-auth'
     | '/(app)/admin/audit-logs'
     | '/(app)/admin/schools'
@@ -546,6 +558,7 @@ export interface RootRouteChildren {
   legalPrivacyPolicyRoute: typeof legalPrivacyPolicyRoute
   legalTermsRoute: typeof legalTermsRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiTelemetryRoute: typeof ApiTelemetryRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
   appAdminAuditLogsRoute: typeof appAdminAuditLogsRoute
   appAdminSchoolsRoute: typeof appAdminSchoolsRoute
@@ -575,6 +588,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/better-auth'
       fullPath: '/demo/better-auth'
       preLoaderRoute: typeof DemoBetterAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/telemetry': {
+      id: '/api/telemetry'
+      path: '/api/telemetry'
+      fullPath: '/api/telemetry'
+      preLoaderRoute: typeof ApiTelemetryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -948,6 +968,7 @@ const rootRouteChildren: RootRouteChildren = {
   legalPrivacyPolicyRoute: legalPrivacyPolicyRoute,
   legalTermsRoute: legalTermsRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiTelemetryRoute: ApiTelemetryRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,
   appAdminAuditLogsRoute: appAdminAuditLogsRoute,
   appAdminSchoolsRoute: appAdminSchoolsRoute,

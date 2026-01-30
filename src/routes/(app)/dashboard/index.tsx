@@ -1,3 +1,4 @@
+// #! MESS
 /**
  * EWF-ID User Dashboard Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
@@ -6,22 +7,28 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { 
-  User, 
-  Shield, 
-  Key, 
-  Settings, 
-  LogOut, 
+import {
+  User,
+  Shield,
+  Key,
+  Settings,
+  LogOut,
   Activity,
   Calendar,
   Vote,
   Radio,
   Monitor,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/dashboard/")({
@@ -69,11 +76,12 @@ function DashboardPage() {
   }
 
   const user = session.user;
-  const initials = user.name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase() || "U";
+  const initials =
+    user.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase() || "U";
 
   const apps = [
     {
@@ -108,7 +116,10 @@ function DashboardPage() {
   ];
 
   const filteredApps = apps.filter(
-    (app) => !app.requiresRole || user.role === app.requiresRole || user.role === "admin"
+    (app) =>
+      !app.requiresRole ||
+      user.role === app.requiresRole ||
+      user.role === "admin",
   );
 
   return (
@@ -122,9 +133,19 @@ function DashboardPage() {
               <AvatarFallback className="text-lg">{initials}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold text-white">Welcome back, {user.name?.split(" ")[0] || "User"}!</h1>
+              <h1 className="text-2xl font-bold text-white">
+                Welcome back, {user.name?.split(" ")[0] || "User"}!
+              </h1>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant={user.role === "admin" ? "destructive" : user.role === "team" ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    user.role === "admin"
+                      ? "destructive"
+                      : user.role === "team"
+                        ? "default"
+                        : "secondary"
+                  }
+                >
                   {user.role || "user"}
                 </Badge>
                 {profile?.schoolVerified && (
@@ -163,7 +184,9 @@ function DashboardPage() {
                 </div>
                 <div>
                   <p className="font-medium">Security</p>
-                  <p className="text-sm text-muted-foreground">2FA & Passkeys</p>
+                  <p className="text-sm text-muted-foreground">
+                    2FA & Passkeys
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -177,7 +200,9 @@ function DashboardPage() {
                 </div>
                 <div>
                   <p className="font-medium">Sessions</p>
-                  <p className="text-sm text-muted-foreground">{profile?.stats?.activeSessions || 0} active</p>
+                  <p className="text-sm text-muted-foreground">
+                    {profile?.stats?.activeSessions || 0} active
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -202,7 +227,9 @@ function DashboardPage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Erstwähler Forum Apps</CardTitle>
-            <CardDescription>Access connected applications with your EWF-ID</CardDescription>
+            <CardDescription>
+              Access connected applications with your EWF-ID
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -216,7 +243,9 @@ function DashboardPage() {
                 >
                   <Card className="cursor-pointer hover:border-primary transition-colors h-full">
                     <CardContent className="flex items-center gap-4 p-4">
-                      <div className={`rounded-full bg-opacity-10 p-3 ${app.color.replace("text-", "bg-")}/10`}>
+                      <div
+                        className={`rounded-full bg-opacity-10 p-3 ${app.color.replace("text-", "bg-")}/10`}
+                      >
                         <app.icon className={`h-6 w-6 ${app.color}`} />
                       </div>
                       <div className="flex-1">
@@ -224,7 +253,9 @@ function DashboardPage() {
                           <p className="font-medium">{app.name}</p>
                           <ExternalLink className="h-3 w-3 text-muted-foreground" />
                         </div>
-                        <p className="text-sm text-muted-foreground">{app.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {app.description}
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -262,7 +293,9 @@ function DashboardPage() {
               {profile?.schools?.length > 0 && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">School</span>
-                  <span className="font-medium">{profile.schools[0].schoolName}</span>
+                  <span className="font-medium">
+                    {profile.schools[0].schoolName}
+                  </span>
                 </div>
               )}
             </CardContent>
@@ -275,11 +308,15 @@ function DashboardPage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Active Sessions</span>
-                <span className="font-medium">{profile?.stats?.activeSessions || 0}</span>
+                <span className="font-medium">
+                  {profile?.stats?.activeSessions || 0}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">API Keys</span>
-                <span className="font-medium">{profile?.stats?.activeApiKeys || 0}</span>
+                <span className="font-medium">
+                  {profile?.stats?.activeApiKeys || 0}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Last Login</span>

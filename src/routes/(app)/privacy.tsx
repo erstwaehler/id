@@ -1,20 +1,25 @@
+// #! MESS
 /**
  * EWF-ID Privacy Page (GDPR - Account Deletion)
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
  */
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Separator } from "~/components/ui/separator";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Loader2,
   CheckCircle,
   AlertCircle,
@@ -22,7 +27,7 @@ import {
   Trash2,
   Download,
   XCircle,
-  Clock
+  Clock,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/privacy")({
@@ -46,97 +51,6 @@ function PrivacyPage() {
         return null;
       }
       return result.data;
-    },
-  });
-
-  const { data: deletionStatus, isLoading: deletionLoading } = useQuery({
-    queryKey: ["deletion-status"],
-    queryFn: async () => {
-      const response = await fetch("/api/users/me/delete", {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        if (response.status === 404) return null;
-        throw new Error("Failed to fetch deletion status");
-      }
-      return response.json();
-    },
-    enabled: !!session,
-  });
-
-  const { data: exportRequests, isLoading: exportLoading } = useQuery({
-    queryKey: ["export-status"],
-    queryFn: async () => {
-      // This would need a proper endpoint to list export requests
-      return [];
-    },
-    enabled: !!session,
-  });
-
-  const requestExportMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/users/me/export", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to request data export");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      setSuccess("Data export requested. You'll receive an email when it's ready.");
-      setTimeout(() => setSuccess(null), 5000);
-    },
-    onError: (err: Error) => {
-      setError(err.message);
-    },
-  });
-
-  const requestDeletionMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/users/me/delete", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to request account deletion");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      setSuccess("Account deletion requested. You have 30 days to cancel this request.");
-      setShowDeleteConfirm(false);
-      setConfirmText("");
-      queryClient.invalidateQueries({ queryKey: ["deletion-status"] });
-      setTimeout(() => setSuccess(null), 5000);
-    },
-    onError: (err: Error) => {
-      setError(err.message);
-    },
-  });
-
-  const cancelDeletionMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/users/me/delete", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to cancel deletion request");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      setSuccess("Account deletion cancelled.");
-      queryClient.invalidateQueries({ queryKey: ["deletion-status"] });
-      setTimeout(() => setSuccess(null), 3000);
-    },
-    onError: (err: Error) => {
-      setError(err.message);
     },
   });
 
@@ -166,7 +80,9 @@ function PrivacyPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-white">Privacy & Data</h1>
-            <p className="text-muted-foreground">Manage your data and account</p>
+            <p className="text-muted-foreground">
+              Manage your data and account
+            </p>
           </div>
         </div>
 
@@ -174,7 +90,13 @@ function PrivacyPage() {
           <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-500 bg-red-500/10 rounded-md">
             <AlertCircle className="h-4 w-4" />
             {error}
-            <button onClick={() => setError(null)} className="ml-auto">×</button>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="ml-auto"
+            >
+              ×
+            </button>
           </div>
         )}
         {success && (
@@ -189,7 +111,8 @@ function PrivacyPage() {
           <CardHeader>
             <CardTitle>Your Data Rights (GDPR)</CardTitle>
             <CardDescription>
-              Under GDPR, you have the following rights regarding your personal data
+              Under GDPR, you have the following rights regarding your personal
+              data
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -206,7 +129,9 @@ function PrivacyPage() {
               <div className="flex items-start gap-3 p-4 border rounded-lg">
                 <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">Right to Rectification (Art. 16)</p>
+                  <p className="font-medium">
+                    Right to Rectification (Art. 16)
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Correct inaccurate data via your profile
                   </p>
@@ -224,7 +149,9 @@ function PrivacyPage() {
               <div className="flex items-start gap-3 p-4 border rounded-lg">
                 <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">Right to Data Portability (Art. 20)</p>
+                  <p className="font-medium">
+                    Right to Data Portability (Art. 20)
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Export your data in a machine-readable format
                   </p>
@@ -294,7 +221,9 @@ function PrivacyPage() {
                 <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/50 rounded-lg">
                   <Clock className="h-5 w-5 text-yellow-500" />
                   <div>
-                    <p className="font-medium text-yellow-500">Deletion Scheduled</p>
+                    <p className="font-medium text-yellow-500">
+                      Deletion Scheduled
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       Your account will be permanently deleted on{" "}
                       {deletionDate?.toLocaleDateString()} at{" "}
@@ -318,10 +247,13 @@ function PrivacyPage() {
             ) : showDeleteConfirm ? (
               <div className="space-y-4">
                 <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
-                  <p className="font-medium text-red-500 mb-2">⚠️ This action is irreversible</p>
+                  <p className="font-medium text-red-500 mb-2">
+                    ⚠️ This action is irreversible
+                  </p>
                   <p className="text-sm text-muted-foreground mb-4">
-                    All your data will be permanently deleted after a 30-day grace period.
-                    During this time, you can cancel the deletion request.
+                    All your data will be permanently deleted after a 30-day
+                    grace period. During this time, you can cancel the deletion
+                    request.
                   </p>
                   <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 mb-4">
                     <li>Your profile and account will be deleted</li>
@@ -334,7 +266,8 @@ function PrivacyPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="confirm">
-                    Type <span className="font-mono font-bold">DELETE</span> to confirm
+                    Type <span className="font-mono font-bold">DELETE</span> to
+                    confirm
                   </Label>
                   <Input
                     id="confirm"
@@ -348,7 +281,10 @@ function PrivacyPage() {
                   <Button
                     variant="destructive"
                     onClick={() => requestDeletionMutation.mutate()}
-                    disabled={confirmText !== "DELETE" || requestDeletionMutation.isPending}
+                    disabled={
+                      confirmText !== "DELETE" ||
+                      requestDeletionMutation.isPending
+                    }
                   >
                     {requestDeletionMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -357,10 +293,13 @@ function PrivacyPage() {
                     )}
                     Delete My Account
                   </Button>
-                  <Button variant="outline" onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setConfirmText("");
-                  }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setConfirmText("");
+                    }}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -368,8 +307,9 @@ function PrivacyPage() {
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  When you delete your account, you have a 30-day grace period to change your mind.
-                  After this period, your account and all associated data will be permanently deleted.
+                  When you delete your account, you have a 30-day grace period
+                  to change your mind. After this period, your account and all
+                  associated data will be permanently deleted.
                 </p>
                 <Button
                   variant="destructive"
@@ -388,8 +328,12 @@ function PrivacyPage() {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Have questions about your data? Contact our Data Protection Officer at{" "}
-                <a href="mailto:privacy@ewf-stade.de" className="text-primary hover:underline">
+                Have questions about your data? Contact our Data Protection
+                Officer at{" "}
+                <a
+                  href="mailto:privacy@ewf-stade.de"
+                  className="text-primary hover:underline"
+                >
                   privacy@ewf-stade.de
                 </a>
               </p>

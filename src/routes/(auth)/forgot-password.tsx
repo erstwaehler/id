@@ -11,57 +11,93 @@ import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
-import { AlertCircle, Loader2, Mail, CheckCircle, ArrowLeft } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import {
+  AlertCircle,
+  Loader2,
+  Mail,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
+import { useTrace } from "~/lib/telemery/frontend";
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export const Route = createFileRoute("/(auth)/forgot-password")({
+  validateSearch: z.object({
+    email: z.email("Invalid email address").optional().catch(undefined),
+  }),
   component: ForgotPasswordPage,
 });
 
 function ForgotPasswordPage() {
+  const params = Route.useSearch();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { startTrace } = useTrace();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
+    defaultValues: {
+      email: params.email || "",
+    },
     resolver: zodResolver(forgotPasswordSchema),
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true);
-    setError(null);
+    const trace = startTrace("forgot_password.request_reset");
+    trace.addEvent("request_initiated", {
+      "user.email": data.email,
+    });
 
-    try {
-      const result = await authClient.forgetPassword({
-        email: data.email,
-        redirectTo: "/reset-password",
+    const result = await authClient.requestPasswordReset({
+      email: data.email,
+      redirectTo: "/reset-password",
+      fetchOptions: {
+        headers: {
+          ...trace.getHeaders(),
+        },
+      },
+    });
+    trace.addEvent("request_completed", {
+      "request.success": !result.error,
+      "request.error": result.error?.message,
+    });
+
+    if (result.error) {
+      setError(String(result.error.message));
+      trace.end({
+        outcome: "failure",
+        "error.message": result.error.message,
       });
-
-      if (result.error) {
-        setError(result.error.message || "Failed to send reset email");
-      } else {
-        setSuccess(true);
-      }
-    } catch (err) {
-      setError("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
+    } else {
+      setSuccess(true);
+      trace.end({
+        outcome: "success",
+      });
     }
+    setIsLoading(false);
   };
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <div className="flex justify-center mb-4">
@@ -69,9 +105,12 @@ function ForgotPasswordPage() {
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Check your email</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Check your email
+            </CardTitle>
             <CardDescription className="text-center">
-              If an account exists with that email, we've sent password reset instructions.
+              If an account exists with that email, we've sent password reset
+              instructions.
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
@@ -88,13 +127,15 @@ function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
             <img src="/logo.svg" alt="EWF-ID" className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Forgot password?</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Forgot password?
+          </CardTitle>
           <CardDescription className="text-center">
             Enter your email and we'll send you a link to reset your password
           </CardDescription>

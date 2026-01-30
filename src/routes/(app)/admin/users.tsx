@@ -1,19 +1,31 @@
+// #! MESS
 /**
  * EWF-ID Admin Users Page
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
  */
-import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  Link,
+  useSearch,
+} from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { 
+import {
   ArrowLeft,
   Search,
   ChevronLeft,
@@ -26,7 +38,7 @@ import {
   Eye,
   Loader2,
   AlertCircle,
-  UserPlus
+  UserPlus,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/admin/users")({
@@ -57,7 +69,10 @@ function AdminUsersPage() {
         navigate({ to: "/login" });
         return null;
       }
-      if (result.data.user.role !== "admin" && result.data.user.role !== "team") {
+      if (
+        result.data.user.role !== "admin" &&
+        result.data.user.role !== "team"
+      ) {
         navigate({ to: "/dashboard" });
         return null;
       }
@@ -85,7 +100,13 @@ function AdminUsersPage() {
   });
 
   const suspendMutation = useMutation({
-    mutationFn: async ({ userId, suspend }: { userId: string; suspend: boolean }) => {
+    mutationFn: async ({
+      userId,
+      suspend,
+    }: {
+      userId: string;
+      suspend: boolean;
+    }) => {
       const endpoint = suspend
         ? `/api/admin/users/${userId}/suspend`
         : `/api/admin/users/${userId}/unsuspend`;
@@ -113,7 +134,11 @@ function AdminUsersPage() {
     e.preventDefault();
     navigate({
       to: "/admin/users",
-      search: { page: 1, search: searchQuery || undefined, role: searchParams.role },
+      search: {
+        page: 1,
+        search: searchQuery || undefined,
+        role: searchParams.role,
+      },
     });
   };
 
@@ -172,7 +197,9 @@ function AdminUsersPage() {
           <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-500 bg-red-500/10 rounded-md">
             <AlertCircle className="h-4 w-4" />
             {error}
-            <button onClick={() => setError(null)} className="ml-auto">×</button>
+            <button onClick={() => setError(null)} className="ml-auto">
+              ×
+            </button>
           </div>
         )}
         {success && (
@@ -201,7 +228,11 @@ function AdminUsersPage() {
                 onChange={(e) =>
                   navigate({
                     to: "/admin/users",
-                    search: { page: 1, search: searchParams.search, role: e.target.value || undefined },
+                    search: {
+                      page: 1,
+                      search: searchParams.search,
+                      role: e.target.value || undefined,
+                    },
                   })
                 }
               >
@@ -235,19 +266,32 @@ function AdminUsersPage() {
                   >
                     <div className="flex items-center gap-4">
                       <Avatar>
-                        <AvatarImage src={user.image || undefined} alt={user.name} />
+                        <AvatarImage
+                          src={user.image || undefined}
+                          alt={user.name}
+                        />
                         <AvatarFallback>
-                          {user.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "U"}
+                          {user.name
+                            ?.split(" ")
+                            .map((n: string) => n[0])
+                            .join("")
+                            .toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{user.name || "Unnamed User"}</p>
+                          <p className="font-medium">
+                            {user.name || "Unnamed User"}
+                          </p>
                           {user.banned && (
-                            <Badge variant="destructive" className="text-xs">Suspended</Badge>
+                            <Badge variant="destructive" className="text-xs">
+                              Suspended
+                            </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -256,13 +300,20 @@ function AdminUsersPage() {
                           {user.role || "user"}
                         </Badge>
                         {user.emailVerified ? (
-                          <Badge variant="success" className="text-xs">Verified</Badge>
+                          <Badge variant="success" className="text-xs">
+                            Verified
+                          </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-xs">Unverified</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Unverified
+                          </Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Link to="/admin/users/$userId" params={{ userId: user.id }}>
+                        <Link
+                          to="/admin/users/$userId"
+                          params={{ userId: user.id }}
+                        >
                           <Button variant="ghost" size="icon">
                             <Eye className="h-4 w-4" />
                           </Button>

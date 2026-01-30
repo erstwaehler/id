@@ -1,20 +1,23 @@
-/**
- * EWF-ID Settings Page
- * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
- */
+// #! MESS
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Separator } from "~/components/ui/separator";
-import { 
-  ArrowLeft, 
-  Globe, 
+import {
+  ArrowLeft,
+  Globe,
   Bell,
   Loader2,
   CheckCircle,
@@ -23,7 +26,7 @@ import {
   Sun,
   Download,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/settings")({
@@ -97,7 +100,9 @@ function SettingsPage() {
       return response.json();
     },
     onSuccess: () => {
-      setSuccess("Data export requested. You'll receive an email when it's ready.");
+      setSuccess(
+        "Data export requested. You'll receive an email when it's ready.",
+      );
       setTimeout(() => setSuccess(null), 5000);
     },
     onError: (err: Error) => {
@@ -133,7 +138,13 @@ function SettingsPage() {
           <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-500 bg-red-500/10 rounded-md">
             <AlertCircle className="h-4 w-4" />
             {error}
-            <button onClick={() => setError(null)} className="ml-auto">×</button>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="ml-auto"
+            >
+              ×
+            </button>
           </div>
         )}
         {success && (
@@ -150,7 +161,9 @@ function SettingsPage() {
               <Globe className="h-5 w-5 text-muted-foreground" />
               <div>
                 <CardTitle>Language</CardTitle>
-                <CardDescription>Choose your preferred language</CardDescription>
+                <CardDescription>
+                  Choose your preferred language
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -162,6 +175,7 @@ function SettingsPage() {
                 { code: "uk", name: "Українська", flag: "🇺🇦" },
               ].map((lang) => (
                 <button
+                  type="button"
                   key={lang.code}
                   onClick={() => updateLocaleMutation.mutate(lang.code)}
                   disabled={updateLocaleMutation.isPending}
@@ -194,7 +208,9 @@ function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Security Alerts</p>
-                <p className="text-sm text-muted-foreground">Get notified about security events</p>
+                <p className="text-sm text-muted-foreground">
+                  Get notified about security events
+                </p>
               </div>
               <Badge variant="success">Always On</Badge>
             </div>
@@ -202,7 +218,9 @@ function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Login Notifications</p>
-                <p className="text-sm text-muted-foreground">Get notified when you sign in from a new device</p>
+                <p className="text-sm text-muted-foreground">
+                  Get notified when you sign in from a new device
+                </p>
               </div>
               <Badge variant="success">Always On</Badge>
             </div>
@@ -210,7 +228,9 @@ function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Product Updates</p>
-                <p className="text-sm text-muted-foreground">News about EWF products and features</p>
+                <p className="text-sm text-muted-foreground">
+                  News about EWF products and features
+                </p>
               </div>
               <Badge variant="secondary">Optional</Badge>
             </div>
@@ -224,7 +244,9 @@ function SettingsPage() {
               <Download className="h-5 w-5 text-muted-foreground" />
               <div>
                 <CardTitle>Data & Privacy</CardTitle>
-                <CardDescription>Manage your data and privacy settings</CardDescription>
+                <CardDescription>
+                  Manage your data and privacy settings
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -295,13 +317,21 @@ function SettingsPage() {
 
         {/* Links */}
         <div className="mt-8 flex flex-wrap gap-4 justify-center text-sm text-muted-foreground">
-          <Link to="/privacy-policy" className="hover:underline">Privacy Policy</Link>
+          <Link to="/privacy-policy" className="hover:underline">
+            Privacy Policy
+          </Link>
           <span>•</span>
-          <Link to="/terms" className="hover:underline">Terms of Service</Link>
+          <Link to="/terms" className="hover:underline">
+            Terms of Service
+          </Link>
           <span>•</span>
-          <Link to="/cookies" className="hover:underline">Cookie Policy</Link>
+          <Link to="/cookies" className="hover:underline">
+            Cookie Policy
+          </Link>
           <span>•</span>
-          <Link to="/impressum" className="hover:underline">Impressum</Link>
+          <Link to="/impressum" className="hover:underline">
+            Impressum
+          </Link>
         </div>
       </div>
     </div>

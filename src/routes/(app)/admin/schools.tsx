@@ -1,3 +1,4 @@
+// #! MESS
 /**
  * EWF-ID Admin Schools Page
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
@@ -12,10 +13,16 @@ import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { 
+import {
   ArrowLeft,
   Plus,
   School,
@@ -25,13 +32,23 @@ import {
   AlertCircle,
   CheckCircle,
   Edit,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 
 const schoolSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers, and hyphens only"),
-  oidcIssuer: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  slug: z
+    .string()
+    .min(2, "Slug must be at least 2 characters")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug must be lowercase letters, numbers, and hyphens only",
+    ),
+  oidcIssuer: z
+    .string()
+    .url("Must be a valid URL")
+    .optional()
+    .or(z.literal("")),
   oidcClientId: z.string().optional(),
   oidcClientSecret: z.string().optional(),
   enabled: z.boolean(),
@@ -119,7 +136,13 @@ function AdminSchoolsPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<SchoolFormData> }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<SchoolFormData>;
+    }) => {
       const response = await fetch(`/api/admin/schools/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -229,7 +252,9 @@ function AdminSchoolsPage() {
           <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-500 bg-red-500/10 rounded-md">
             <AlertCircle className="h-4 w-4" />
             {error}
-            <button onClick={() => setError(null)} className="ml-auto">×</button>
+            <button onClick={() => setError(null)} className="ml-auto">
+              ×
+            </button>
           </div>
         )}
         {success && (
@@ -243,7 +268,9 @@ function AdminSchoolsPage() {
         {showAddForm && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>{editingSchool ? "Edit School" : "Add New School"}</CardTitle>
+              <CardTitle>
+                {editingSchool ? "Edit School" : "Add New School"}
+              </CardTitle>
               <CardDescription>
                 Configure school details and OIDC settings
               </CardDescription>
@@ -259,7 +286,9 @@ function AdminSchoolsPage() {
                       {...register("name")}
                     />
                     {errors.name && (
-                      <p className="text-sm text-red-500">{errors.name.message}</p>
+                      <p className="text-sm text-red-500">
+                        {errors.name.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -270,7 +299,9 @@ function AdminSchoolsPage() {
                       {...register("slug")}
                     />
                     {errors.slug && (
-                      <p className="text-sm text-red-500">{errors.slug.message}</p>
+                      <p className="text-sm text-red-500">
+                        {errors.slug.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -283,7 +314,9 @@ function AdminSchoolsPage() {
                     {...register("oidcIssuer")}
                   />
                   {errors.oidcIssuer && (
-                    <p className="text-sm text-red-500">{errors.oidcIssuer.message}</p>
+                    <p className="text-sm text-red-500">
+                      {errors.oidcIssuer.message}
+                    </p>
                   )}
                 </div>
 
@@ -301,7 +334,9 @@ function AdminSchoolsPage() {
                     <Input
                       id="oidcClientSecret"
                       type="password"
-                      placeholder={editingSchool ? "Leave empty to keep current" : "secret"}
+                      placeholder={
+                        editingSchool ? "Leave empty to keep current" : "secret"
+                      }
                       {...register("oidcClientSecret")}
                     />
                   </div>
@@ -319,7 +354,9 @@ function AdminSchoolsPage() {
                 <div className="flex gap-2">
                   <Button
                     type="submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
+                    disabled={
+                      createMutation.isPending || updateMutation.isPending
+                    }
                   >
                     {(createMutation.isPending || updateMutation.isPending) && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -340,7 +377,8 @@ function AdminSchoolsPage() {
           <CardHeader>
             <CardTitle>Configured Schools</CardTitle>
             <CardDescription>
-              {schoolList.length} school{schoolList.length !== 1 ? "s" : ""} configured
+              {schoolList.length} school{schoolList.length !== 1 ? "s" : ""}{" "}
+              configured
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -364,7 +402,9 @@ function AdminSchoolsPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{school.name}</p>
-                          <Badge variant={school.enabled ? "success" : "secondary"}>
+                          <Badge
+                            variant={school.enabled ? "success" : "secondary"}
+                          >
                             {school.enabled ? "Active" : "Disabled"}
                           </Badge>
                         </div>

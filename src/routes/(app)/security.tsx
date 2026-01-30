@@ -1,3 +1,4 @@
+// #! MESS
 /**
  * EWF-ID Security Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
@@ -9,22 +10,28 @@ import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Separator } from "~/components/ui/separator";
-import { 
-  AlertCircle, 
-  Loader2, 
-  ArrowLeft, 
-  Shield, 
-  Key, 
-  Smartphone, 
+import {
+  AlertCircle,
+  Loader2,
+  ArrowLeft,
+  Shield,
+  Key,
+  Smartphone,
   Lock,
   Plus,
   Trash2,
   CheckCircle,
-  XCircle
+  XCircle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(app)/security")({
@@ -230,7 +237,9 @@ function SecurityPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-white">Security</h1>
-            <p className="text-muted-foreground">Manage your security settings</p>
+            <p className="text-muted-foreground">
+              Manage your security settings
+            </p>
           </div>
         </div>
 
@@ -238,7 +247,13 @@ function SecurityPage() {
           <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-500 bg-red-500/10 rounded-md">
             <AlertCircle className="h-4 w-4" />
             {error}
-            <button onClick={() => setError(null)} className="ml-auto">×</button>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="ml-auto"
+            >
+              ×
+            </button>
           </div>
         )}
         {success && (
@@ -306,7 +321,10 @@ function SecurityPage() {
                     )}
                     Update Password
                   </Button>
-                  <Button variant="outline" onClick={() => setShowPasswordForm(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowPasswordForm(false)}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -323,10 +341,14 @@ function SecurityPage() {
                 <Smartphone className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <CardTitle>Two-Factor Authentication</CardTitle>
-                  <CardDescription>Add an extra layer of security</CardDescription>
+                  <CardDescription>
+                    Add an extra layer of security
+                  </CardDescription>
                 </div>
               </div>
-              <Badge variant={twoFactorStatus?.enabled ? "success" : "secondary"}>
+              <Badge
+                variant={twoFactorStatus?.enabled ? "success" : "secondary"}
+              >
                 {twoFactorStatus?.enabled ? "Enabled" : "Disabled"}
               </Badge>
             </div>
@@ -354,25 +376,32 @@ function SecurityPage() {
                     maxLength={6}
                     placeholder="000000"
                     value={verifyCode}
-                    onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) =>
+                      setVerifyCode(e.target.value.replace(/\D/g, ""))
+                    }
                     className="text-center text-2xl tracking-widest"
                   />
                 </div>
                 <div className="flex gap-2">
                   <Button
                     onClick={() => verify2FAMutation.mutate()}
-                    disabled={verify2FAMutation.isPending || verifyCode.length !== 6}
+                    disabled={
+                      verify2FAMutation.isPending || verifyCode.length !== 6
+                    }
                   >
                     {verify2FAMutation.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
                     Verify & Enable
                   </Button>
-                  <Button variant="outline" onClick={() => {
-                    setShow2FASetup(false);
-                    setTotpUri(null);
-                    setVerifyCode("");
-                  }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShow2FASetup(false);
+                      setTotpUri(null);
+                      setVerifyCode("");
+                    }}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -383,7 +412,9 @@ function SecurityPage() {
                   Two-factor authentication is currently enabled.
                 </p>
                 <div className="space-y-2">
-                  <Label htmlFor="disablePassword">Enter password to disable</Label>
+                  <Label htmlFor="disablePassword">
+                    Enter password to disable
+                  </Label>
                   <Input
                     id="disablePassword"
                     type="password"
@@ -403,7 +434,10 @@ function SecurityPage() {
                 </Button>
               </div>
             ) : (
-              <Button onClick={() => enable2FAMutation.mutate()} disabled={enable2FAMutation.isPending}>
+              <Button
+                onClick={() => enable2FAMutation.mutate()}
+                disabled={enable2FAMutation.isPending}
+              >
                 {enable2FAMutation.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
@@ -421,10 +455,16 @@ function SecurityPage() {
                 <Key className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <CardTitle>Passkeys</CardTitle>
-                  <CardDescription>Passwordless authentication with biometrics</CardDescription>
+                  <CardDescription>
+                    Passwordless authentication with biometrics
+                  </CardDescription>
                 </div>
               </div>
-              <Button size="sm" onClick={() => addPasskeyMutation.mutate()} disabled={addPasskeyMutation.isPending}>
+              <Button
+                size="sm"
+                onClick={() => addPasskeyMutation.mutate()}
+                disabled={addPasskeyMutation.isPending}
+              >
                 {addPasskeyMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -450,9 +490,12 @@ function SecurityPage() {
                     <div className="flex items-center gap-3">
                       <Key className="h-5 w-5 text-muted-foreground" />
                       <div>
-                        <p className="font-medium">{passkey.name || "Passkey"}</p>
+                        <p className="font-medium">
+                          {passkey.name || "Passkey"}
+                        </p>
                         <p className="text-sm text-muted-foreground">
-                          Added {new Date(passkey.createdAt).toLocaleDateString()}
+                          Added{" "}
+                          {new Date(passkey.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
