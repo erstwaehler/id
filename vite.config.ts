@@ -17,6 +17,18 @@ const config = defineConfig(({ mode }) => {
   Object.assign(process.env, env);
 
   return {
+    optimizeDeps: {
+      include: [
+        "@opentelemetry/resources",
+        "@opentelemetry/semantic-conventions",
+        "@opentelemetry/sdk-trace-web",
+        "@opentelemetry/sdk-trace-base",
+        "@opentelemetry/exporter-trace-otlp-http",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-fetch",
+        "@opentelemetry/api",
+      ],
+    },
     resolve: {
       alias: {
         "#env": fileURLToPath(new URL("./src/env.ts", import.meta.url)),

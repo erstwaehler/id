@@ -22,7 +22,8 @@ import { type ReactNode, useEffect, useRef } from "react";
 import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { Resource } from "@opentelemetry/resources";
+import * as ResourcesPkg from "@opentelemetry/resources";
+const Resource = ResourcesPkg.Resource;
 import {
   SEMRESATTRS_SERVICE_NAME,
   SEMRESATTRS_SERVICE_VERSION,

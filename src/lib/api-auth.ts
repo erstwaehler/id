@@ -5,129 +5,285 @@
  * Provides authentication for API routes via session or API key
  * Uses Better Auth's built-in API key plugin
  */
-import { auth } from "#auth";
-import logger from "#logger";
 
-export interface AuthResult {
-  authenticated: boolean;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    role: string | null;
-  };
-  method: "session" | "api_key" | "bearer" | "none";
-  apiKeyId?: string;
-  error?: string;
-}
+import { AuthenticationError, BetterAuthAPIError } from "'defective/betterauth";
+import { annotateThis } from "'defective/o11y";
+import {
+  convertDefective,
+  killDefectiveLogic,
+  TypescriptVSEffectError,
+} from "'defective/wtf";
+import { APIError } from "better-auth";
+import type { UserWithRole } from "better-auth/plugins";
+import { Cache, Context, Data, Duration, Effect, Layer } from "effect";
+import { auth } from "#auth";
+import { Role } from "./permissions";
+
+export class AuthenticationResult extends Data.TaggedClass(
+  "AuthenticationResult",
+)<{
+  readonly authenticated: boolean;
+  readonly user?: UserWithRole;
+  readonly method: "api_key" | "bearer" | "none";
+}> {}
+
+export class User extends Context.Tag("UserService")<
+  User,
+  {
+    readonly fetchById: (
+      userId: string,
+    ) => Effect.Effect<UserWithRole, BetterAuthAPIError, never>;
+    readonly hasRole: (
+      userId: string,
+      role: string,
+    ) => Effect.Effect<boolean, BetterAuthAPIError, never>;
+  }
+>() {}
+
+const _internalFetchUserById = Effect.fn("api.fetchUserById")(function* (
+  userId: string,
+) {
+  return yield* Effect.tryPromise({
+    try: async () =>
+      await auth.api.getUser({
+        query: {
+          id: userId,
+        },
+      }),
+    catch: (error) => {
+      if (
+        error instanceof APIError &&
+        (error.status === 404 || error.status === "NOT_FOUND")
+      ) {
+        return new BetterAuthAPIError({
+          message: "User not found",
+          code: 404,
+          reason: "UserNotFound",
+        });
+      }
+
+      return new BetterAuthAPIError({
+        message: JSON.stringify(error),
+        code: 500,
+        reason: "UnexpectedThrow",
+      });
+    },
+  }).pipe(annotateThis);
+});
+
+export const UserLive = Layer.effect(
+  User,
+  Effect.gen(function* () {
+    const fetchUserById = yield* Cache.make({
+      capacity: 100,
+      timeToLive: Duration.minutes(5),
+      lookup: _internalFetchUserById,
+    });
+
+    return {
+      fetchById: (userId: string) => fetchUserById.get(userId),
+      hasRole: (userId: string, role: string) =>
+        fetchUserById.get(userId).pipe(
+          Effect.map((user) => {
+            if (!user.role) return false;
+
+            const roleHierarchy: Record<string, number> = {
+              [Role.USER]: 1,
+              [Role.STUDENT]: 2,
+              [Role.TEACHER]: 3,
+              [Role.TEAM]: 4,
+              [Role.ADMIN]: 5,
+            };
+
+            const userLevel = roleHierarchy[user.role] || 0;
+            const requiredLevel = roleHierarchy[role] || 0;
+
+            return userLevel >= requiredLevel;
+          }),
+        ),
+    };
+  }),
+);
 
 /**
  * Authenticate a request using session or API key
  */
-export async function authenticateRequest(request: Request): Promise<AuthResult> {
-  // Check for Authorization header
-  const authHeader = request.headers.get("authorization");
+export const authenticateRequest = Effect.fn("api.authenticateRequest")(
+  function* (request: Request) {
+    const authHeader = request.headers.get("authorization");
+    const userService = yield* User;
 
-  if (authHeader) {
-    // Bearer token (API key or access token)
-    if (authHeader.startsWith("Bearer ")) {
+    // API Key Authentication
+    if (authHeader?.startsWith("Bearer ")) {
+      yield* Effect.log("Attempting API key authentication", {
+        attributes: {
+          "auth.method": "api_key",
+        },
+      });
       const token = authHeader.slice(7);
 
-      // Try Better Auth's API key verification
-      try {
-        const result = await auth.api.verifyApiKey({
-          headers: request.headers,
-        });
-
-        if (result?.valid && result.key) {
-          return {
-            authenticated: true,
-            user: {
-              id: result.key.userId,
-              email: result.key.userId, // API key doesn't have email directly
-              name: result.key.name || "API User",
-              role: null, // Would need to fetch user for role
+      const result = yield* Effect.tryPromise({
+        try: async () =>
+          await auth.api.verifyApiKey({
+            headers: request.headers,
+            body: {
+              key: token,
             },
-            method: "api_key",
-            apiKeyId: result.key.id,
-          };
-        }
-      } catch (error) {
-        logger.debug("API key verification failed", { error: String(error) });
-      }
-
-      // Try Better Auth bearer token
-      try {
-        const session = await auth.api.getSession({
-          headers: request.headers,
-        });
-
-        if (session?.user) {
-          return {
-            authenticated: true,
-            user: {
-              id: session.user.id,
-              email: session.user.email,
-              name: session.user.name,
-              role: session.user.role || null,
-            },
-            method: "bearer",
-          };
-        }
-      } catch (error) {
-        logger.debug("Bearer token authentication failed", { error: String(error) });
-      }
-    }
-  }
-
-  // Try session-based authentication
-  try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (session?.user) {
-      return {
-        authenticated: true,
-        user: {
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.name,
-          role: session.user.role || null,
+          }),
+        catch: (error) => {
+          return new BetterAuthAPIError({
+            message: JSON.stringify(error),
+            code: 500,
+            reason: "UnexpectedThrow",
+          });
         },
-        method: "session",
-      };
+      }).pipe(
+        Effect.tap((result) => {
+          if (!result.valid || !result.key)
+            return Effect.fail(
+              new AuthenticationError({
+                message: "Invalid API key",
+                code: 401,
+                reason: "InvalidCredentials",
+              }),
+            );
+          return Effect.void;
+        }),
+        annotateThis,
+        Effect.catchTag("BetterAuthAPIError", (error) => {
+          return Effect.fail(
+            new AuthenticationError({
+              message: error.message,
+              code: error.code,
+              reason: "ServerError",
+            }),
+          );
+        }),
+      );
+
+      if (!result.valid || !result.key) {
+        return yield* Effect.fail(
+          new TypescriptVSEffectError({
+            location: "API Key Valid Check",
+            path: "~/lib/api-auth.ts:authenticateRequest",
+          }),
+        ).pipe(annotateThis, convertDefective, killDefectiveLogic);
+      }
+      yield* Effect.log("API Key Authentication Succeeded");
+
+      const user = yield* userService.fetchById(result.key.userId).pipe(
+        Effect.catchTag("BetterAuthAPIError", (error) => {
+          // This implies that the API key is valid but the user does not exist
+          if (error.reason === "UserNotFound") {
+            return new BetterAuthAPIError({
+              reason: "DetachedDataState",
+              message: "API key is valid but user does not exist",
+              code: 409,
+            });
+          }
+          return Effect.fail(error);
+        }),
+        annotateThis,
+        Effect.catchTag("BetterAuthAPIError", (error) => {
+          return Effect.fail(
+            new AuthenticationError({
+              message: error.message,
+              code: error.code,
+              reason: "ServerError",
+            }),
+          );
+        }),
+      );
+
+      return yield* Effect.succeed(
+        new AuthenticationResult({
+          authenticated: true,
+          user,
+          method: "api_key",
+        }),
+      );
     }
-  } catch (error) {
-    logger.debug("Session authentication failed", { error: String(error) });
-  }
 
-  return {
-    authenticated: false,
-    method: "none",
-    error: "No valid authentication provided",
-  };
-}
+    // Bearer Token Authentication
+    yield* Effect.log("Attempting Bearer token authentication");
+    const session = yield* Effect.tryPromise({
+      try: async () =>
+        await auth.api.getSession({
+          headers: request.headers,
+        }),
+      catch: (error) => {
+        return new BetterAuthAPIError({
+          message: JSON.stringify(error),
+          code: 500,
+          reason: "UnexpectedThrow",
+        });
+      },
+    }).pipe(
+      annotateThis,
+      Effect.catchTag("BetterAuthAPIError", (error) => {
+        return Effect.fail(
+          new AuthenticationError({
+            message: error.message,
+            code: error.code,
+            reason: "ServerError",
+          }),
+        );
+      }),
+    );
 
-/**
- * Helper to check if user has required role
- */
-export function hasRole(userRole: string | null, requiredRole: string): boolean {
-  if (!userRole) return false;
+    if (session) {
+      yield* Effect.log("Bearer Authentication Succeded", {
+        attributes: {
+          "auth.method": "bearer",
+        },
+      });
+      // Fetch it again to get consistent user data
+      const user = yield* userService.fetchById(session.user.id).pipe(
+        Effect.catchTag("BetterAuthAPIError", (error) => {
+          // This implies that the API key is valid but the user does not exist
+          if (error.reason === "UserNotFound") {
+            return new BetterAuthAPIError({
+              reason: "DetachedDataState",
+              message: "API key is valid but user does not exist",
+              code: 409,
+            });
+          }
+          return Effect.fail(error);
+        }),
+        annotateThis,
+        Effect.catchTag("BetterAuthAPIError", (error) => {
+          return Effect.fail(
+            new AuthenticationError({
+              message: error.message,
+              code: error.code,
+              reason: "ServerError",
+            }),
+          );
+        }),
+      );
 
-  const roleHierarchy: Record<string, number> = {
-    user: 1,
-    student: 2,
-    teacher: 3,
-    team: 4,
-    admin: 5,
-  };
+      return yield* Effect.succeed(
+        new AuthenticationResult({
+          authenticated: true,
+          user,
+          method: "bearer",
+        }),
+      );
+    }
 
-  const userLevel = roleHierarchy[userRole] || 0;
-  const requiredLevel = roleHierarchy[requiredRole] || 0;
+    return yield* Effect.fail(
+      new AuthenticationError({
+        reason: "InvalidCredentials",
+        message: "No valid authentication provided",
+        code: 401,
+      }),
+    );
+  },
+);
 
-  return userLevel >= requiredLevel;
-}
+export const userHasRole = Effect.fn("api.userHasRole")(function* (
+  _userId: string,
+) {});
 
 /**
  * Create unauthorized response
