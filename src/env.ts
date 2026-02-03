@@ -64,6 +64,7 @@ const createEnvWithAliases = () => {
 
       // Logging (Axiom)
       AXIOM_TOKEN: z.string().optional(),
+      AXIOM_API_URL: z.string(),
       AXIOM_DATASET: z.string().default("ewf-id"),
 
       // CAPTCHA (Cloudflare Turnstile)

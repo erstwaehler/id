@@ -11,6 +11,49 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import env from "#env";
+import { hashIpAddress } from "~/lib/audit";
+
+/*
+Example cURL to send a test telemetry event via the proxy (forwards to Axiom if AXIOM_TOKEN is set):
+
+# Via the local proxy (recommended for testing the proxy + forwarding)
+curl -X POST 'http://localhost:3000/api/telemetry' \
+  -H 'Content-Type: application/json' \
+  -H 'User-Agent: telemetry-test/1.0' \
+  -H 'X-Forwarded-For: 203.0.113.5' \
+  -d '{
+    "resourceSpans":[
+      {
+        "resource": {"attributes": []},
+        "scopeSpans":[
+          {
+            "spans":[
+              {
+                "traceId":"0123456789abcdef0123456789abcdef",
+                "spanId":"0123456789abcdef",
+                "name":"test-span",
+                "startTimeUnixNano":"1672531200000000000",
+                "endTimeUnixNano":"1672531201000000000",
+                "attributes":[{"key":"test.key","value":{"stringValue":"test-value"}}]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }'
+
+# Or POST directly to Axiom (requires a valid AXIOM_TOKEN and dataset):
+# export AXIOM_TOKEN="your_token_here"
+# export AXIOM_DATASET="your_dataset_here"
+curl -X POST 'https://api.axiom.co/v1/traces' \
+  -H "Authorization: Bearer $AXIOM_TOKEN" \
+  -H "X-Axiom-Dataset: $AXIOM_DATASET" \
+  -H 'Content-Type: application/json' \
+  -d '<same payload as above>'
+
+Note: Replace host/ports as appropriate for your environment.
+*/
 
 interface TelemetryPayload {
   resourceSpans?: Array<{
@@ -82,7 +125,9 @@ function getClientIp(request: Request): string {
   return "unknown";
 }
 
-function isValidTelemetryPayload(payload: unknown): payload is TelemetryPayload {
+function isValidTelemetryPayload(
+  payload: unknown,
+): payload is TelemetryPayload {
   if (!payload || typeof payload !== "object") {
     return false;
   }
@@ -101,7 +146,11 @@ function isValidTelemetryPayload(payload: unknown): payload is TelemetryPayload 
     }
 
     for (const scopeSpan of resourceSpan.scopeSpans) {
-      if (scopeSpan.spans && Array.isArray(scopeSpan.spans) && scopeSpan.spans.length > 0) {
+      if (
+        scopeSpan.spans &&
+        Array.isArray(scopeSpan.spans) &&
+        scopeSpan.spans.length > 0
+      ) {
         return true;
       }
     }
@@ -112,18 +161,18 @@ function isValidTelemetryPayload(payload: unknown): payload is TelemetryPayload 
 
 function enrichPayloadWithServerContext(
   payload: TelemetryPayload,
-  clientIp: string,
+  clientIpHash: string,
   userAgent: string | null,
 ): TelemetryPayload {
-  // Add server-side attributes that client can't be trusted with
+  // Add server-side attributes that client can't be trusted with (only hashed IP to avoid forwarding PII)
   const serverAttributes = [
     {
       key: "server.received_at",
       value: { stringValue: new Date().toISOString() },
     },
     {
-      key: "server.client_ip",
-      value: { stringValue: clientIp },
+      key: "server.client_ip_hash",
+      value: { stringValue: clientIpHash },
     },
     {
       key: "server.validated",
@@ -171,12 +220,20 @@ export const Route = createFileRoute("/api/telemetry")({
           return new Response("Telemetry not configured", { status: 501 });
         }
 
-        // Get client info
-        const clientIp = getClientIp(request);
+        // Get client info and hash the IP for PII compliance
+        const rawClientIp = getClientIp(request);
+        let clientIpHash: string;
+        try {
+          clientIpHash = hashIpAddress(rawClientIp);
+        } catch (error) {
+          console.error("Failed to hash client IP:", error);
+          // Fall back to a stable sentinel so rate-limiting still groups requests
+          clientIpHash = "unknown";
+        }
         const userAgent = request.headers.get("user-agent");
 
-        // Rate limiting
-        if (isRateLimited(clientIp)) {
+        // Rate limiting (keyed by hashed IP to avoid storing raw PII)
+        if (isRateLimited(clientIpHash)) {
           return new Response("Rate limit exceeded", {
             status: 429,
             headers: {
@@ -198,27 +255,24 @@ export const Route = createFileRoute("/api/telemetry")({
           return new Response("Invalid telemetry payload", { status: 400 });
         }
 
-        // Enrich with server context
+        // Enrich with server context (include hashed client IP only)
         const enrichedPayload = enrichPayloadWithServerContext(
           payload,
-          clientIp,
+          clientIpHash,
           userAgent,
         );
 
         // Forward to Axiom
         try {
-          const axiomResponse = await fetch(
-            "https://api.axiom.co/v1/traces",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${env.AXIOM_TOKEN}`,
-                "X-Axiom-Dataset": env.AXIOM_DATASET,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(enrichedPayload),
+          const axiomResponse = await fetch(`${env.AXIOM_API_URL}/v1/traces`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${env.AXIOM_TOKEN}`,
+              "X-Axiom-Dataset": env.AXIOM_DATASET,
+              "Content-Type": "application/json",
             },
-          );
+            body: JSON.stringify(enrichedPayload),
+          });
 
           if (!axiomResponse.ok) {
             const errorText = await axiomResponse.text();

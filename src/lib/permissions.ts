@@ -169,8 +169,8 @@ export function getPermissionsForRole(role: Role | string): string[] {
       case Role.STUDENT:
       case "student":
         return student.statements;
-      case Role.USER:
-      case "user":
+      // case Role.USER:
+      // case "user":
       default:
         return user.statements;
     }
@@ -203,7 +203,7 @@ export function roleHasPermission(
   }
 
   // Check wildcard patterns
-  const [app, resource, action] = permission.split(":");
+  const [app, resource] = permission.split(":");
 
   // app:* pattern
   if (permissions.includes(`${app}:*`)) {
