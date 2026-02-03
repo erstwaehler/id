@@ -8,6 +8,7 @@ import {
   SpanStatusCode,
   type Attributes,
   propagation,
+  SpanContext,
 } from "@opentelemetry/api";
 import { W3CTraceContextPropagator } from "@opentelemetry/core";
 import { Effect } from "effect";
@@ -77,12 +78,17 @@ export interface ServerTraceControl {
   /**
    * Get the trace ID for correlation
    */
-  getTraceId: () => string | undefined;
+  getTraceId: () => string;
 
   /**
    * Get the span ID
    */
-  getSpanId: () => string | undefined;
+  getSpanId: () => string;
+
+  /**
+   * Get the span context
+   */
+  getSpanContext: () => SpanContext;
 
   /**
    * Get headers to propagate trace context to downstream services
@@ -129,7 +135,7 @@ export interface ServerTraceControl {
  * ```
  */
 export function useServerTrace() {
-  const tracer = trace.getTracer("backend");
+  const tracer = trace.getTracer("ewf-id-backend");
   const propagator = new W3CTraceContextPropagator();
 
   /**
@@ -141,7 +147,6 @@ export function useServerTrace() {
   ): ServerTraceControl => {
     let span: Span;
     let spanContext: Context = context.active();
-
     // We'll start the span lazily after extractFromHeaders is called
     // or immediately if not using headers
     let isStarted = false;
@@ -291,6 +296,11 @@ export function useServerTrace() {
         return span.spanContext().spanId;
       },
 
+      getSpanContext: () => {
+        ensureStarted();
+        return span.spanContext();
+      },
+
       getHeaders: () => {
         ensureStarted();
         const headers: Record<string, string> = {};
@@ -388,68 +398,68 @@ export function useServerTrace() {
  * })
  * ```
  */
-export function createTracedServerFn<TArgs = void, TResult = unknown>(options: {
-  /**
-   * HTTP method(s) for the server function
-   */
-  method:
-    | "GET"
-    | "POST"
-    | "PUT"
-    | "DELETE"
-    | "PATCH"
-    | Array<"GET" | "POST" | "PUT" | "DELETE" | "PATCH">;
-  /**
-   * Name for the trace span
-   */
-  name: string;
-  /**
-   * Handler function that receives args and trace control
-   */
-  handler: (args: TArgs, trace: ServerTraceControl) => Promise<TResult>;
-  /**
-   * Optional initial attributes
-   */
-  initialAttributes?: Attributes;
-}) {
-  // TanStack Start's createServerFn needs to be imported at runtime
-  // This is a factory that returns the traced server function
-  return async (createServerFn: any) => {
-    return createServerFn(options.method, async (args: TArgs) => {
-      // Get request from Vinxi
-      let request: Request | undefined;
-      try {
-        // Dynamic import to avoid issues if not in server context
-        const { getWebRequest } = await import("vinxi/http");
-        request = getWebRequest();
-      } catch {
-        // Not in a request context, proceed without headers
-      }
+// export function createTracedServerFn<TArgs = void, TResult = unknown>(options: {
+//   /**
+//    * HTTP method(s) for the server function
+//    */
+//   method:
+//     | "GET"
+//     | "POST"
+//     | "PUT"
+//     | "DELETE"
+//     | "PATCH"
+//     | Array<"GET" | "POST" | "PUT" | "DELETE" | "PATCH">;
+//   /**
+//    * Name for the trace span
+//    */
+//   name: string;
+//   /**
+//    * Handler function that receives args and trace control
+//    */
+//   handler: (args: TArgs, trace: ServerTraceControl) => Promise<TResult>;
+//   /**
+//    * Optional initial attributes
+//    */
+//   initialAttributes?: Attributes;
+// }) {
+//   // TanStack Start's createServerFn needs to be imported at runtime
+//   // This is a factory that returns the traced server function
+//   return async (createServerFn: any) => {
+//     return createServerFn(options.method, async (args: TArgs) => {
+//       // Get request from Vinxi
+//       let request: Request | undefined;
+//       try {
+//         // Dynamic import to avoid issues if not in server context
+//         const { getWebRequest } = await import("vinxi/http");
+//         request = getWebRequest();
+//       } catch {
+//         // Not in a request context, proceed without headers
+//       }
 
-      const { startTrace } = useServerTrace();
-      const trace = startTrace(options.name, options.initialAttributes);
+//       const { startTrace } = useServerTrace();
+//       const trace = startTrace(options.name, options.initialAttributes);
 
-      // Extract headers if we have a request
-      if (request) {
-        trace.extractFromHeaders(request.headers);
-        trace.setAttributes({
-          "http.method": request.method,
-          "http.url": request.url,
-          "http.user_agent": request.headers.get("user-agent") || "unknown",
-        });
-      }
+//       // Extract headers if we have a request
+//       if (request) {
+//         trace.extractFromHeaders(request.headers);
+//         trace.setAttributes({
+//           "http.method": request.method,
+//           "http.url": request.url,
+//           "http.user_agent": request.headers.get("user-agent") || "unknown",
+//         });
+//       }
 
-      try {
-        const result = await options.handler(args, trace);
-        trace.end();
-        return result;
-      } catch (error) {
-        trace.error(error);
-        throw error;
-      }
-    });
-  };
-}
+//       try {
+//         const result = await options.handler(args, trace);
+//         trace.end();
+//         return result;
+//       } catch (error) {
+//         trace.error(error);
+//         throw error;
+//       }
+//     });
+//   };
+// }
 
 /**
  * Helper to wrap any async function with server tracing

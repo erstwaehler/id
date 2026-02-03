@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
 import { Route as ApiTelemetryRouteImport } from './routes/api/telemetry'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as legalTermsRouteImport } from './routes/(legal)/terms'
@@ -55,11 +54,6 @@ import { Route as ApiAdminUsersUserIdRolesRouteImport } from './routes/api/admin
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoBetterAuthRoute = DemoBetterAuthRouteImport.update({
-  id: '/demo/better-auth',
-  path: '/demo/better-auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTelemetryRoute = ApiTelemetryRouteImport.update({
@@ -291,7 +285,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/telemetry': typeof ApiTelemetryRoute
-  '/demo/better-auth': typeof DemoBetterAuthRoute
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
   '/admin/users': typeof appAdminUsersRouteWithChildren
@@ -335,7 +328,6 @@ export interface FileRoutesByTo {
   '/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/telemetry': typeof ApiTelemetryRoute
-  '/demo/better-auth': typeof DemoBetterAuthRoute
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
   '/admin/users': typeof appAdminUsersRouteWithChildren
@@ -380,7 +372,6 @@ export interface FileRoutesById {
   '/(legal)/terms': typeof legalTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/telemetry': typeof ApiTelemetryRoute
-  '/demo/better-auth': typeof DemoBetterAuthRoute
   '/(app)/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/(app)/admin/schools': typeof appAdminSchoolsRoute
   '/(app)/admin/users': typeof appAdminUsersRouteWithChildren
@@ -426,7 +417,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/health'
     | '/api/telemetry'
-    | '/demo/better-auth'
     | '/admin/audit-logs'
     | '/admin/schools'
     | '/admin/users'
@@ -470,7 +460,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/health'
     | '/api/telemetry'
-    | '/demo/better-auth'
     | '/admin/audit-logs'
     | '/admin/schools'
     | '/admin/users'
@@ -514,7 +503,6 @@ export interface FileRouteTypes {
     | '/(legal)/terms'
     | '/api/health'
     | '/api/telemetry'
-    | '/demo/better-auth'
     | '/(app)/admin/audit-logs'
     | '/(app)/admin/schools'
     | '/(app)/admin/users'
@@ -559,7 +547,6 @@ export interface RootRouteChildren {
   legalTermsRoute: typeof legalTermsRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiTelemetryRoute: typeof ApiTelemetryRoute
-  DemoBetterAuthRoute: typeof DemoBetterAuthRoute
   appAdminAuditLogsRoute: typeof appAdminAuditLogsRoute
   appAdminSchoolsRoute: typeof appAdminSchoolsRoute
   appAdminUsersRoute: typeof appAdminUsersRouteWithChildren
@@ -581,13 +568,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/better-auth': {
-      id: '/demo/better-auth'
-      path: '/demo/better-auth'
-      fullPath: '/demo/better-auth'
-      preLoaderRoute: typeof DemoBetterAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/telemetry': {
@@ -969,7 +949,6 @@ const rootRouteChildren: RootRouteChildren = {
   legalTermsRoute: legalTermsRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiTelemetryRoute: ApiTelemetryRoute,
-  DemoBetterAuthRoute: DemoBetterAuthRoute,
   appAdminAuditLogsRoute: appAdminAuditLogsRoute,
   appAdminSchoolsRoute: appAdminSchoolsRoute,
   appAdminUsersRoute: appAdminUsersRouteWithChildren,

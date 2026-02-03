@@ -158,19 +158,13 @@ export function getPermissionsForRole(role: Role | string): string[] {
   const roleDefinition = (() => {
     switch (role) {
       case Role.ADMIN:
-      case "admin":
         return admin.statements;
       case Role.TEAM:
-      case "team":
         return team.statements;
       case Role.TEACHER:
-      case "teacher":
         return teacher.statements;
       case Role.STUDENT:
-      case "student":
         return student.statements;
-      // case Role.USER:
-      // case "user":
       default:
         return user.statements;
     }

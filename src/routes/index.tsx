@@ -1,24 +1,31 @@
 /**
  * EWF-ID Landing Page
  * SPEC.md Phase 6 - Task 6.3: Public Pages
- * 
+ *
  * This is a B2C page for students - they access apps directly via their URLs
  * and are redirected here for authentication.
  */
+
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { m } from "@/paraglide/messages";
-import { 
-  Shield, 
-  Key, 
-  School, 
+import {
+  ArrowRight,
   Globe,
+  Key,
   Lock,
+  School,
+  Shield,
   Users,
-  ArrowRight
 } from "lucide-react";
+import { m } from "@/paraglide/messages";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -59,7 +66,7 @@ function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 max-w-6xl">
         <div className="text-center mb-16">
@@ -118,8 +125,14 @@ function LandingPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "Athenaeum Stade", type: m.landing_school_type_gymnasium() },
-              { name: "Vincent-Lübeck-Gymnasium", type: m.landing_school_type_gymnasium() },
+              {
+                name: "Athenaeum Stade",
+                type: m.landing_school_type_gymnasium(),
+              },
+              {
+                name: "Vincent-Lübeck-Gymnasium",
+                type: m.landing_school_type_gymnasium(),
+              },
               { name: "IGS Stade", type: m.landing_school_type_igs() },
             ].map((school) => (
               <Card key={school.name}>
@@ -140,13 +153,26 @@ function LandingPage() {
         {/* Footer */}
         <footer className="border-t border-slate-700 pt-8">
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400 mb-4">
-            <Link to="/privacy-policy" className="hover:text-white hover:underline">{m.legal_privacy_title()}</Link>
-            <Link to="/terms" className="hover:text-white hover:underline">{m.legal_terms_title()}</Link>
-            <Link to="/cookies" className="hover:text-white hover:underline">{m.legal_cookies_title()}</Link>
-            <Link to="/impressum" className="hover:text-white hover:underline">{m.legal_impressum_title()}</Link>
+            <Link
+              to="/privacy-policy"
+              className="hover:text-white hover:underline"
+            >
+              {m.legal_privacy_title()}
+            </Link>
+            <Link to="/terms" className="hover:text-white hover:underline">
+              {m.legal_terms_title()}
+            </Link>
+            <Link to="/cookies" className="hover:text-white hover:underline">
+              {m.legal_cookies_title()}
+            </Link>
+            <Link to="/impressum" className="hover:text-white hover:underline">
+              {m.legal_impressum_title()}
+            </Link>
           </div>
           <p className="text-center text-sm text-gray-500">
-            {m.landing_footer_copyright({ year: new Date().getFullYear().toString() })}
+            {m.landing_footer_copyright({
+              year: new Date().getFullYear().toString(),
+            })}
           </p>
         </footer>
       </div>

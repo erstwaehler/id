@@ -5,20 +5,10 @@
  * Shared audit logging functionality for all API routes
  */
 
-import { annotateThis } from "'defective/o11y";
-import { createHash, randomUUID, scryptSync } from "node:crypto";
-import { Context, Data, Effect, Layer } from "effect";
-import env from "#env";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { db } from "~/lib/auth-db";
-
-const ENCRYPTION_KEY = env.ENCRYPTION_KEY;
-
-export class AuditError extends Data.TaggedClass("AuditError")<{
-  readonly message: string;
-  readonly reason: "DatabaseError" | "HashingError";
-  readonly cause?: unknown;
-}> {}
+import { AuditServiceLive } from "'/audit";
+import { CryptoAuthLive } from "'/betterauth";
+import { AuditService } from "'services/audit";
+import { Effect } from "effect";
 
 export interface AuditLogOptions {
   userId: string | null;
@@ -32,95 +22,6 @@ export interface AuditLogOptions {
   traceId?: string;
   spanId?: string;
 }
-
-/**
- * Audit Service Definition
- */
-export class AuditService extends Context.Tag("AuditService")<
-  AuditService,
-  {
-    readonly log: (
-      options: AuditLogOptions,
-      request?: Request,
-    ) => Effect.Effect<void, AuditError>;
-  }
->() {}
-
-/**
- * Hash IP address for GDPR compliance using strengthened hashing
- * Uses scrypt with a complex salt derived from ENCRYPTION_KEY
- */
-export const hashIpAddress = (ip: string): string => {
-  // Create a complex salt using the requested combination: 2x SHA512 + MD5 of the ENCRYPTION_KEY
-  const saltStage1 = createHash("sha512").update(ENCRYPTION_KEY).digest("hex");
-  const saltStage2 = createHash("sha512").update(saltStage1).digest("hex");
-  const finalSalt = createHash("md5").update(saltStage2).digest("hex");
-
-  // Use scrypt for key derivation/hashing (similar strength to argon2 for this purpose)
-  // We use sync here since this is likely called in contexts where async might be tricky or we want simplicity in the pure function
-  // but wrapping it in Effect handles the sync nature gracefully.
-  // 64 length, N=16384, r=8, p=1 are reasonable defaults for scrypt
-  return scryptSync(ip, finalSalt, 32).toString("hex");
-};
-
-/**
- * Live implementation of AuditService
- */
-export const AuditServiceLive = Layer.effect(
-  AuditService,
-  Effect.succeed({
-    log: (options: AuditLogOptions, request?: Request) =>
-      Effect.gen(function* () {
-        const rawIp = request
-          ? request.headers.get("x-forwarded-for") ||
-            request.headers.get("x-real-ip") ||
-            "unknown"
-          : "system";
-
-        // Hash IP safely
-        const ipAddressHash = yield* Effect.try({
-          try: () => hashIpAddress(rawIp),
-          catch: (error) =>
-            new AuditError({
-              message: "Failed to hash IP address",
-              reason: "HashingError",
-              cause: error,
-            }),
-        });
-
-        const userAgent = request
-          ? request.headers.get("user-agent") || "unknown"
-          : "system";
-
-        // Perform DB insertion
-        yield* Effect.tryPromise({
-          try: async () => {
-            await db.insert(auditLog).values({
-              id: randomUUID(),
-              userId: options.userId,
-              action: options.action,
-              resource: options.resource,
-              resourceId: options.resourceId ?? null,
-              metadata: options.metadata ?? {},
-              ipAddressHash,
-              userAgent,
-              traceId: options.traceId ?? null,
-              spanId: options.spanId ?? null,
-              result: options.result ?? "success",
-              errorMessage: options.errorMessage ?? null,
-              duration: options.duration ?? null,
-            });
-          },
-          catch: (error) =>
-            new AuditError({
-              message: "Failed to insert audit log",
-              reason: "DatabaseError",
-              cause: error,
-            }),
-        });
-      }).pipe(annotateThis, Effect.ignoreLogged),
-  }),
-);
 
 /**
  * Audit action categories for consistency
@@ -238,7 +139,7 @@ export async function createAuditLog(
   const program = Effect.gen(function* () {
     const auditService = yield* AuditService;
     return yield* auditService.log(options, request);
-  }).pipe(Effect.provide(AuditServiceLive));
+  }).pipe(Effect.provide(AuditServiceLive), Effect.provide(CryptoAuthLive));
 
   await Effect.runPromise(program);
 }

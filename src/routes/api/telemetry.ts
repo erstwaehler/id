@@ -9,14 +9,30 @@
  *
  * POST /api/telemetry - Accept OTLP trace data from frontend
  */
+
+import { CryptoAuthLive } from "'/betterauth";
+import { annotateThis, otelLive } from "'defective/o11y";
+import { TelemetryError, TelemetryPayload } from "'defective/telemetry";
+import { Crypto } from "'services/betterauth";
 import { createFileRoute } from "@tanstack/react-router";
+import type { UserWithRole } from "better-auth/plugins";
+import { Effect, Logger, LogLevel, Schedule } from "effect";
+import { Tracer } from "@effect/opentelemetry";
+import { PostHog } from "posthog-node";
 import env from "#env";
-import { hashIpAddress } from "~/lib/audit";
+import { context } from "@opentelemetry/api";
+
+const posthog = env.POSTHOG_KEY
+  ? new PostHog(env.POSTHOG_KEY, {
+      host: env.POSTHOG_HOST,
+    })
+  : null;
+import { authenticateRequest, UserLive } from "~/lib/api-auth";
+import { useServerTrace } from "~/lib/telemery/defective";
+import { APP_VERSION, CURRENT_BRANCH, LATEST_COMMIT_HASH } from "~/lib/version";
 
 /*
-Example cURL to send a test telemetry event via the proxy (forwards to Axiom if AXIOM_TOKEN is set):
-
-# Via the local proxy (recommended for testing the proxy + forwarding)
+# Test curl
 curl -X POST 'http://localhost:3000/api/telemetry' \
   -H 'Content-Type: application/json' \
   -H 'User-Agent: telemetry-test/1.0' \
@@ -42,264 +58,327 @@ curl -X POST 'http://localhost:3000/api/telemetry' \
       }
     ]
   }'
-
-# Or POST directly to Axiom (requires a valid AXIOM_TOKEN and dataset):
-# export AXIOM_TOKEN="your_token_here"
-# export AXIOM_DATASET="your_dataset_here"
-curl -X POST 'https://api.axiom.co/v1/traces' \
-  -H "Authorization: Bearer $AXIOM_TOKEN" \
-  -H "X-Axiom-Dataset: $AXIOM_DATASET" \
-  -H 'Content-Type: application/json' \
-  -d '<same payload as above>'
-
-Note: Replace host/ports as appropriate for your environment.
 */
 
-interface TelemetryPayload {
-  resourceSpans?: Array<{
-    resource?: {
-      attributes?: Array<{ key: string; value: unknown }>;
-    };
-    scopeSpans?: Array<{
-      spans?: Array<{
-        traceId?: string;
-        spanId?: string;
-        name?: string;
-        kind?: number;
-        startTimeUnixNano?: string;
-        endTimeUnixNano?: string;
-        attributes?: Array<{ key: string; value: unknown }>;
-        events?: Array<unknown>;
-        status?: { code?: number; message?: string };
-      }>;
-    }>;
-  }>;
-}
-
-// Simple in-memory rate limiter
-// In production, use Redis or similar
-const rateLimiter = new Map<string, { count: number; resetAt: number }>();
-
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 100; // 100 requests per minute per IP
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const existing = rateLimiter.get(ip);
-
-  if (!existing || now > existing.resetAt) {
-    // Reset or create new entry
-    rateLimiter.set(ip, {
-      count: 1,
-      resetAt: now + RATE_LIMIT_WINDOW_MS,
-    });
-    return false;
-  }
-
-  if (existing.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return true;
-  }
-
-  existing.count++;
-  return false;
-}
-
-function getClientIp(request: Request): string {
-  // Try various headers for client IP
+const getSafeIp = Effect.fn("api.telemery.getSafeIp")(function* (
+  request: Request,
+) {
+  const crypto = yield* Crypto;
   const forwardedFor = request.headers.get("x-forwarded-for");
   if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim();
+    return yield* crypto
+      .hash(forwardedFor.split(",")[0].trim())
+      .pipe(annotateThis);
   }
 
   const realIp = request.headers.get("x-real-ip");
   if (realIp) {
-    return realIp;
+    return yield* crypto.hash(realIp).pipe(annotateThis);
   }
 
   // Fallback (Vercel/Netlify)
   const cfConnectingIp = request.headers.get("cf-connecting-ip");
   if (cfConnectingIp) {
-    return cfConnectingIp;
+    return yield* crypto.hash(cfConnectingIp).pipe(annotateThis);
   }
 
   return "unknown";
-}
+});
 
-function isValidTelemetryPayload(
-  payload: unknown,
-): payload is TelemetryPayload {
-  if (!payload || typeof payload !== "object") {
-    return false;
-  }
-
-  const p = payload as Partial<TelemetryPayload>;
-
-  // Basic structure validation
-  if (!Array.isArray(p.resourceSpans)) {
-    return false;
-  }
-
-  // Validate at least one span exists
-  for (const resourceSpan of p.resourceSpans) {
-    if (!resourceSpan.scopeSpans || !Array.isArray(resourceSpan.scopeSpans)) {
-      continue;
+const isValidTelemetryPayload = (payload: unknown) =>
+  Effect.gen(function* () {
+    // 1. Erstmal sicherstellen, dass es ein Record/Objekt ist
+    if (typeof payload !== "object" || payload === null) {
+      return yield* Effect.fail(
+        new TelemetryError({ message: "Payload is not an object", code: 400 }),
+      );
     }
 
-    for (const scopeSpan of resourceSpan.scopeSpans) {
-      if (
-        scopeSpan.spans &&
-        Array.isArray(scopeSpan.spans) &&
-        scopeSpan.spans.length > 0
-      ) {
-        return true;
+    // 2. Type-Cast auf Record<string, unknown>
+    const raw = payload as Record<string, unknown>;
+
+    if (!Array.isArray(raw.resourceSpans)) {
+      return yield* Effect.fail(
+        new TelemetryError({
+          message: "Payload missing resourceSpans array",
+          code: 400,
+        }),
+      );
+    }
+
+    // 3. Validierung durch explizite Typ-Prüfung in der Schleife
+    const hasSpans = raw.resourceSpans.some((rs) => {
+      if (typeof rs === "object" && rs !== null && "scopeSpans" in rs) {
+        const scopeSpans = (rs as Record<string, unknown>).scopeSpans;
+        return (
+          Array.isArray(scopeSpans) &&
+          scopeSpans.some((ss) => {
+            if (typeof ss === "object" && ss !== null && "spans" in ss) {
+              const spans = (ss as Record<string, unknown>).spans;
+              return Array.isArray(spans) && spans.length > 0;
+            }
+            return false;
+          })
+        );
       }
+      return false;
+    });
+
+    if (!hasSpans) {
+      return yield* Effect.fail(
+        new TelemetryError({ message: "Payload contains no spans", code: 400 }),
+      );
     }
-  }
 
-  return false;
-}
+    return new TelemetryPayload(
+      raw as unknown as ConstructorParameters<typeof TelemetryPayload>[0],
+    );
+  }).pipe(annotateThis, Effect.withSpan("api.telemetry.validatePayload"));
 
-function enrichPayloadWithServerContext(
+/**
+ * Reichert das Telemetry-Payload mit Server-Kontext an.
+ * Nutzt Effect, da für das Hashing der User-ID der Crypto-Service benötigt wird.
+ */
+export const enrichPayloadWithServerContext = (
   payload: TelemetryPayload,
   clientIpHash: string,
   userAgent: string | null,
-): TelemetryPayload {
-  // Add server-side attributes that client can't be trusted with (only hashed IP to avoid forwarding PII)
-  const serverAttributes = [
-    {
-      key: "server.received_at",
-      value: { stringValue: new Date().toISOString() },
-    },
-    {
-      key: "server.client_ip_hash",
-      value: { stringValue: clientIpHash },
-    },
-    {
-      key: "server.validated",
-      value: { boolValue: true },
-    },
-    {
-      key: "telemetry.sdk.name",
-      value: { stringValue: "ewf-id-frontend" },
-    },
-  ];
+  user: UserWithRole | null,
+) =>
+  Effect.gen(function* () {
+    const crypto = yield* Crypto;
 
-  if (userAgent) {
-    serverAttributes.push({
-      key: "http.user_agent",
-      value: { stringValue: userAgent },
-    });
-  }
+    // 1. User ID anonymisieren (Hashing), falls vorhanden
+    const userIdHash = user ? yield* crypto.hash(user.id) : null;
 
-  // Add to resource attributes
-  if (!payload.resourceSpans) {
-    payload.resourceSpans = [];
-  }
+    // 2. Runtime Umgebung bestimmen
+    const runtime = process.env.VERCEL
+      ? "vercel"
+      : process.env.RAILWAY_ENVIRONMENT
+        ? "railway"
+        : "bun";
 
-  for (const resourceSpan of payload.resourceSpans) {
-    if (!resourceSpan.resource) {
-      resourceSpan.resource = { attributes: [] };
+    // 3. Basis-Attribute definieren (Wide Events Philosophie)
+    const serverAttributes = [
+      {
+        key: "server.received_at",
+        value: { stringValue: new Date().toISOString() },
+      },
+      {
+        key: "server.client_ip_hash",
+        value: { stringValue: clientIpHash },
+      },
+      {
+        key: "server.runtime",
+        value: { stringValue: runtime },
+      },
+      {
+        key: "app.environment",
+        value: { stringValue: env.NODE_ENV },
+      },
+      {
+        key: "app.version",
+        value: { stringValue: APP_VERSION },
+      },
+      {
+        key: "app.commit_hash",
+        value: { stringValue: LATEST_COMMIT_HASH },
+      },
+      {
+        key: "app.branch",
+        value: { stringValue: CURRENT_BRANCH },
+      },
+      {
+        key: "telemetry.sdk.name",
+        value: { stringValue: "ewf-id-proxy" },
+      },
+    ];
+
+    // 4. Optionale Attribute hinzufügen
+    if (userAgent) {
+      serverAttributes.push({
+        key: "http.user_agent",
+        value: { stringValue: userAgent },
+      });
     }
-    if (!resourceSpan.resource.attributes) {
-      resourceSpan.resource.attributes = [];
+
+    if (userIdHash) {
+      serverAttributes.push(
+        {
+          key: "user.id_hash",
+          value: { stringValue: userIdHash },
+        },
+        {
+          key: "user.role",
+          value: { stringValue: user?.role ?? "user" },
+        },
+      );
     }
 
-    resourceSpan.resource.attributes.push(...serverAttributes);
-  }
+    // 5. Payload mutieren (Alle ResourceSpans anreichern)
+    for (const resourceSpan of payload.resourceSpans) {
+      resourceSpan.resource ??= { attributes: [] };
+      resourceSpan.resource.attributes ??= [];
 
-  return payload;
-}
+      // Wir pushen die Server-Attribute in die Resource-Attributes
+      resourceSpan.resource.attributes.push(...serverAttributes);
+    }
+
+    return payload;
+  }).pipe(Effect.withSpan("api.telemetry.enrichPayload"));
 
 export const Route = createFileRoute("/api/telemetry")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Check if Axiom is configured
-        if (!env.AXIOM_TOKEN) {
-          console.warn("AXIOM_TOKEN not configured, telemetry dropped");
-          return new Response("Telemetry not configured", { status: 501 });
-        }
+        const { startTrace } = useServerTrace();
 
-        // Get client info and hash the IP for PII compliance
-        const rawClientIp = getClientIp(request);
-        let clientIpHash: string;
-        try {
-          clientIpHash = hashIpAddress(rawClientIp);
-        } catch (error) {
-          console.error("Failed to hash client IP:", error);
-          // Fall back to a stable sentinel so rate-limiting still groups requests
-          clientIpHash = "unknown";
-        }
-        const userAgent = request.headers.get("user-agent");
-
-        // Rate limiting (keyed by hashed IP to avoid storing raw PII)
-        if (isRateLimited(clientIpHash)) {
-          return new Response("Rate limit exceeded", {
-            status: 429,
-            headers: {
-              "Retry-After": "60",
-            },
-          });
-        }
-
-        // Parse payload
-        let payload: unknown;
-        try {
-          payload = await request.json();
-        } catch (error) {
-          return new Response("Invalid JSON", { status: 400 });
-        }
-
-        // Validate payload structure
-        if (!isValidTelemetryPayload(payload)) {
-          return new Response("Invalid telemetry payload", { status: 400 });
-        }
-
-        // Enrich with server context (include hashed client IP only)
-        const enrichedPayload = enrichPayloadWithServerContext(
-          payload,
-          clientIpHash,
-          userAgent,
-        );
-
-        // Forward to Axiom
-        try {
-          const axiomResponse = await fetch(`${env.AXIOM_API_URL}/v1/traces`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${env.AXIOM_TOKEN}`,
-              "X-Axiom-Dataset": env.AXIOM_DATASET,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(enrichedPayload),
-          });
-
-          if (!axiomResponse.ok) {
-            const errorText = await axiomResponse.text();
-            console.error("Axiom API error:", {
-              status: axiomResponse.status,
-              body: errorText,
-            });
-
-            // Don't expose internal details to client
-            return new Response("Failed to send telemetry", {
-              status: 500,
-            });
+        const program = Effect.gen(function* () {
+          if (!env.AXIOM_TOKEN) {
+            return yield* Effect.fail(
+              new TelemetryError({
+                message: "Axiom not configured",
+                code: 501,
+              }),
+            );
           }
 
-          // Success
-          return new Response("OK", {
-            status: 202, // Accepted
-            headers: {
-              "Content-Type": "text/plain",
-            },
-          });
-        } catch (error) {
-          console.error("Error forwarding telemetry to Axiom:", error);
-          return new Response("Internal server error", {
-            status: 500,
-          });
-        }
+          const userAgent = request.headers.get("user-agent");
+
+          const getUserEffect = authenticateRequest(request).pipe(
+            Effect.map((payload) => {
+              return payload.user ?? null;
+            }),
+            Effect.catchTag("AuthenticationError", (error) => {
+              if (error.reason === "InvalidCredentials") {
+                return Effect.succeed(null);
+              }
+              return Effect.fail(
+                new TelemetryError({
+                  message: error.message,
+                  code: error.code,
+                }),
+              );
+            }),
+            Effect.withSpan("getUser"),
+          );
+
+          const clientIpHashEffect = getSafeIp(request).pipe(
+            annotateThis,
+            Effect.mapError((_err) => {
+              return new TelemetryError({
+                message: "Failed to get client IP",
+                code: 500,
+              });
+            }),
+            Effect.withSpan("getSafeIp"),
+          );
+
+          // 3. Payload parsen
+          const jsonEffect = Effect.tryPromise({
+            try: () => request.json(),
+            catch: () =>
+              new TelemetryError({ message: "Invalid JSON", code: 400 }),
+          }).pipe(
+            Effect.tap((payload) => Effect.logDebug(JSON.stringify(payload))),
+            Effect.withSpan("parseJson"),
+            isValidTelemetryPayload,
+            Effect.withSpan("validatePayload"),
+          );
+
+          const enrichedPayload = yield* Effect.all(
+            [clientIpHashEffect, jsonEffect, getUserEffect],
+            { concurrency: "unbounded" },
+          ).pipe(
+            Effect.tap(([_clientIpHash, _payload, user]) =>
+              Effect.logDebug(JSON.stringify(user)),
+            ),
+            Effect.flatMap(([clientIpHash, payload, user]) =>
+              enrichPayloadWithServerContext(
+                payload,
+                clientIpHash,
+                userAgent,
+                user,
+              ),
+            ),
+            Effect.withSpan("enrichPayload"),
+          );
+
+          // 6. Forward to Axiom
+          const response = yield* Effect.tryPromise({
+            try: (signal) =>
+              fetch(`${env.AXIOM_API_URL}/v1/traces`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${env.AXIOM_TOKEN}`,
+                  "X-Axiom-Dataset": env.AXIOM_DATASET,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(enrichedPayload),
+                signal, // Übergibt den Abbruch-Signal vom Timeout an fetch
+              }),
+            catch: (error) =>
+              new TelemetryError({
+                message: `Fetch failed: ${String(error)}`,
+                code: 500,
+              }),
+          }).pipe(
+            Effect.timeout("20 seconds"),
+            Effect.withSpan("api.telemetry.axiom_fetch_attempt"),
+            Effect.retry(
+              Schedule.recurs(3).pipe(Schedule.addDelay(() => "500 millis")),
+            ),
+            Effect.withSpan("api.telemetry.forward_to_axiom"),
+          );
+
+          if (!response.ok) {
+            return yield* Effect.fail(
+              new TelemetryError({ message: "Axiom API error", code: 500 }),
+            );
+          }
+
+          return new Response("OK", { status: 202 });
+        }).pipe(
+          Effect.tapError((error) =>
+            Effect.sync(() => {
+              posthog?.capture({
+                distinctId: "server",
+                event: "telemetry.error",
+                properties: {
+                  traceId: trace.getTraceId(),
+                  error: String(error),
+                },
+              });
+            }),
+          ),
+          // Fehler-Mapping auf Response Objekte
+          Effect.catchTag("TelemetryError", (error) =>
+            Effect.succeed(new Response(error.message, { status: error.code })),
+          ),
+          Effect.withSpan("handleAxiosResponse"),
+        );
+
+        // Trace starten und Kontext an Effect übergeben
+        const trace = startTrace("api.telemetry.proxy");
+        trace.extractFromHeaders(request.headers);
+        trace.setAttributes({
+          "http.method": "POST",
+          "http.url": request.url,
+        });
+
+        const ctx = trace.getSpanContext();
+
+        const response = await Effect.runPromise(
+          program.pipe(
+            Effect.provide(CryptoAuthLive),
+            Effect.provide(UserLive),
+            Effect.provide(otelLive),
+            Effect.provide(Logger.minimumLogLevel(LogLevel.Debug)),
+            Tracer.withSpanContext(ctx),
+          ),
+        );
+        trace.end();
+        return response;
       },
 
       // Health check for the proxy

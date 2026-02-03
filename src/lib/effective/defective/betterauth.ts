@@ -1,19 +1,15 @@
 import { Data } from "effect";
 
-export type EncryptionErrorReason = "SystemError";
-export type DecryptionErrorReason =
+export type CryptoErrorReason =
+  | "SystemError"
   | "InvalidFormat"
   | "AuthenticationFailed"
   | "Unknown";
 
-export class EncryptionError extends Data.TaggedError("EncryptionError")<{
+export class CryptoError extends Data.TaggedError("CryptoError")<{
   readonly message: string;
-  readonly reason: EncryptionErrorReason;
-}> {}
-
-export class DecryptionError extends Data.TaggedError("DecryptionError")<{
-  readonly message: string;
-  readonly reason: DecryptionErrorReason;
+  readonly reason: CryptoErrorReason;
+  readonly cause?: unknown;
 }> {}
 
 export class AuthenticationError extends Data.TaggedError(

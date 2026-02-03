@@ -3,11 +3,10 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
   createRootRouteWithContext,
   HeadContent,
-  redirect,
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { getLocale, shouldRedirect } from "@/paraglide/runtime";
+import { getLocale } from "@/paraglide/runtime";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import { TelemetryProvider } from "../lib/telemery/provider";
 import appCss from "../styles.css?url";
