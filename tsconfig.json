@@ -23,7 +23,16 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+      "#env": ["./src/env.ts"],
+      "#flags": ["./src/lib/flags.ts"],
+      "#auth": ["./src/lib/auth.ts"],
+      "#auth/client": ["./src/lib/auth-client.ts"],
+      "#logger": ["./src/lib/logging.ts"],
+      "'defective/*": ["./src/lib/effective/defective/*"],
+      "'services/*": ["./src/lib/effective/services/*"],
+      "'/*": ["./src/lib/effective/*"],
+      "~/*": ["./src/*"],
+      "@/*": ["./*"],
+    },
+  },
 }
