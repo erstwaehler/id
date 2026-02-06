@@ -58,8 +58,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TelemetryProvider
           serviceName="ewf-id-frontend"
           serviceVersion="1.0.0"
-          autoInstrumentFetch={true}
-        >
+          autoInstrumentFetch={true}>
           {children}
           <TanStackDevtools
             config={{

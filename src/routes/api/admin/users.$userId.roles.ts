@@ -5,14 +5,15 @@
  * POST /api/admin/users/$userId/roles - Assign role
  * DELETE /api/admin/users/$userId/roles/$role - Revoke role
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { user as userTable } from "~/lib/auth/schema/betterauth";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { eq } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { auth } from "#auth";
+import { auditLog } from "~/lib/auth/schema/audit";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import { db } from "~/lib/auth-db";
 
 const VALID_ROLES = ["user", "student", "teacher", "team", "admin"] as const;
 type ValidRole = (typeof VALID_ROLES)[number];

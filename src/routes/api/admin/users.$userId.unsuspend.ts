@@ -4,13 +4,14 @@
  *
  * POST /api/admin/users/$userId/unsuspend - Unsuspend account
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { user as userTable } from "~/lib/auth/schema/betterauth";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { eq } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { eq } from "drizzle-orm";
+import { auth } from "#auth";
+import { auditLog } from "~/lib/auth/schema/audit";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import { db } from "~/lib/auth-db";
 
 async function getSession(request: Request) {
   const session = await auth.api.getSession({

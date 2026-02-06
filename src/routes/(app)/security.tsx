@@ -3,13 +3,25 @@
  * EWF-ID Security Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
  */
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Key,
+  Loader2,
+  Lock,
+  Plus,
+  Shield,
+  Smartphone,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "~/lib/auth-client";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Card,
   CardContent,
@@ -17,22 +29,11 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import {
-  AlertCircle,
-  Loader2,
-  ArrowLeft,
-  Shield,
-  Key,
-  Smartphone,
-  Lock,
-  Plus,
-  Trash2,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { Skeleton } from "~/components/ui/skeleton";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/security")({
   component: SecurityPage,
@@ -250,8 +251,7 @@ function SecurityPage() {
             <button
               type="button"
               onClick={() => setError(null)}
-              className="ml-auto"
-            >
+              className="ml-auto">
               ×
             </button>
           </div>
@@ -314,8 +314,7 @@ function SecurityPage() {
                 <div className="flex gap-2">
                   <Button
                     onClick={() => changePasswordMutation.mutate()}
-                    disabled={changePasswordMutation.isPending}
-                  >
+                    disabled={changePasswordMutation.isPending}>
                     {changePasswordMutation.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
@@ -323,8 +322,7 @@ function SecurityPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setShowPasswordForm(false)}
-                  >
+                    onClick={() => setShowPasswordForm(false)}>
                     Cancel
                   </Button>
                 </div>
@@ -347,8 +345,7 @@ function SecurityPage() {
                 </div>
               </div>
               <Badge
-                variant={twoFactorStatus?.enabled ? "success" : "secondary"}
-              >
+                variant={twoFactorStatus?.enabled ? "success" : "secondary"}>
                 {twoFactorStatus?.enabled ? "Enabled" : "Disabled"}
               </Badge>
             </div>
@@ -387,8 +384,7 @@ function SecurityPage() {
                     onClick={() => verify2FAMutation.mutate()}
                     disabled={
                       verify2FAMutation.isPending || verifyCode.length !== 6
-                    }
-                  >
+                    }>
                     {verify2FAMutation.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
@@ -400,8 +396,7 @@ function SecurityPage() {
                       setShow2FASetup(false);
                       setTotpUri(null);
                       setVerifyCode("");
-                    }}
-                  >
+                    }}>
                     Cancel
                   </Button>
                 </div>
@@ -425,8 +420,7 @@ function SecurityPage() {
                 <Button
                   variant="destructive"
                   onClick={() => disable2FAMutation.mutate()}
-                  disabled={disable2FAMutation.isPending || !currentPassword}
-                >
+                  disabled={disable2FAMutation.isPending || !currentPassword}>
                   {disable2FAMutation.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -436,8 +430,7 @@ function SecurityPage() {
             ) : (
               <Button
                 onClick={() => enable2FAMutation.mutate()}
-                disabled={enable2FAMutation.isPending}
-              >
+                disabled={enable2FAMutation.isPending}>
                 {enable2FAMutation.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
@@ -463,8 +456,7 @@ function SecurityPage() {
               <Button
                 size="sm"
                 onClick={() => addPasskeyMutation.mutate()}
-                disabled={addPasskeyMutation.isPending}
-              >
+                disabled={addPasskeyMutation.isPending}>
                 {addPasskeyMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -485,8 +477,7 @@ function SecurityPage() {
                 {passkeys.map((passkey: any) => (
                   <div
                     key={passkey.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
+                    className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <Key className="h-5 w-5 text-muted-foreground" />
                       <div>
@@ -503,8 +494,7 @@ function SecurityPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => deletePasskeyMutation.mutate(passkey.id)}
-                      disabled={deletePasskeyMutation.isPending}
-                    >
+                      disabled={deletePasskeyMutation.isPending}>
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>

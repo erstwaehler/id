@@ -3,18 +3,33 @@
  * EWF-ID Admin User Detail Page
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
  */
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createFileRoute,
-  useNavigate,
   Link,
+  useNavigate,
   useParams,
 } from "@tanstack/react-router";
+import {
+  Activity,
+  AlertCircle,
+  ArrowLeft,
+  Ban,
+  Calendar,
+  CheckCircle,
+  Key,
+  Loader2,
+  Mail,
+  Save,
+  School,
+  Shield,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "~/lib/auth-client";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Card,
   CardContent,
@@ -22,25 +37,11 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import {
-  ArrowLeft,
-  Ban,
-  CheckCircle,
-  Shield,
-  Trash2,
-  Loader2,
-  AlertCircle,
-  Mail,
-  Calendar,
-  Activity,
-  Key,
-  School,
-  Save,
-} from "lucide-react";
+import { Skeleton } from "~/components/ui/skeleton";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/admin/users/$userId")({
   component: AdminUserDetailPage,
@@ -230,8 +231,7 @@ function AdminUserDetailPage() {
                         : user.role === "team"
                           ? "default"
                           : "secondary"
-                    }
-                  >
+                    }>
                     {user.role || "user"}
                   </Badge>
                   {user.emailVerified ? (
@@ -255,8 +255,7 @@ function AdminUserDetailPage() {
                 <Button
                   variant={user.banned ? "default" : "destructive"}
                   onClick={() => suspendMutation.mutate(!user.banned)}
-                  disabled={suspendMutation.isPending}
-                >
+                  disabled={suspendMutation.isPending}>
                   {suspendMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : user.banned ? (
@@ -277,8 +276,7 @@ function AdminUserDetailPage() {
                         deleteMutation.mutate();
                       }
                     }}
-                    disabled={deleteMutation.isPending}
-                  >
+                    disabled={deleteMutation.isPending}>
                     {deleteMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
@@ -311,8 +309,7 @@ function AdminUserDetailPage() {
                   <select
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
                     value={selectedRole || user.role || "user"}
-                    onChange={(e) => setSelectedRole(e.target.value)}
-                  >
+                    onChange={(e) => setSelectedRole(e.target.value)}>
                     <option value="user">User</option>
                     <option value="student">Student</option>
                     <option value="teacher">Teacher</option>
@@ -330,8 +327,7 @@ function AdminUserDetailPage() {
                     updateRoleMutation.isPending ||
                     !selectedRole ||
                     selectedRole === user.role
-                  }
-                >
+                  }>
                   {updateRoleMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
@@ -388,8 +384,7 @@ function AdminUserDetailPage() {
                   {user.schools.map((school: any) => (
                     <div
                       key={school.schoolId}
-                      className="flex items-center justify-between"
-                    >
+                      className="flex items-center justify-between">
                       <span>{school.schoolName}</span>
                       <Badge variant={school.verified ? "success" : "outline"}>
                         {school.verified ? "Verified" : "Pending"}

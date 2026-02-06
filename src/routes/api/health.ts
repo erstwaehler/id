@@ -3,7 +3,7 @@
  * SPEC.md Phase 5 - Task 5.5
  *
  * GET /api/health - Returns system health status
- * 
+ *
  * Note: This is a simple health check without database checks
  * to avoid potential DOS vectors and high billing on serverless.
  * The app running on Vercel/Lambda will fail if unhealthy anyway.

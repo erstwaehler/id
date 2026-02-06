@@ -2,19 +2,27 @@
  * EWF-ID Login Page
  * SPEC.md Phase 6 - Task 6.3: Public Pages
  */
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { AlertCircle, Key, Loader2, Lock, Mail, School } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
+import { m } from "@/paraglide/messages";
 import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { AlertCircle, Loader2, Mail, Lock, School, Key } from "lucide-react";
-import { m } from "@/paraglide/messages";
+import { authClient } from "~/lib/auth-client";
 
 const loginSchema = z.object({
   email: z.string().email(m.auth_invalid_email()),
@@ -120,7 +128,9 @@ function LoginPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">{m.auth_2fa_title()}</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              {m.auth_2fa_title()}
+            </CardTitle>
             <CardDescription className="text-center">
               {m.auth_2fa_subtitle()}
             </CardDescription>
@@ -145,7 +155,10 @@ function LoginPage() {
                 className="text-center text-2xl tracking-widest"
               />
             </div>
-            <Button onClick={handleTOTPSubmit} className="w-full" disabled={isLoading || totpCode.length !== 6}>
+            <Button
+              onClick={handleTOTPSubmit}
+              className="w-full"
+              disabled={isLoading || totpCode.length !== 6}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {m.auth_2fa_verify()}
             </Button>
@@ -167,7 +180,9 @@ function LoginPage() {
           <div className="flex justify-center mb-4">
             <img src="/logo.svg" alt="EWF-ID" className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">{m.auth_welcome_back()}</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            {m.auth_welcome_back()}
+          </CardTitle>
           <CardDescription className="text-center">
             {m.auth_signin_subtitle()}
           </CardDescription>
@@ -201,7 +216,9 @@ function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">{m.common_password()}</Label>
-                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline">
                   {m.auth_forgot_password()}
                 </Link>
               </div>
@@ -216,7 +233,9 @@ function LoginPage() {
                 />
               </div>
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -231,12 +250,17 @@ function LoginPage() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">{m.auth_or_continue()}</span>
+              <span className="bg-card px-2 text-muted-foreground">
+                {m.auth_or_continue()}
+              </span>
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Button variant="outline" onClick={handlePasskeyLogin} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={handlePasskeyLogin}
+              disabled={isLoading}>
               <Key className="mr-2 h-4 w-4" />
               {m.auth_passkey()}
             </Button>
@@ -247,20 +271,31 @@ function LoginPage() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">{m.auth_school_login()}</span>
+              <span className="bg-card px-2 text-muted-foreground">
+                {m.auth_school_login()}
+              </span>
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Button variant="outline" onClick={() => handleSchoolLogin("athenaeum")} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => handleSchoolLogin("athenaeum")}
+              disabled={isLoading}>
               <School className="mr-2 h-4 w-4" />
               Athenaeum Stade
             </Button>
-            <Button variant="outline" onClick={() => handleSchoolLogin("vlg")} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => handleSchoolLogin("vlg")}
+              disabled={isLoading}>
               <School className="mr-2 h-4 w-4" />
               Vincent-Lübeck-Gymnasium
             </Button>
-            <Button variant="outline" onClick={() => handleSchoolLogin("igs")} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => handleSchoolLogin("igs")}
+              disabled={isLoading}>
               <School className="mr-2 h-4 w-4" />
               IGS Stade
             </Button>

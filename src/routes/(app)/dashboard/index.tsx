@@ -3,9 +3,24 @@
  * EWF-ID User Dashboard Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
  */
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+
 import { useQuery } from "@tanstack/react-query";
-import { authClient } from "~/lib/auth-client";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  Activity,
+  Calendar,
+  ExternalLink,
+  Key,
+  LogOut,
+  Monitor,
+  Radio,
+  Settings,
+  Shield,
+  User,
+  Vote,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -14,22 +29,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  User,
-  Shield,
-  Key,
-  Settings,
-  LogOut,
-  Activity,
-  Calendar,
-  Vote,
-  Radio,
-  Monitor,
-  ExternalLink,
-} from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/dashboard/")({
   component: DashboardPage,
@@ -144,8 +145,7 @@ function DashboardPage() {
                       : user.role === "team"
                         ? "default"
                         : "secondary"
-                  }
-                >
+                  }>
                   {user.role || "user"}
                 </Badge>
                 {profile?.schoolVerified && (
@@ -239,13 +239,11 @@ function DashboardPage() {
                   href={app.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block"
-                >
+                  className="block">
                   <Card className="cursor-pointer hover:border-primary transition-colors h-full">
                     <CardContent className="flex items-center gap-4 p-4">
                       <div
-                        className={`rounded-full bg-opacity-10 p-3 ${app.color.replace("text-", "bg-")}/10`}
-                      >
+                        className={`rounded-full bg-opacity-10 p-3 ${app.color.replace("text-", "bg-")}/10`}>
                         <app.icon className={`h-6 w-6 ${app.color}`} />
                       </div>
                       <div className="flex-1">

@@ -186,12 +186,8 @@
           "tableFrom": "audit_log",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -309,12 +305,8 @@
           "tableFrom": "account",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -499,12 +491,8 @@
           "tableFrom": "apikey",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -618,12 +606,8 @@
           "tableFrom": "oauth_access_token",
           "tableTo": "oauth_application",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "client_id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["client_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -632,12 +616,8 @@
           "tableFrom": "oauth_access_token",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -647,16 +627,12 @@
         "oauth_access_token_access_token_unique": {
           "name": "oauth_access_token_access_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "access_token"
-          ]
+          "columns": ["access_token"]
         },
         "oauth_access_token_refresh_token_unique": {
           "name": "oauth_access_token_refresh_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "refresh_token"
-          ]
+          "columns": ["refresh_token"]
         }
       },
       "policies": {},
@@ -764,12 +740,8 @@
           "tableFrom": "oauth_application",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -779,9 +751,7 @@
         "oauth_application_client_id_unique": {
           "name": "oauth_application_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -873,12 +843,8 @@
           "tableFrom": "oauth_consent",
           "tableTo": "oauth_application",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "client_id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["client_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -887,12 +853,8 @@
           "tableFrom": "oauth_consent",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1012,12 +974,8 @@
           "tableFrom": "passkey",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1111,12 +1069,8 @@
           "tableFrom": "session",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1126,9 +1080,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1202,12 +1154,8 @@
           "tableFrom": "two_factor",
           "tableTo": "user",
           "schemaTo": "betterauth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1332,9 +1280,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1413,10 +1359,7 @@
     "public.audit_result": {
       "name": "audit_result",
       "schema": "public",
-      "values": [
-        "success",
-        "failure"
-      ]
+      "values": ["success", "failure"]
     }
   },
   "schemas": {},

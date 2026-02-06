@@ -8,7 +8,7 @@
  * Supports authentication via session cookie or API key
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
+import type { z } from "zod";
 import { authenticateRequest, unauthorizedResponse } from "~/lib/api-auth";
 
 type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

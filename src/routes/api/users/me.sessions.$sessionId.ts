@@ -4,13 +4,13 @@
  *
  * DELETE /api/users/me/sessions/$sessionId - Revoke a specific session
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { session as sessionTable } from "~/lib/auth/schema/betterauth";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { eq, and } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { and, eq } from "drizzle-orm";
+import { auth } from "#auth";
+import { session as sessionTable } from "~/lib/auth/schema/betterauth";
+import { db } from "~/lib/auth-db";
 
 async function getSession(request: Request) {
   const session = await auth.api.getSession({

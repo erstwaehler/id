@@ -3,16 +3,26 @@
  * EWF-ID Profile Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
  */
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Globe,
+  Loader2,
+  Mail,
+  Save,
+  School,
+  User,
+} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Card,
   CardContent,
@@ -20,21 +30,11 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import {
-  AlertCircle,
-  Loader2,
-  Save,
-  ArrowLeft,
-  School,
-  Mail,
-  User,
-  Globe,
-} from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Skeleton } from "~/components/ui/skeleton";
+import { authClient } from "~/lib/auth-client";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -183,8 +183,7 @@ function ProfilePage() {
                       : user.role === "team"
                         ? "default"
                         : "secondary"
-                  }
-                >
+                  }>
                   {user.role || "user"}
                 </Badge>
                 {profile.emailVerified && (
@@ -266,8 +265,7 @@ function ProfilePage() {
                   <select
                     id="locale"
                     className="flex h-9 w-full rounded-md border border-input bg-transparent pl-10 pr-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    {...register("locale")}
-                  >
+                    {...register("locale")}>
                     <option value="de">Deutsch</option>
                     <option value="en">English</option>
                     <option value="uk">Українська</option>
@@ -277,8 +275,7 @@ function ProfilePage() {
 
               <Button
                 type="submit"
-                disabled={updateMutation.isPending || !isDirty}
-              >
+                disabled={updateMutation.isPending || !isDirty}>
                 {updateMutation.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
@@ -319,8 +316,7 @@ function ProfilePage() {
               {profile.schools.map((school: any) => (
                 <div
                   key={school.schoolId}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
+                  className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <School className="h-5 w-5 text-muted-foreground" />
                     <div>

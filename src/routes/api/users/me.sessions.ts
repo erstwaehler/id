@@ -4,13 +4,14 @@
  *
  * GET /api/users/me/sessions - List current user's sessions
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { session as sessionTable } from "~/lib/auth/schema/betterauth";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { eq, desc } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { desc, eq } from "drizzle-orm";
+import { auth } from "#auth";
+import { auditLog } from "~/lib/auth/schema/audit";
+import { session as sessionTable } from "~/lib/auth/schema/betterauth";
+import { db } from "~/lib/auth-db";
 
 async function getSession(request: Request) {
   const session = await auth.api.getSession({

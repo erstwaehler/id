@@ -8,7 +8,6 @@ import {
   admin as adminPlugin,
   apiKey,
   bearer,
-  createAuthMiddleware,
   haveIBeenPwned,
   multiSession,
   oAuthProxy,
@@ -21,11 +20,11 @@ import { tanstackStartCookies } from "better-auth/tanstack-start/solid";
 import ms from "ms";
 import { Resend } from "resend";
 import env from "#env";
+import { auditAfterHook, auditBeforeHook } from "./audit/hooks";
 import * as schema from "./auth/schema/betterauth";
 import { db } from "./auth-db";
 import { PasswordResetEmail, VerificationEmail } from "./emails";
 import { ac, admin, student, teacher, team, user } from "./permissions";
-import { useServerTrace } from "./telemery/defective";
 
 // Initialize Resend for email sending
 const resend = new Resend(env.RESEND_API_KEY);
@@ -303,49 +302,8 @@ export const auth = betterAuth({
   },
 
   hooks: {
-    before: createAuthMiddleware(async (ctx) => {
-      const { startTrace } = useServerTrace();
-      const trace = startTrace("auth.hook.before");
-      trace.extractFromHeaders(ctx.request?.headers ?? {});
-      trace.setAttribute("path", ctx.path);
-      trace.addEvent("auth_hook_before_executed");
-      trace.end();
-      return {
-        context: {
-          ...ctx,
-          request: {
-            ...ctx.request,
-            headers: {
-              ...ctx.request?.headers,
-              ...trace.getHeaders(),
-            },
-          },
-        },
-      };
-    }),
-    after: createAuthMiddleware(async (ctx) => {
-      const { startTrace } = useServerTrace();
-      const trace = startTrace("auth.hook.after");
-      trace.extractFromHeaders(ctx.request?.headers ?? {});
-      trace.setAttribute("path", ctx.path);
-      trace.addEvent("auth_hook_after_executed");
-      trace.end();
-
-      const traceHeaders = trace.getHeaders();
-      const responseHeaders = new Headers();
-
-      // Add trace headers to response
-      Object.entries(traceHeaders).forEach(([key, value]) => {
-        responseHeaders.set(key, value);
-      });
-
-      return {
-        context: {
-          ...ctx,
-          responseHeaders,
-        },
-      };
-    }),
+    before: auditBeforeHook,
+    after: auditAfterHook,
   },
 
   // Callbacks for custom behavior

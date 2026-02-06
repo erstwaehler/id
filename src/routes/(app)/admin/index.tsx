@@ -3,9 +3,23 @@
  * EWF-ID Admin Dashboard
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
  */
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+
 import { useQuery } from "@tanstack/react-query";
-import { authClient } from "~/lib/auth-client";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  Activity,
+  AlertTriangle,
+  Clock,
+  FileText,
+  Key,
+  School,
+  Settings,
+  Shield,
+  TrendingDown,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -14,21 +28,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  Users,
-  Activity,
-  School,
-  Key,
-  Shield,
-  FileText,
-  Settings,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  AlertTriangle,
-} from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/admin/")({
   component: AdminDashboardPage,
@@ -124,8 +125,7 @@ function AdminDashboardPage() {
             <Badge
               variant={
                 session.user.role === "admin" ? "destructive" : "default"
-              }
-            >
+              }>
               {session.user.role}
             </Badge>
             <Link to="/dashboard">
@@ -326,8 +326,7 @@ function AdminDashboardPage() {
                 stats.recentActions.map((action: any, index: number) => (
                   <div
                     key={`s${index}`}
-                    className="flex items-center justify-between border-b pb-2 last:border-0"
-                  >
+                    className="flex items-center justify-between border-b pb-2 last:border-0">
                     <div className="flex items-center gap-3">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <div>

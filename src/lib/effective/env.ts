@@ -1,6 +1,6 @@
 import { CLIENT_ENV, SERVER_ENV } from "'services/env";
-import env from "#env";
 import { Layer } from "effect";
+import env from "#env";
 
 const T3_CLIENT = CLIENT_ENV.of({
   CLOUDFLARE_TURNSTILE_SITE_KEY: env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY,

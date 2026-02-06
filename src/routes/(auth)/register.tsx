@@ -2,38 +2,56 @@
  * EWF-ID Registration Page
  * SPEC.md Phase 6 - Task 6.3: Public Pages
  */
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+  Lock,
+  Mail,
+  School,
+  User,
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
+import { m } from "@/paraglide/messages";
 import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { AlertCircle, Loader2, Mail, Lock, User, School, CheckCircle } from "lucide-react";
-import { m } from "@/paraglide/messages";
+import { authClient } from "~/lib/auth-client";
 
-const registerSchema = z.object({
-  name: z.string().min(2, m.register_name_min()),
-  email: z.string().email(m.auth_invalid_email()),
-  password: z
-    .string()
-    .min(12, m.register_password_min())
-    .max(128, m.register_password_max())
-    .regex(/[a-z]/, m.register_password_lowercase())
-    .regex(/[A-Z]/, m.register_password_uppercase())
-    .regex(/[0-9]/, m.register_password_number()),
-  confirmPassword: z.string(),
-  acceptTerms: z.boolean().refine((val) => val === true, {
-    message: m.register_terms_required(),
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: m.register_password_match(),
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(2, m.register_name_min()),
+    email: z.string().email(m.auth_invalid_email()),
+    password: z
+      .string()
+      .min(12, m.register_password_min())
+      .max(128, m.register_password_max())
+      .regex(/[a-z]/, m.register_password_lowercase())
+      .regex(/[A-Z]/, m.register_password_uppercase())
+      .regex(/[0-9]/, m.register_password_number()),
+    confirmPassword: z.string(),
+    acceptTerms: z.boolean().refine((val) => val === true, {
+      message: m.register_terms_required(),
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: m.register_password_match(),
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -105,7 +123,9 @@ function RegisterPage() {
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">{m.register_success_title()}</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              {m.register_success_title()}
+            </CardTitle>
             <CardDescription className="text-center">
               {m.register_success_message()}
             </CardDescription>
@@ -127,7 +147,9 @@ function RegisterPage() {
           <div className="flex justify-center mb-4">
             <img src="/logo.svg" alt="EWF-ID" className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">{m.register_title()}</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            {m.register_title()}
+          </CardTitle>
           <CardDescription className="text-center">
             {m.register_subtitle()}
           </CardDescription>
@@ -188,26 +210,38 @@ function RegisterPage() {
                 />
               </div>
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className={`flex items-center gap-1 ${passwordStrength.length ? "text-green-500" : "text-muted-foreground"}`}>
-                  {passwordStrength.length ? "✓" : "○"} {m.register_password_12chars()}
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.length ? "text-green-500" : "text-muted-foreground"}`}>
+                  {passwordStrength.length ? "✓" : "○"}{" "}
+                  {m.register_password_12chars()}
                 </div>
-                <div className={`flex items-center gap-1 ${passwordStrength.lowercase ? "text-green-500" : "text-muted-foreground"}`}>
-                  {passwordStrength.lowercase ? "✓" : "○"} {m.register_password_lowercase_check()}
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.lowercase ? "text-green-500" : "text-muted-foreground"}`}>
+                  {passwordStrength.lowercase ? "✓" : "○"}{" "}
+                  {m.register_password_lowercase_check()}
                 </div>
-                <div className={`flex items-center gap-1 ${passwordStrength.uppercase ? "text-green-500" : "text-muted-foreground"}`}>
-                  {passwordStrength.uppercase ? "✓" : "○"} {m.register_password_uppercase_check()}
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.uppercase ? "text-green-500" : "text-muted-foreground"}`}>
+                  {passwordStrength.uppercase ? "✓" : "○"}{" "}
+                  {m.register_password_uppercase_check()}
                 </div>
-                <div className={`flex items-center gap-1 ${passwordStrength.number ? "text-green-500" : "text-muted-foreground"}`}>
-                  {passwordStrength.number ? "✓" : "○"} {m.register_password_number_check()}
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.number ? "text-green-500" : "text-muted-foreground"}`}>
+                  {passwordStrength.number ? "✓" : "○"}{" "}
+                  {m.register_password_number_check()}
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{m.register_confirm_password_label()}</Label>
+              <Label htmlFor="confirmPassword">
+                {m.register_confirm_password_label()}
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -219,7 +253,9 @@ function RegisterPage() {
                 />
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
@@ -236,13 +272,17 @@ function RegisterPage() {
                   {m.register_terms_link()}
                 </Link>{" "}
                 {m.common_and()}{" "}
-                <Link to="/privacy-policy" className="text-primary hover:underline">
+                <Link
+                  to="/privacy-policy"
+                  className="text-primary hover:underline">
                   {m.register_privacy_link()}
                 </Link>
               </Label>
             </div>
             {errors.acceptTerms && (
-              <p className="text-sm text-red-500">{errors.acceptTerms.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.acceptTerms.message}
+              </p>
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -256,20 +296,31 @@ function RegisterPage() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">{m.register_or_school()}</span>
+              <span className="bg-card px-2 text-muted-foreground">
+                {m.register_or_school()}
+              </span>
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Button variant="outline" onClick={() => handleSchoolLogin("athenaeum")} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => handleSchoolLogin("athenaeum")}
+              disabled={isLoading}>
               <School className="mr-2 h-4 w-4" />
               Athenaeum Stade
             </Button>
-            <Button variant="outline" onClick={() => handleSchoolLogin("vlg")} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => handleSchoolLogin("vlg")}
+              disabled={isLoading}>
               <School className="mr-2 h-4 w-4" />
               Vincent-Lübeck-Gymnasium
             </Button>
-            <Button variant="outline" onClick={() => handleSchoolLogin("igs")} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => handleSchoolLogin("igs")}
+              disabled={isLoading}>
               <School className="mr-2 h-4 w-4" />
               IGS Stade
             </Button>

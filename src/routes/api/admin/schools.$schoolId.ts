@@ -6,13 +6,14 @@
  * PUT /api/admin/schools/$schoolId - Update school (admin only)
  * DELETE /api/admin/schools/$schoolId - Delete school (admin only)
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { school, userSchool, auditLog } from "~/lib/auth/schema/audit";
-import { eq, and, count } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { and, count, eq } from "drizzle-orm";
 import { z } from "zod";
+import { auth } from "#auth";
+import { auditLog, school, userSchool } from "~/lib/auth/schema/audit";
+import { db } from "~/lib/auth-db";
 
 const updateSchoolSchema = z.object({
   name: z.string().min(1).max(200).optional(),

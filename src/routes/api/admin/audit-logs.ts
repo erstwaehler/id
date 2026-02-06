@@ -1,27 +1,20 @@
 /**
  * EWF-ID Admin Audit Logs API
- * SPEC.md Phase 5 - Task 5.3
+ * MIGRATED: Audit logs are now handled via OTEL/Axiom
  *
- * GET /api/admin/audit-logs - List audit logs (paginated, filtered)
+ * Note: The audit system has been migrated to use OpenTelemetry
+ * with Axiom. Audit logs are now stored in Axiom and accessible
+ * via the Axiom dashboard rather than this API endpoint.
+ *
+ * See: src/lib/audit/README.md for querying audit data in Axiom
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { user as userTable } from "~/lib/auth/schema/betterauth";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { eq, desc, asc, ilike, or, and, gte, lte, count } from "drizzle-orm";
 import { z } from "zod";
+import { auth } from "#auth";
 
 const listAuditLogsQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(50),
-  userId: z.string().uuid().optional(),
-  action: z.string().optional(),
-  resource: z.string().optional(),
-  result: z.enum(["success", "failure"]).optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
-  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
 async function getSession(request: Request) {
@@ -38,7 +31,7 @@ function isAdmin(role: string | null): boolean {
 export const Route = createFileRoute("/api/admin/audit-logs")({
   server: {
     handlers: {
-      // GET /api/admin/audit-logs - List audit logs (admin only)
+      // GET /api/admin/audit-logs - Returns migration notice
       GET: async ({ request }) => {
         const session = await getSession(request);
 
@@ -49,7 +42,7 @@ export const Route = createFileRoute("/api/admin/audit-logs")({
           });
         }
 
-        if (!isAdmin(session.user.role)) {
+        if (!isAdmin(session.user.role || null)) {
           return new Response(
             JSON.stringify({ error: "Forbidden - admin role required" }),
             {
@@ -59,7 +52,7 @@ export const Route = createFileRoute("/api/admin/audit-logs")({
           );
         }
 
-        // Parse query params
+        // Parse query params (kept for API compatibility)
         const url = new URL(request.url);
         const queryParams = Object.fromEntries(url.searchParams.entries());
         const validation = listAuditLogsQuerySchema.safeParse(queryParams);
@@ -77,118 +70,34 @@ export const Route = createFileRoute("/api/admin/audit-logs")({
           );
         }
 
-        const {
-          page,
-          limit,
-          userId,
-          action,
-          resource,
-          result,
-          startDate,
-          endDate,
-          sortOrder,
-        } = validation.data;
-        const offset = (page - 1) * limit;
+        const { page, limit } = validation.data;
 
-        // Build where conditions
-        const conditions = [];
-
-        if (userId) {
-          conditions.push(eq(auditLog.userId, userId));
-        }
-
-        if (action) {
-          conditions.push(ilike(auditLog.action, `%${action}%`));
-        }
-
-        if (resource) {
-          conditions.push(ilike(auditLog.resource, `%${resource}%`));
-        }
-
-        if (result) {
-          conditions.push(eq(auditLog.result, result));
-        }
-
-        if (startDate) {
-          conditions.push(gte(auditLog.timestamp, new Date(startDate)));
-        }
-
-        if (endDate) {
-          conditions.push(lte(auditLog.timestamp, new Date(endDate)));
-        }
-
-        const whereClause =
-          conditions.length > 0 ? and(...conditions) : undefined;
-
-        // Build sort
-        const orderBy =
-          sortOrder === "asc"
-            ? asc(auditLog.timestamp)
-            : desc(auditLog.timestamp);
-
-        // Get total count
-        const [countResult] = await db
-          .select({ count: count() })
-          .from(auditLog)
-          .where(whereClause);
-
-        const totalCount = countResult?.count || 0;
-
-        // Get logs with user info
-        const logs = await db
-          .select({
-            id: auditLog.id,
-            timestamp: auditLog.timestamp,
-            userId: auditLog.userId,
-            action: auditLog.action,
-            resource: auditLog.resource,
-            resourceId: auditLog.resourceId,
-            metadata: auditLog.metadata,
-            ipAddress: auditLog.ipAddress,
-            userAgent: auditLog.userAgent,
-            traceId: auditLog.traceId,
-            result: auditLog.result,
-            errorMessage: auditLog.errorMessage,
-            duration: auditLog.duration,
-            userName: userTable.name,
-            userEmail: userTable.email,
-          })
-          .from(auditLog)
-          .leftJoin(userTable, eq(auditLog.userId, userTable.id))
-          .where(whereClause)
-          .orderBy(orderBy)
-          .limit(limit)
-          .offset(offset);
-
+        // Return migration notice
         return new Response(
           JSON.stringify({
-            logs: logs.map((log) => ({
-              id: log.id,
-              timestamp: log.timestamp,
-              user: log.userId
-                ? {
-                    id: log.userId,
-                    name: log.userName,
-                    email: log.userEmail,
-                  }
-                : null,
-              action: log.action,
-              resource: log.resource,
-              resourceId: log.resourceId,
-              metadata: log.metadata,
-              ipAddress: log.ipAddress,
-              userAgent: log.userAgent,
-              traceId: log.traceId,
-              result: log.result,
-              errorMessage: log.errorMessage,
-              duration: log.duration,
-            })),
-            pagination: {
-              page,
-              limit,
-              totalCount,
-              totalPages: Math.ceil(totalCount / limit),
-              hasMore: page * limit < totalCount,
+            message: "Audit logs have been migrated to OTEL/Axiom",
+            info: "Audit logs are now stored in Axiom. Query them directly via the Axiom dashboard.",
+            documentation: "See src/lib/audit/README.md for Axiom queries",
+            note: "The Postgres audit_log table has been removed. All audit data flows through OpenTelemetry to Axiom.",
+            empty_result: {
+              logs: [],
+              pagination: {
+                page,
+                limit,
+                totalCount: 0,
+                totalPages: 0,
+                hasMore: false,
+              },
+            },
+            example_axiom_queries: {
+              all_auth_events:
+                '["logs"] | where ["audit.event_category"] == "auth"',
+              failed_logins:
+                '["logs"] | where ["audit.event_type"] contains "login" and ["audit.result"] == "failure"',
+              critical_events:
+                '["logs"] | where ["audit.security_risk_level"] == "CRITICAL"',
+              admin_operations:
+                '["logs"] | where ["audit.event_category"] == "admin"',
             },
           }),
           {

@@ -5,14 +5,15 @@
  * GET /api/admin/oidc-clients - List OIDC clients
  * POST /api/admin/oidc-clients - Create OIDC client (admin only)
  */
+
+import { randomBytes, randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { oidcClient, auditLog } from "~/lib/auth/schema/audit";
-import { eq, desc } from "drizzle-orm";
-import { randomUUID, randomBytes } from "node:crypto";
 import argon2 from "argon2";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { auth } from "#auth";
+import { auditLog, oidcClient } from "~/lib/auth/schema/audit";
+import { db } from "~/lib/auth-db";
 
 const createOidcClientSchema = z.object({
   name: z.string().min(1).max(200),

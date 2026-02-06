@@ -46,8 +46,7 @@ export function VerificationEmail({
               </Text>
               <Button
                 className="bg-slate-900 rounded-md text-white block text-base font-semibold text-center no-underline py-3 px-6 mx-auto my-6"
-                href={verificationUrl}
-              >
+                href={verificationUrl}>
                 E-Mail bestätigen
               </Button>
               <Text className="text-slate-500 text-sm leading-6 my-4">

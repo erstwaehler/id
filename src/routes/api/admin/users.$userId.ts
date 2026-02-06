@@ -6,19 +6,20 @@
  * PUT /api/admin/users/$userId - Update user (admin only)
  * DELETE /api/admin/users/$userId - Delete user (admin only)
  */
+
+import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
+import { and, count, desc, eq } from "drizzle-orm";
+import { z } from "zod";
 import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
+import { apiKey, auditLog, school, userSchool } from "~/lib/auth/schema/audit";
 import {
-  user as userTable,
-  session as sessionTable,
   account as accountTable,
   passkey as passkeyTable,
+  session as sessionTable,
+  user as userTable,
 } from "~/lib/auth/schema/betterauth";
-import { auditLog, userSchool, school, apiKey } from "~/lib/auth/schema/audit";
-import { eq, desc, and, count } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
-import { z } from "zod";
+import { db } from "~/lib/auth-db";
 
 const updateUserSchema = z.object({
   name: z.string().min(2).max(100).optional(),

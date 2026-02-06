@@ -5,17 +5,18 @@
  * POST /api/admin/users/$userId/suspend - Suspend account
  * POST /api/admin/users/$userId/unsuspend - Unsuspend account
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import {
-  user as userTable,
-  session as sessionTable,
-} from "~/lib/auth/schema/betterauth";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { eq } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { auth } from "#auth";
+import { auditLog } from "~/lib/auth/schema/audit";
+import {
+  session as sessionTable,
+  user as userTable,
+} from "~/lib/auth/schema/betterauth";
+import { db } from "~/lib/auth-db";
 
 const suspendSchema = z.object({
   reason: z.string().min(1).max(500),

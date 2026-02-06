@@ -3,12 +3,19 @@
  * SPEC.md Phase 6 - Task 6.3: Public Pages
  */
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { AlertCircle, CheckCircle, Loader2, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
-import { AlertCircle, Loader2, CheckCircle, Mail } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(auth)/verify-email")({
   component: VerifyEmailPage,
@@ -19,9 +26,9 @@ export const Route = createFileRoute("/(auth)/verify-email")({
 
 function VerifyEmailPage() {
   const { token } = useSearch({ from: "/(auth)/verify-email" });
-  const [status, setStatus] = useState<"loading" | "success" | "error" | "no-token">(
-    token ? "loading" : "no-token"
-  );
+  const [status, setStatus] = useState<
+    "loading" | "success" | "error" | "no-token"
+  >(token ? "loading" : "no-token");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,7 +63,9 @@ function VerifyEmailPage() {
             <div className="flex justify-center mb-4">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Verifying your email...</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Verifying your email...
+            </CardTitle>
             <CardDescription className="text-center">
               Please wait while we verify your email address
             </CardDescription>
@@ -76,9 +85,12 @@ function VerifyEmailPage() {
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Email verified!</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Email verified!
+            </CardTitle>
             <CardDescription className="text-center">
-              Your email has been successfully verified. You can now access all features of your account.
+              Your email has been successfully verified. You can now access all
+              features of your account.
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
@@ -101,7 +113,9 @@ function VerifyEmailPage() {
                 <AlertCircle className="h-12 w-12 text-red-500" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Verification failed</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Verification failed
+            </CardTitle>
             <CardDescription className="text-center">
               {error || "This verification link is invalid or has expired."}
             </CardDescription>
@@ -111,7 +125,8 @@ function VerifyEmailPage() {
               <Button>Sign in</Button>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Need a new verification email? Sign in and request one from your account settings.
+              Need a new verification email? Sign in and request one from your
+              account settings.
             </p>
           </CardFooter>
         </Card>
@@ -129,9 +144,12 @@ function VerifyEmailPage() {
               <Mail className="h-12 w-12 text-blue-500" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Check your email</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Check your email
+          </CardTitle>
           <CardDescription className="text-center">
-            We've sent you a verification link. Please check your inbox and click the link to verify your email address.
+            We've sent you a verification link. Please check your inbox and
+            click the link to verify your email address.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

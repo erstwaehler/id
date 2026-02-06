@@ -155,8 +155,7 @@ function LandingPage() {
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400 mb-4">
             <Link
               to="/privacy-policy"
-              className="hover:text-white hover:underline"
-            >
+              className="hover:text-white hover:underline">
               {m.legal_privacy_title()}
             </Link>
             <Link to="/terms" className="hover:text-white hover:underline">

@@ -10,14 +10,14 @@
  * POST /api/telemetry - Accept OTLP trace data from frontend
  */
 
-import { CryptoAuthLive } from "'/betterauth";
-import { annotateThis, otelLive } from "'defective/o11y";
-import { TelemetryError, TelemetryPayload } from "'defective/telemetry";
-import { Crypto } from "'services/betterauth";
+import { CryptoAuthLive } from "'/betterauth.ts";
+import { annotateThis, otelNOT } from "'defective/o11y.ts";
+import { TelemetryError, TelemetryPayload } from "'defective/telemetry.ts";
+import { Crypto } from "'services/betterauth.ts";
+import { Tracer } from "@effect/opentelemetry";
 import { createFileRoute } from "@tanstack/react-router";
 import type { UserWithRole } from "better-auth/plugins";
 import { Effect, Logger, LogLevel, Schedule } from "effect";
-import { Tracer } from "@effect/opentelemetry";
 import { PostHog } from "posthog-node";
 import env from "#env";
 
@@ -26,9 +26,15 @@ const posthog = env.POSTHOG_KEY
       host: env.POSTHOG_HOST,
     })
   : null;
-import { authenticateRequest, UserLive } from "~/lib/api-auth";
-import { useServerTrace } from "~/lib/telemery/defective";
-import { APP_VERSION, CURRENT_BRANCH, LATEST_COMMIT_HASH } from "~/lib/version";
+
+import process from "node:process";
+import { authenticateRequest, UserLive } from "~/lib/api-auth.ts";
+import { useServerTrace } from "~/lib/telemery/defective.ts";
+import {
+  APP_VERSION,
+  CURRENT_BRANCH,
+  LATEST_COMMIT_HASH,
+} from "~/lib/version.ts";
 
 /*
 # Test curl
@@ -371,7 +377,7 @@ export const Route = createFileRoute("/api/telemetry")({
           program.pipe(
             Effect.provide(CryptoAuthLive),
             Effect.provide(UserLive),
-            Effect.provide(otelLive),
+            Effect.provide(otelNOT),
             Effect.provide(Logger.minimumLogLevel(LogLevel.Debug)),
             Tracer.withSpanContext(ctx),
           ),

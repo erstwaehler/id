@@ -1,6 +1,6 @@
-import { CryptoError } from "'defective/betterauth";
-import { Context, Effect } from "effect";
-import crypto from "node:crypto";
+import type { CryptoError } from "'defective/betterauth";
+import type crypto from "node:crypto";
+import { Context, type Effect } from "effect";
 
 class Crypto extends Context.Tag("Crypto Service")<
   Crypto,

@@ -1,11 +1,11 @@
 // frontend telemery hooks/func(void)'s and pass in/out to server or effect.ts
 
 import {
-  trace,
+  type Attributes,
   context,
   type Span,
   SpanStatusCode,
-  type Attributes,
+  trace,
 } from "@opentelemetry/api";
 import { W3CTraceContextPropagator } from "@opentelemetry/core";
 import { useCallback, useRef } from "react";

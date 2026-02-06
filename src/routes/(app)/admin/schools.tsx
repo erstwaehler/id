@@ -3,16 +3,27 @@
  * EWF-ID Admin Schools Page
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
  */
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Edit,
+  ExternalLink,
+  Loader2,
+  Plus,
+  School,
+  Settings,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Card,
   CardContent,
@@ -20,20 +31,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  ArrowLeft,
-  Plus,
-  School,
-  Settings,
-  Trash2,
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-  Edit,
-  ExternalLink,
-} from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
 const schoolSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -356,8 +357,7 @@ function AdminSchoolsPage() {
                     type="submit"
                     disabled={
                       createMutation.isPending || updateMutation.isPending
-                    }
-                  >
+                    }>
                     {(createMutation.isPending || updateMutation.isPending) && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
@@ -393,8 +393,7 @@ function AdminSchoolsPage() {
                 {schoolList.map((school: any) => (
                   <div
                     key={school.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
+                    className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
                       <div className="rounded-full bg-primary/10 p-3">
                         <School className="h-6 w-6 text-primary" />
@@ -403,8 +402,7 @@ function AdminSchoolsPage() {
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{school.name}</p>
                           <Badge
-                            variant={school.enabled ? "success" : "secondary"}
-                          >
+                            variant={school.enabled ? "success" : "secondary"}>
                             {school.enabled ? "Active" : "Disabled"}
                           </Badge>
                         </div>
@@ -423,8 +421,7 @@ function AdminSchoolsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => startEditing(school)}
-                      >
+                        onClick={() => startEditing(school)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
@@ -435,8 +432,7 @@ function AdminSchoolsPage() {
                             deleteMutation.mutate(school.id);
                           }
                         }}
-                        disabled={deleteMutation.isPending}
-                      >
+                        disabled={deleteMutation.isPending}>
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>

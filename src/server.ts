@@ -1,10 +1,11 @@
-import { otelProcessor, otelResource } from "'defective/o11y";
+import { customSampler, otelProcessor, otelResource } from "'defective/o11y";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import handler from "@tanstack/react-start/server-entry";
 import { PostHog } from "posthog-node";
 import env from "#env";
 import { paraglideMiddleware } from "../paraglide/server";
+
 process.setMaxListeners(100);
 
 // Initialize PostHog in server context
@@ -22,6 +23,7 @@ if (typeof window === "undefined" && env.AXIOM_TOKEN) {
   const sdk = new NodeSDK({
     spanProcessor: otelProcessor,
     resource: otelResource,
+    sampler: customSampler,
     instrumentations: [getNodeAutoInstrumentations()],
   });
 

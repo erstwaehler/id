@@ -1,12 +1,12 @@
 /**
  * EWF-ID PostHog Analytics Integration
  * SPEC.md Phase 7 - Task 7.2: PostHog Integration
- * 
+ *
  * Provides product analytics with GDPR-compliant cookie consent
  */
 import posthog from "posthog-js";
-import { getCookieConsent } from "~/components/CookieConsent";
 import env from "#env";
+import { getCookieConsent } from "~/components/CookieConsent";
 
 let isInitialized = false;
 
@@ -94,7 +94,7 @@ export function resetUser(): void {
  */
 export function trackEvent(
   eventName: string,
-  properties?: Record<string, unknown>
+  properties?: Record<string, unknown>,
 ): void {
   if (!isInitialized) return;
 
@@ -111,7 +111,7 @@ export function trackEvent(
 export function trackException(
   error: Error,
   context?: Record<string, unknown>,
-  traceId?: string
+  traceId?: string,
 ): void {
   if (!isInitialized) return;
 
@@ -188,42 +188,42 @@ export const AnalyticsEvents = {
   EMAIL_VERIFIED: "email_verified",
   PASSWORD_RESET_REQUESTED: "password_reset_requested",
   PASSWORD_RESET_COMPLETED: "password_reset_completed",
-  
+
   // 2FA
   TWO_FA_ENABLED: "2fa_enabled",
   TWO_FA_DISABLED: "2fa_disabled",
-  
+
   // Passkeys
   PASSKEY_REGISTERED: "passkey_registered",
   PASSKEY_REMOVED: "passkey_removed",
-  
+
   // School SSO
   SCHOOL_SSO_INITIATED: "school_sso_initiated",
   SCHOOL_SSO_COMPLETED: "school_sso_completed",
-  
+
   // Sessions
   SESSION_REVOKED: "session_revoked",
-  
+
   // API Keys
   API_KEY_CREATED: "api_key_created",
   API_KEY_REVOKED: "api_key_revoked",
-  
+
   // Profile
   PROFILE_UPDATED: "profile_updated",
   AVATAR_UPLOADED: "avatar_uploaded",
   LOCALE_CHANGED: "locale_changed",
-  
+
   // GDPR
   DATA_EXPORT_REQUESTED: "data_export_requested",
   DATA_EXPORT_DOWNLOADED: "data_export_downloaded",
   ACCOUNT_DELETION_REQUESTED: "account_deletion_requested",
   ACCOUNT_DELETION_COMPLETED: "account_deletion_completed",
   ACCOUNT_DELETION_CANCELLED: "account_deletion_cancelled",
-  
+
   // OIDC
   OIDC_AUTHORIZATION_REQUEST: "oidc_authorization_request",
   OIDC_TOKEN_ISSUED: "oidc_token_issued",
-  
+
   // Admin
   ADMIN_USER_CREATED: "admin_user_created",
   ADMIN_USER_UPDATED: "admin_user_updated",
@@ -232,10 +232,11 @@ export const AnalyticsEvents = {
   ADMIN_ROLE_REVOKED: "admin_role_revoked",
   ADMIN_USER_SUSPENDED: "admin_user_suspended",
   ADMIN_USER_UNSUSPENDED: "admin_user_unsuspended",
-  
+
   // Cookie Consent
   COOKIE_CONSENT_GIVEN: "cookie_consent_given",
   COOKIE_CONSENT_CHANGED: "cookie_consent_changed",
 } as const;
 
-export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
+export type AnalyticsEventName =
+  (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

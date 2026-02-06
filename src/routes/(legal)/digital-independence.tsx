@@ -3,18 +3,24 @@
  * SPEC.md Phase 6 - Task 6.6: Legal & Compliance Pages
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
 import {
+  ArrowRight,
   Globe,
+  Heart,
+  Key,
   Lock,
+  Server,
   Shield,
   Users,
-  Server,
-  Key,
-  Heart,
-  ArrowRight,
 } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 export const Route = createFileRoute("/(legal)/digital-independence")({
   component: DigitalIndependencePage,
@@ -72,8 +78,9 @@ function DigitalIndependencePage() {
             Digital Independence
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Why digital sovereignty matters for education and how EWF-ID supports 
-            the independence of students and schools in the digital age.
+            Why digital sovereignty matters for education and how EWF-ID
+            supports the independence of students and schools in the digital
+            age.
           </p>
         </div>
 
@@ -87,19 +94,20 @@ function DigitalIndependencePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p>
-              The Erstwähler Forum (EWF) initiative was born from a simple idea: 
-              students should have access to tools that respect their privacy, 
+              The Erstwähler Forum (EWF) initiative was born from a simple idea:
+              students should have access to tools that respect their privacy,
               support their education, and don't treat them as products.
             </p>
             <p>
-              Too often, educational institutions are forced to rely on services 
-              from big tech companies that harvest student data, create filter bubbles, 
-              and compromise privacy. We believe there's a better way.
+              Too often, educational institutions are forced to rely on services
+              from big tech companies that harvest student data, create filter
+              bubbles, and compromise privacy. We believe there's a better way.
             </p>
             <p>
-              EWF-ID is our answer to the authentication challenge. By providing a 
-              secure, privacy-respecting identity provider, we enable schools and 
-              students to use digital tools without sacrificing their digital sovereignty.
+              EWF-ID is our answer to the authentication challenge. By providing
+              a secure, privacy-respecting identity provider, we enable schools
+              and students to use digital tools without sacrificing their
+              digital sovereignty.
             </p>
           </CardContent>
         </Card>
@@ -109,37 +117,39 @@ function DigitalIndependencePage() {
           <h2 className="text-2xl font-bold text-white mb-6 text-center">
             Why Digital Independence Matters
           </h2>
-          
+
           <div className="space-y-6 text-gray-300">
             <Card>
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-2">For Students</h3>
                 <p>
-                  Young people are forming their digital identities during their school years. 
-                  Using tools that respect privacy teaches important lessons about data rights 
-                  and helps develop healthy digital habits.
+                  Young people are forming their digital identities during their
+                  school years. Using tools that respect privacy teaches
+                  important lessons about data rights and helps develop healthy
+                  digital habits.
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-2">For Schools</h3>
                 <p>
-                  Educational institutions have a responsibility to protect student data. 
-                  Using privacy-respecting alternatives reduces liability, builds trust with 
-                  parents, and aligns with educational values.
+                  Educational institutions have a responsibility to protect
+                  student data. Using privacy-respecting alternatives reduces
+                  liability, builds trust with parents, and aligns with
+                  educational values.
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-2">For Society</h3>
                 <p>
-                  When we train the next generation on tools that respect privacy and 
-                  support digital independence, we're investing in a future where digital 
-                  rights are valued and protected.
+                  When we train the next generation on tools that respect
+                  privacy and support digital independence, we're investing in a
+                  future where digital rights are valued and protected.
                 </p>
               </CardContent>
             </Card>
@@ -180,35 +190,36 @@ function DigitalIndependencePage() {
               <li className="flex items-start gap-3">
                 <ArrowRight className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>Single Sign-On</strong> - One account for all EWF applications, 
-                  reducing password fatigue and security risks
+                  <strong>Single Sign-On</strong> - One account for all EWF
+                  applications, reducing password fatigue and security risks
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <ArrowRight className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>School Integration</strong> - Seamless login with existing school 
-                  accounts while maintaining data separation
+                  <strong>School Integration</strong> - Seamless login with
+                  existing school accounts while maintaining data separation
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <ArrowRight className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>Data Portability</strong> - Export all your data anytime, 
-                  in standard formats
+                  <strong>Data Portability</strong> - Export all your data
+                  anytime, in standard formats
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <ArrowRight className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>Right to Deletion</strong> - Delete your account completely, 
-                  no hidden data retention
+                  <strong>Right to Deletion</strong> - Delete your account
+                  completely, no hidden data retention
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <ArrowRight className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>Transparency</strong> - See exactly what data we collect and why
+                  <strong>Transparency</strong> - See exactly what data we
+                  collect and why
                 </span>
               </li>
             </ul>
@@ -221,7 +232,8 @@ function DigitalIndependencePage() {
             Join the Movement
           </h2>
           <p className="text-gray-300 mb-6">
-            Ready to embrace digital independence? Create your EWF-ID account today.
+            Ready to embrace digital independence? Create your EWF-ID account
+            today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/register">
@@ -241,9 +253,17 @@ function DigitalIndependencePage() {
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-slate-700">
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
-            <Link to="/privacy-policy" className="hover:text-white hover:underline">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-white hover:underline">Terms of Service</Link>
-            <Link to="/impressum" className="hover:text-white hover:underline">Impressum</Link>
+            <Link
+              to="/privacy-policy"
+              className="hover:text-white hover:underline">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="hover:text-white hover:underline">
+              Terms of Service
+            </Link>
+            <Link to="/impressum" className="hover:text-white hover:underline">
+              Impressum
+            </Link>
           </div>
         </footer>
       </div>

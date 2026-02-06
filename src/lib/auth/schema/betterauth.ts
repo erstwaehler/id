@@ -1,12 +1,11 @@
 import { relations } from "drizzle-orm";
 import {
-  
+  boolean,
+  index,
+  integer,
   pgSchema,
   text,
   timestamp,
-  boolean,
-  integer,
-  index,
 } from "drizzle-orm/pg-core";
 import { encryptedText } from "~/lib/db/custom-types";
 

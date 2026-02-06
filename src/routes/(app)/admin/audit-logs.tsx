@@ -1,20 +1,24 @@
-// #! MESS
 /**
  * EWF-ID Admin Audit Logs Page
- * SPEC.md Phase 6 - Task 6.5: Admin Pages
+ * MIGRATED: Audit logs are now handled via OTEL/Axiom
+ *
+ * This page has been updated to reflect the migration of audit logging
+ * from Postgres to Axiom via OpenTelemetry. Admins should now use
+ * the Axiom dashboard to query and view audit logs.
  */
-import {
-  createFileRoute,
-  useNavigate,
-  Link,
-  useSearch,
-} from "@tanstack/react-router";
-import { useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  Activity,
+  AlertCircle,
+  ArrowLeft,
+  Database,
+  ExternalLink,
+} from "lucide-react";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import {
   Card,
   CardContent,
@@ -22,20 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
-import {
-  ArrowLeft,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Clock,
-  User,
-  Shield,
-  Download,
-  Filter,
-} from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/admin/audit-logs")({
   component: AdminAuditLogsPage,
@@ -48,11 +39,6 @@ export const Route = createFileRoute("/(app)/admin/audit-logs")({
 
 function AdminAuditLogsPage() {
   const navigate = useNavigate();
-  const searchParams = useSearch({ from: "/(app)/admin/audit-logs" });
-  const [actionFilter, setActionFilter] = useState(searchParams.action || "");
-
-  const page = searchParams.page || 1;
-  const perPage = 50;
 
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ["session"],
@@ -73,79 +59,21 @@ function AdminAuditLogsPage() {
     },
   });
 
-  const { data: logsData, isLoading: logsLoading } = useQuery({
-    queryKey: [
-      "admin-audit-logs",
-      page,
-      searchParams.action,
-      searchParams.userId,
-    ],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(perPage),
-      });
-      if (searchParams.action) params.append("action", searchParams.action);
-      if (searchParams.userId) params.append("userId", searchParams.userId);
-
-      const response = await fetch(`/api/admin/audit-logs?${params}`, {
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to fetch audit logs");
-      return response.json();
-    },
-    enabled: !!session,
-  });
-
-  const handleFilter = () => {
-    navigate({
-      to: "/admin/audit-logs",
-      search: {
-        page: 1,
-        action: actionFilter || undefined,
-        userId: searchParams.userId,
-      },
-    });
-  };
-
-  const handlePageChange = (newPage: number) => {
-    navigate({
-      to: "/admin/audit-logs",
-      search: { ...searchParams, page: newPage },
-    });
-  };
-
-  const getActionBadgeVariant = (action: string) => {
-    if (
-      action.includes("delete") ||
-      action.includes("suspend") ||
-      action.includes("ban")
-    ) {
-      return "destructive";
-    }
-    if (action.includes("create") || action.includes("register")) {
-      return "success";
-    }
-    if (action.includes("update") || action.includes("change")) {
-      return "default";
-    }
-    return "secondary";
-  };
-
-  const getResultBadgeVariant = (result: string) => {
-    return result === "success" ? "success" : "destructive";
-  };
-
   if (sessionLoading) {
-    return <AdminAuditLogsSkeleton />;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="animate-pulse h-8 w-32 bg-slate-700 rounded" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!session?.user) {
     return null;
   }
-
-  const logs = logsData?.logs || [];
-  const totalPages = Math.ceil((logsData?.total || 0) / perPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -163,178 +91,144 @@ function AdminAuditLogsPage() {
               System activity and security events
             </p>
           </div>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
+          <Badge variant="outline" className="gap-1">
+            <Activity className="h-3 w-3" />
+            OTEL/Axiom
+          </Badge>
         </div>
 
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex gap-4">
-              <div className="relative flex-1">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Filter by action (e.g., user.login, session.create)..."
-                  className="pl-10"
-                  value={actionFilter}
-                  onChange={(e) => setActionFilter(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleFilter}>Apply Filter</Button>
-              {(searchParams.action || searchParams.userId) && (
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    navigate({ to: "/admin/audit-logs", search: { page: 1 } })
-                  }
-                >
-                  Clear
-                </Button>
-              )}
+        {/* Migration Notice */}
+        <div className="mb-6 border border-amber-500/50 bg-amber-500/10 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+            <div>
+              <h3 className="text-amber-500 font-medium mb-1">
+                System Migration Notice
+              </h3>
+              <p className="text-slate-300 text-sm">
+                Audit logging has been migrated from Postgres to
+                OpenTelemetry/Axiom. All audit events are now streamed to Axiom
+                for real-time monitoring and analysis.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Logs Table */}
-        <Card>
+        {/* Migration Details */}
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Activity Log</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Migration Summary
+            </CardTitle>
             <CardDescription>
-              {logsData?.total || 0} events recorded
+              The audit system has been completely redesigned for better
+              performance and scalability
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0">
-            {logsLoading ? (
-              <div className="p-4 space-y-4">
-                {[...Array(10)].map((_, i) => (
-                  <Skeleton key={i} className="h-16" />
-                ))}
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <h3 className="font-medium text-red-400">Removed</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Postgres audit_log table</li>
+                  <li>• Manual audit service implementation</li>
+                  <li>• Database-backed audit queries</li>
+                  <li>• Legacy audit API endpoints</li>
+                </ul>
               </div>
-            ) : logs.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="text-left p-4 font-medium">Timestamp</th>
-                      <th className="text-left p-4 font-medium">Action</th>
-                      <th className="text-left p-4 font-medium">User</th>
-                      <th className="text-left p-4 font-medium">Resource</th>
-                      <th className="text-left p-4 font-medium">IP Address</th>
-                      <th className="text-left p-4 font-medium">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {logs.map((log: any) => (
-                      <tr key={log.id} className="border-b hover:bg-muted/50">
-                        <td className="p-4">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {new Date(log.timestamp).toLocaleString()}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <Badge variant={getActionBadgeVariant(log.action)}>
-                            {log.action}
-                          </Badge>
-                        </td>
-                        <td className="p-4">
-                          {log.userId ? (
-                            <Link
-                              to="/admin/users/$userId"
-                              params={{ userId: log.userId }}
-                              className="flex items-center gap-2 text-sm hover:underline"
-                            >
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span>
-                                {log.userName || log.userId.slice(0, 8)}...
-                              </span>
-                            </Link>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">
-                              System
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          <span className="text-sm">
-                            {log.resource}
-                            {log.resourceId &&
-                              `:${log.resourceId.slice(0, 8)}...`}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className="text-sm font-mono">
-                            {log.ipAddress || "-"}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <Badge variant={getResultBadgeVariant(log.result)}>
-                            {log.result}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-2">
+                <h3 className="font-medium text-green-400">Added</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• OTEL-based audit hooks</li>
+                  <li>• Axiom integration for log storage</li>
+                  <li>• Real-time audit streaming</li>
+                  <li>• Comprehensive event coverage</li>
+                  <li>• Security risk classification</li>
+                </ul>
               </div>
-            ) : (
-              <div className="p-8 text-center text-muted-foreground">
-                No audit logs found
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4">
+        {/* Axiom Integration */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Access Audit Logs in Axiom
+            </CardTitle>
+            <CardDescription>
+              All audit events are now available in your Axiom dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
+              The new audit system captures all Better Auth events including:
+              authentication, 2FA, passkeys, admin operations, OIDC flows, and
+              more.
             </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page <= 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page >= totalPages}
-              >
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
-function AdminAuditLogsSkeleton() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex items-center gap-4 mb-8">
-          <Skeleton className="h-10 w-10" />
-          <div>
-            <Skeleton className="h-8 w-32 mb-2" />
-            <Skeleton className="h-4 w-48" />
-          </div>
-        </div>
-        <Skeleton className="h-16 mb-6" />
-        <Skeleton className="h-[600px]" />
+            <div className="bg-slate-950 rounded-lg p-4 font-mono text-xs space-y-2 overflow-x-auto">
+              <div className="text-green-400">{`-- Query all authentication events`}</div>
+              <div className="text-slate-300">
+                {"['logs'] | where ['audit.event_category'] == \"auth\""}
+              </div>
+              <div className="text-slate-500 mt-2">---</div>
+              <div className="text-green-400">{`-- Query failed login attempts`}</div>
+              <div className="text-slate-300">
+                {
+                  "['logs'] | where ['audit.event_type'] contains \"login\" and ['audit.result'] == \"failure\""
+                }
+              </div>
+              <div className="text-slate-500 mt-2">---</div>
+              <div className="text-green-400">{`-- Query critical security events`}</div>
+              <div className="text-slate-300">
+                {
+                  "['logs'] | where ['audit.security_risk_level'] == \"CRITICAL\""
+                }
+              </div>
+              <div className="text-slate-500 mt-2">---</div>
+              <div className="text-green-400">{`-- Query admin operations`}</div>
+              <div className="text-slate-300">
+                {"['logs'] | where ['audit.event_category'] == \"admin\""}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Documentation Link */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Documentation</CardTitle>
+            <CardDescription>
+              Refer to the audit system documentation for complete details
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              The comprehensive audit logging documentation includes:
+            </p>
+            <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+              <li>Complete event type mappings for all Better Auth plugins</li>
+              <li>Security risk level classifications</li>
+              <li>OTEL attribute specifications</li>
+              <li>Production-ready Axiom query examples</li>
+              <li>Export capabilities and compliance features</li>
+            </ul>
+            <div className="flex gap-2 mt-4">
+              <a
+                href="https://github.com/ewf-id/ewf-id/blob/main/src/lib/audit/README.md"
+                target="_blank"
+                rel="noopener noreferrer">
+                <Button variant="outline" size="sm">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View Documentation
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

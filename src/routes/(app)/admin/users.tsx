@@ -3,18 +3,34 @@
  * EWF-ID Admin Users Page
  * SPEC.md Phase 6 - Task 6.5: Admin Pages
  */
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createFileRoute,
-  useNavigate,
   Link,
+  useNavigate,
   useSearch,
 } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Ban,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Loader2,
+  MoreVertical,
+  Search,
+  Shield,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import {
   Card,
   CardContent,
@@ -22,24 +38,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
+import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import {
-  ArrowLeft,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  MoreVertical,
-  Ban,
-  CheckCircle,
-  Shield,
-  Trash2,
-  Eye,
-  Loader2,
-  AlertCircle,
-  UserPlus,
-} from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/admin/users")({
   component: AdminUsersPage,
@@ -234,8 +235,7 @@ function AdminUsersPage() {
                       role: e.target.value || undefined,
                     },
                   })
-                }
-              >
+                }>
                 <option value="">All Roles</option>
                 <option value="admin">Admin</option>
                 <option value="team">Team</option>
@@ -262,8 +262,7 @@ function AdminUsersPage() {
                 {users.map((user: any) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 hover:bg-muted/50"
-                  >
+                    className="flex items-center justify-between p-4 hover:bg-muted/50">
                     <div className="flex items-center gap-4">
                       <Avatar>
                         <AvatarImage
@@ -312,8 +311,7 @@ function AdminUsersPage() {
                       <div className="flex items-center gap-1">
                         <Link
                           to="/admin/users/$userId"
-                          params={{ userId: user.id }}
-                        >
+                          params={{ userId: user.id }}>
                           <Button variant="ghost" size="icon">
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -327,8 +325,7 @@ function AdminUsersPage() {
                               suspend: !user.banned,
                             })
                           }
-                          disabled={suspendMutation.isPending}
-                        >
+                          disabled={suspendMutation.isPending}>
                           {user.banned ? (
                             <CheckCircle className="h-4 w-4 text-green-500" />
                           ) : (
@@ -359,8 +356,7 @@ function AdminUsersPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(page - 1)}
-                disabled={page <= 1}
-              >
+                disabled={page <= 1}>
                 <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
@@ -368,8 +364,7 @@ function AdminUsersPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(page + 1)}
-                disabled={page >= totalPages}
-              >
+                disabled={page >= totalPages}>
                 Next
                 <ChevronRight className="h-4 w-4" />
               </Button>

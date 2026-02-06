@@ -2,12 +2,13 @@
  * EWF-ID Cookie Consent Banner
  * SPEC.md Phase 6 - Task 6.7: Cookie Consent Banner
  */
-import { useState, useEffect } from "react";
+
 import { Link } from "@tanstack/react-router";
+import { Cookie, Settings, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { m } from "@/paraglide/messages";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Cookie, X, Settings } from "lucide-react";
-import { m } from "@/paraglide/messages";
 
 export type CookieConsent = {
   essential: boolean; // Always true
@@ -29,7 +30,9 @@ export function getCookieConsent(): CookieConsent | null {
   }
 }
 
-export function setCookieConsent(consent: Omit<CookieConsent, "essential" | "timestamp">): void {
+export function setCookieConsent(
+  consent: Omit<CookieConsent, "essential" | "timestamp">,
+): void {
   const fullConsent: CookieConsent = {
     essential: true,
     ...consent,
@@ -38,7 +41,9 @@ export function setCookieConsent(consent: Omit<CookieConsent, "essential" | "tim
   localStorage.setItem(CONSENT_KEY, JSON.stringify(fullConsent));
 
   // Dispatch event for other components to react
-  window.dispatchEvent(new CustomEvent("cookieConsentChanged", { detail: fullConsent }));
+  window.dispatchEvent(
+    new CustomEvent("cookieConsentChanged", { detail: fullConsent }),
+  );
 }
 
 export function CookieConsentBanner() {
@@ -86,7 +91,9 @@ export function CookieConsentBanner() {
                   <Cookie className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{m.cookie_banner_title()}</h3>
+                  <h3 className="font-semibold mb-1">
+                    {m.cookie_banner_title()}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     {m.cookie_banner_message()}
                   </p>
@@ -99,11 +106,16 @@ export function CookieConsentBanner() {
                 <Button variant="outline" onClick={handleRejectAll}>
                   {m.cookie_banner_reject_all()}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setShowSettings(true)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSettings(true)}>
                   <Settings className="mr-2 h-4 w-4" />
                   {m.cookie_banner_customize()}
                 </Button>
-                <Link to="/cookies" className="text-sm text-muted-foreground hover:underline ml-auto">
+                <Link
+                  to="/cookies"
+                  className="text-sm text-muted-foreground hover:underline ml-auto">
                   {m.legal_cookies_title()}
                 </Link>
               </div>
@@ -112,11 +124,14 @@ export function CookieConsentBanner() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">{m.cookie_banner_customize()}</h3>
-                <Button variant="ghost" size="icon" onClick={() => setShowSettings(false)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSettings(false)}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
@@ -168,7 +183,9 @@ export function CookieConsentBanner() {
                 <Button onClick={handleSavePreferences}>
                   {m.cookie_save_preferences()}
                 </Button>
-                <Button variant="outline" onClick={() => setShowSettings(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSettings(false)}>
                   {m.common_cancel()}
                 </Button>
               </div>
@@ -193,9 +210,15 @@ export function useCookieConsent() {
       setConsent(event.detail);
     };
 
-    window.addEventListener("cookieConsentChanged", handleChange as EventListener);
+    window.addEventListener(
+      "cookieConsentChanged",
+      handleChange as EventListener,
+    );
     return () => {
-      window.removeEventListener("cookieConsentChanged", handleChange as EventListener);
+      window.removeEventListener(
+        "cookieConsentChanged",
+        handleChange as EventListener,
+      );
     };
   }, []);
 

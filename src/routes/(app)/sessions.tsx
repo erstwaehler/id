@@ -3,9 +3,24 @@
  * EWF-ID Sessions Page
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
  */
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "~/lib/auth-client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Laptop,
+  Loader2,
+  MapPin,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -14,22 +29,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  ArrowLeft,
-  Laptop,
-  Smartphone,
-  Tablet,
-  Monitor,
-  Loader2,
-  Trash2,
-  MapPin,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
-import { useState } from "react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/sessions")({
   component: SessionsPage,
@@ -182,8 +183,7 @@ function SessionsPage() {
               variant="destructive"
               size="sm"
               onClick={() => revokeAllMutation.mutate()}
-              disabled={revokeAllMutation.isPending}
-            >
+              disabled={revokeAllMutation.isPending}>
               {revokeAllMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
@@ -199,8 +199,7 @@ function SessionsPage() {
             <button
               type="button"
               onClick={() => setError(null)}
-              className="ml-auto"
-            >
+              className="ml-auto">
               ×
             </button>
           </div>
@@ -240,8 +239,7 @@ function SessionsPage() {
                       key={session.id}
                       className={`flex items-start justify-between p-4 border rounded-lg ${
                         isCurrent ? "border-primary bg-primary/5" : ""
-                      }`}
-                    >
+                      }`}>
                       <div className="flex items-start gap-4">
                         <div className="rounded-full bg-muted p-3">
                           <DeviceIcon className="h-6 w-6" />
@@ -266,9 +264,7 @@ function SessionsPage() {
                             )}
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {new Date(
-                                session.createdAt,
-                              ).toLocaleDateString()}{" "}
+                              {new Date(session.createdAt).toLocaleDateString()}{" "}
                               at{" "}
                               {new Date(session.createdAt).toLocaleTimeString()}
                             </span>
@@ -288,8 +284,7 @@ function SessionsPage() {
                           onClick={() =>
                             revokeSessionMutation.mutate(session.id)
                           }
-                          disabled={revokeSessionMutation.isPending}
-                        >
+                          disabled={revokeSessionMutation.isPending}>
                           {revokeSessionMutation.isPending ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (

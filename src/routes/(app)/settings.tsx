@@ -1,10 +1,23 @@
 // #! MESS
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  Bell,
+  CheckCircle,
+  Download,
+  Globe,
+  Loader2,
+  Moon,
+  Sun,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "~/lib/auth-client";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
 import {
   Card,
   CardContent,
@@ -12,22 +25,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import {
-  ArrowLeft,
-  Globe,
-  Bell,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  Moon,
-  Sun,
-  Download,
-  Trash2,
-  AlertTriangle,
-} from "lucide-react";
+import { Skeleton } from "~/components/ui/skeleton";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/settings")({
   component: SettingsPage,
@@ -141,8 +142,7 @@ function SettingsPage() {
             <button
               type="button"
               onClick={() => setError(null)}
-              className="ml-auto"
-            >
+              className="ml-auto">
               ×
             </button>
           </div>
@@ -183,8 +183,7 @@ function SettingsPage() {
                     profile?.locale === lang.code
                       ? "border-primary bg-primary/10"
                       : "hover:border-primary/50"
-                  }`}
-                >
+                  }`}>
                   <span className="text-2xl">{lang.flag}</span>
                   <span className="font-medium">{lang.name}</span>
                 </button>
@@ -261,8 +260,7 @@ function SettingsPage() {
               <Button
                 variant="outline"
                 onClick={() => exportDataMutation.mutate()}
-                disabled={exportDataMutation.isPending}
-              >
+                disabled={exportDataMutation.isPending}>
                 {exportDataMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (

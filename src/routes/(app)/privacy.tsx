@@ -3,13 +3,22 @@
  * EWF-ID Privacy Page (GDPR - Account Deletion)
  * SPEC.md Phase 6 - Task 6.4: Authenticated User Pages
  */
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "~/lib/auth-client";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Download,
+  Loader2,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Card,
   CardContent,
@@ -17,18 +26,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  ArrowLeft,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  AlertTriangle,
-  Trash2,
-  Download,
-  XCircle,
-  Clock,
-} from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
 export const Route = createFileRoute("/(app)/privacy")({
   component: PrivacyPage,
@@ -93,8 +94,7 @@ function PrivacyPage() {
             <button
               type="button"
               onClick={() => setError(null)}
-              className="ml-auto"
-            >
+              className="ml-auto">
               ×
             </button>
           </div>
@@ -189,8 +189,7 @@ function PrivacyPage() {
               </ul>
               <Button
                 onClick={() => requestExportMutation.mutate()}
-                disabled={requestExportMutation.isPending}
-              >
+                disabled={requestExportMutation.isPending}>
                 {requestExportMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -234,8 +233,7 @@ function PrivacyPage() {
                 <Button
                   variant="outline"
                   onClick={() => cancelDeletionMutation.mutate()}
-                  disabled={cancelDeletionMutation.isPending}
-                >
+                  disabled={cancelDeletionMutation.isPending}>
                   {cancelDeletionMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
@@ -284,8 +282,7 @@ function PrivacyPage() {
                     disabled={
                       confirmText !== "DELETE" ||
                       requestDeletionMutation.isPending
-                    }
-                  >
+                    }>
                     {requestDeletionMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
@@ -298,8 +295,7 @@ function PrivacyPage() {
                     onClick={() => {
                       setShowDeleteConfirm(false);
                       setConfirmText("");
-                    }}
-                  >
+                    }}>
                     Cancel
                   </Button>
                 </div>
@@ -313,8 +309,7 @@ function PrivacyPage() {
                 </p>
                 <Button
                   variant="destructive"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
+                  onClick={() => setShowDeleteConfirm(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Request Account Deletion
                 </Button>
@@ -332,8 +327,7 @@ function PrivacyPage() {
                 Officer at{" "}
                 <a
                   href="mailto:privacy@ewf-stade.de"
-                  className="text-primary hover:underline"
-                >
+                  className="text-primary hover:underline">
                   privacy@ewf-stade.de
                 </a>
               </p>

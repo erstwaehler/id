@@ -5,13 +5,14 @@
  * GET /api/admin/schools - List schools
  * POST /api/admin/schools - Create school (admin only)
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "#auth";
-import { db } from "~/lib/auth-db";
-import { school, userSchool, auditLog } from "~/lib/auth/schema/audit";
-import { eq, desc, count, and } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { and, count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { auth } from "#auth";
+import { auditLog, school, userSchool } from "~/lib/auth/schema/audit";
+import { db } from "~/lib/auth-db";
 
 const createSchoolSchema = z.object({
   id: z.string().min(2).max(50),

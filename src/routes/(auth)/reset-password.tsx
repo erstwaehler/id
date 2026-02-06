@@ -2,31 +2,46 @@
  * EWF-ID Reset Password Page
  * SPEC.md Phase 6 - Task 6.3: Public Pages
  */
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
+import { AlertCircle, CheckCircle, Loader2, Lock } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
-import { AlertCircle, Loader2, Lock, CheckCircle } from "lucide-react";
+import { authClient } from "~/lib/auth-client";
 
-const resetPasswordSchema = z.object({
-  password: z
-    .string()
-    .min(12, "Password must be at least 12 characters")
-    .max(128, "Password must be at most 128 characters")
-    .regex(/[a-z]/, "Password must contain a lowercase letter")
-    .regex(/[A-Z]/, "Password must contain an uppercase letter")
-    .regex(/[0-9]/, "Password must contain a number"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(12, "Password must be at least 12 characters")
+      .max(128, "Password must be at most 128 characters")
+      .regex(/[a-z]/, "Password must contain a lowercase letter")
+      .regex(/[A-Z]/, "Password must contain an uppercase letter")
+      .regex(/[0-9]/, "Password must contain a number"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
@@ -99,9 +114,12 @@ function ResetPasswordPage() {
                 <AlertCircle className="h-12 w-12 text-red-500" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Invalid Link</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Invalid Link
+            </CardTitle>
             <CardDescription className="text-center">
-              This password reset link is invalid or has expired. Please request a new one.
+              This password reset link is invalid or has expired. Please request
+              a new one.
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
@@ -124,9 +142,12 @@ function ResetPasswordPage() {
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Password reset!</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Password reset!
+            </CardTitle>
             <CardDescription className="text-center">
-              Your password has been successfully reset. You can now sign in with your new password.
+              Your password has been successfully reset. You can now sign in
+              with your new password.
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
@@ -146,7 +167,9 @@ function ResetPasswordPage() {
           <div className="flex justify-center mb-4">
             <img src="/logo.svg" alt="EWF-ID" className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Reset your password</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Reset your password
+          </CardTitle>
           <CardDescription className="text-center">
             Enter your new password below
           </CardDescription>
@@ -173,19 +196,25 @@ function ResetPasswordPage() {
                 />
               </div>
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className={`flex items-center gap-1 ${passwordStrength.length ? "text-green-500" : "text-muted-foreground"}`}>
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.length ? "text-green-500" : "text-muted-foreground"}`}>
                   {passwordStrength.length ? "✓" : "○"} 12+ characters
                 </div>
-                <div className={`flex items-center gap-1 ${passwordStrength.lowercase ? "text-green-500" : "text-muted-foreground"}`}>
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.lowercase ? "text-green-500" : "text-muted-foreground"}`}>
                   {passwordStrength.lowercase ? "✓" : "○"} Lowercase
                 </div>
-                <div className={`flex items-center gap-1 ${passwordStrength.uppercase ? "text-green-500" : "text-muted-foreground"}`}>
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.uppercase ? "text-green-500" : "text-muted-foreground"}`}>
                   {passwordStrength.uppercase ? "✓" : "○"} Uppercase
                 </div>
-                <div className={`flex items-center gap-1 ${passwordStrength.number ? "text-green-500" : "text-muted-foreground"}`}>
+                <div
+                  className={`flex items-center gap-1 ${passwordStrength.number ? "text-green-500" : "text-muted-foreground"}`}>
                   {passwordStrength.number ? "✓" : "○"} Number
                 </div>
               </div>
@@ -204,7 +233,9 @@ function ResetPasswordPage() {
                 />
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 

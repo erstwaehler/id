@@ -6,14 +6,20 @@
  *
  * Supports authentication via session cookie or API key
  */
-import { createFileRoute } from "@tanstack/react-router";
-import { db } from "~/lib/auth-db";
-import { user as userTable } from "~/lib/auth/schema/betterauth";
-import { auditLog } from "~/lib/auth/schema/audit";
-import { eq, desc, asc, ilike, or, and, sql, count } from "drizzle-orm";
+
 import { randomUUID } from "node:crypto";
+import { createFileRoute } from "@tanstack/react-router";
+import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { z } from "zod";
-import { authenticateRequest, unauthorizedResponse, forbiddenResponse, hasRole } from "~/lib/api-auth";
+import {
+  authenticateRequest,
+  forbiddenResponse,
+  hasRole,
+  unauthorizedResponse,
+} from "~/lib/api-auth";
+import { auditLog } from "~/lib/auth/schema/audit";
+import { user as userTable } from "~/lib/auth/schema/betterauth";
+import { db } from "~/lib/auth-db";
 
 const listUsersQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),

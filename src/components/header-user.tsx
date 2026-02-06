@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { authClient } from "~/lib/auth-client";
 import { m } from "@/paraglide/messages";
+import { authClient } from "~/lib/auth-client";
 
 export default function BetterAuthHeader() {
   const { data: session, isPending } = authClient.useSession();
@@ -26,8 +26,7 @@ export default function BetterAuthHeader() {
         <button
           type="button"
           onClick={() => authClient.signOut()}
-          className="flex-1 h-9 px-4 text-sm font-medium bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
-        >
+          className="flex-1 h-9 px-4 text-sm font-medium bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
           {m.nav_logout()}
         </button>
       </div>
@@ -37,8 +36,7 @@ export default function BetterAuthHeader() {
   return (
     <Link
       to="/login"
-      className="h-9 px-4 text-sm font-medium bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors inline-flex items-center"
-    >
+      className="h-9 px-4 text-sm font-medium bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors inline-flex items-center">
       {m.nav_login()}
     </Link>
   );

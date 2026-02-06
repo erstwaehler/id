@@ -2,15 +2,20 @@
  * EWF-ID Forgot Password Page
  * SPEC.md Phase 6 - Task 6.3: Public Pages
  */
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Loader2,
+  Mail,
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Card,
   CardContent,
@@ -19,13 +24,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import {
-  AlertCircle,
-  Loader2,
-  Mail,
-  CheckCircle,
-  ArrowLeft,
-} from "lucide-react";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { authClient } from "~/lib/auth-client";
 import { useTrace } from "~/lib/telemery/frontend";
 
 const forgotPasswordSchema = z.object({
