@@ -8,60 +8,10 @@
  * Supports authentication via session cookie or API key
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "~/lib/auth-db";
-import {
-  user as userTable,
-  session as sessionTable,
-} from "~/lib/auth/schema/betterauth";
-import { userSchool, school, apiKey, auditLog } from "~/lib/auth/schema/audit";
-import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { randomUUID } from "node:crypto";
 import { authenticateRequest, unauthorizedResponse } from "~/lib/api-auth";
 
-// Profile update schema
-const updateProfileSchema = z.object({
-  name: z.string().min(2).max(100).optional(),
-  firstName: z.string().min(1).max(50).optional(),
-  lastName: z.string().min(1).max(50).optional(),
-  displayName: z.string().min(1).max(50).optional(),
-  bio: z.string().max(500).optional(),
-  locale: z.enum(["de", "en", "uk"]).optional(),
-  image: z.string().url().optional(),
-});
-
 type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
-
-async function createAuditLog(
-  userId: string | null,
-  action: string,
-  resource: string,
-  resourceId: string | null,
-  metadata: Record<string, unknown>,
-  request: Request,
-  result: "success" | "failure" = "success",
-  errorMessage?: string,
-) {
-  try {
-    await db.insert(auditLog).values({
-      id: randomUUID(),
-      userId,
-      action,
-      resource,
-      resourceId,
-      metadata,
-      ipAddress:
-        request.headers.get("x-forwarded-for") ||
-        request.headers.get("x-real-ip") ||
-        "unknown",
-      userAgent: request.headers.get("user-agent") || "unknown",
-      result,
-      errorMessage,
-    });
-  } catch (error) {
-    console.error("Failed to create audit log:", error);
-  }
-}
 
 export const Route = createFileRoute("/api/users/me")({
   server: {

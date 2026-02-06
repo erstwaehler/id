@@ -20,7 +20,6 @@ import { Effect, Logger, LogLevel, Schedule } from "effect";
 import { Tracer } from "@effect/opentelemetry";
 import { PostHog } from "posthog-node";
 import env from "#env";
-import { context } from "@opentelemetry/api";
 
 const posthog = env.POSTHOG_KEY
   ? new PostHog(env.POSTHOG_KEY, {
