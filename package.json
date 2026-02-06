@@ -26,6 +26,7 @@
   "dependencies": {
     "@better-auth/passkey": "^1.4.18",
     "@effect/platform": "^0.94.2",
+    "@effect/platform-bun": "^0.87.1",
     "@effect/platform-node": "^0.104.1",
     "@hookform/resolvers": "^5.2.2",
     "@inlang/plugin-m-function-matcher": "^2.2.0",
@@ -111,6 +112,12 @@
   "trustedDependencies": [
     "@parcel/watcher",
     "core-js",
-    "protobufjs"
+    "protobufjs",
+    "bun",
+    "argon2",
+    "esbuild",
+    "msgpackr-extract",
+    "drizzle-kit",
+    "@esbuild-kit/core-utils"
   ]
 }
