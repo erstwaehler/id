@@ -24,5 +24,9 @@ export class BetterAuthAPIError extends Data.TaggedError("BetterAuthAPIError")<{
   readonly message: string;
   readonly code: number;
   // Allways Append!
-  readonly reason: "UnexpectedThrow" | "UserNotFound" | "DetachedDataState";
+  readonly reason:
+    | "UnexpectedThrow"
+    | "UserNotFound"
+    | "DetachedDataState"
+    | "SessionNotFound";
 }> {}

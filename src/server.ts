@@ -9,15 +9,17 @@ import { paraglideMiddleware } from "../paraglide/server";
 process.setMaxListeners(100);
 
 // Initialize PostHog in server context
+let posthog: PostHog | null = null;
 if (typeof window === "undefined" && env.POSTHOG_KEY) {
-  const posthog = new PostHog(env.POSTHOG_KEY, {
+  posthog = new PostHog(env.POSTHOG_KEY, {
     host: env.POSTHOG_HOST,
   });
 
   process.on("SIGTERM", () => {
-    posthog.shutdown();
+    posthog?.shutdown();
   });
 }
+export { posthog };
 
 if (typeof window === "undefined" && env.AXIOM_TOKEN) {
   const sdk = new NodeSDK({

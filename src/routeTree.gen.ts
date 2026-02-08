@@ -32,24 +32,12 @@ import { Route as appProfileRouteImport } from './routes/(app)/profile'
 import { Route as appPrivacyRouteImport } from './routes/(app)/privacy'
 import { Route as appDashboardIndexRouteImport } from './routes/(app)/dashboard/index'
 import { Route as appAdminIndexRouteImport } from './routes/(app)/admin/index'
-import { Route as ApiUsersMeRouteImport } from './routes/api/users/me'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
-import { Route as ApiAdminSchoolsRouteImport } from './routes/api/admin/schools'
-import { Route as ApiAdminOidcClientsRouteImport } from './routes/api/admin/oidc-clients'
-import { Route as ApiAdminAuditLogsRouteImport } from './routes/api/admin/audit-logs'
 import { Route as appAdminUsersRouteImport } from './routes/(app)/admin/users'
 import { Route as appAdminSchoolsRouteImport } from './routes/(app)/admin/schools'
 import { Route as appAdminAuditLogsRouteImport } from './routes/(app)/admin/audit-logs'
-import { Route as ApiUsersMeSessionsRouteImport } from './routes/api/users/me.sessions'
-import { Route as ApiAdminUsersUserIdRouteImport } from './routes/api/admin/users.$userId'
-import { Route as ApiAdminSchoolsSchoolIdRouteImport } from './routes/api/admin/schools.$schoolId'
-import { Route as ApiAdminAnalyticsOverviewRouteImport } from './routes/api/admin/analytics.overview'
 import { Route as appAdminUsersUserIdRouteImport } from './routes/(app)/admin/users.$userId'
 import { Route as ApiUsersMeSessionsSessionIdRouteImport } from './routes/api/users/me.sessions.$sessionId'
-import { Route as ApiAdminUsersUserIdUnsuspendRouteImport } from './routes/api/admin/users.$userId.unsuspend'
-import { Route as ApiAdminUsersUserIdSuspendRouteImport } from './routes/api/admin/users.$userId.suspend'
-import { Route as ApiAdminUsersUserIdRolesRouteImport } from './routes/api/admin/users.$userId.roles'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -167,34 +155,9 @@ const appAdminIndexRoute = appAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUsersMeRoute = ApiUsersMeRouteImport.update({
-  id: '/api/users/me',
-  path: '/api/users/me',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
-  id: '/api/admin/users',
-  path: '/api/admin/users',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminSchoolsRoute = ApiAdminSchoolsRouteImport.update({
-  id: '/api/admin/schools',
-  path: '/api/admin/schools',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminOidcClientsRoute = ApiAdminOidcClientsRouteImport.update({
-  id: '/api/admin/oidc-clients',
-  path: '/api/admin/oidc-clients',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminAuditLogsRoute = ApiAdminAuditLogsRouteImport.update({
-  id: '/api/admin/audit-logs',
-  path: '/api/admin/audit-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appAdminUsersRoute = appAdminUsersRouteImport.update({
@@ -212,27 +175,6 @@ const appAdminAuditLogsRoute = appAdminAuditLogsRouteImport.update({
   path: '/admin/audit-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUsersMeSessionsRoute = ApiUsersMeSessionsRouteImport.update({
-  id: '/sessions',
-  path: '/sessions',
-  getParentRoute: () => ApiUsersMeRoute,
-} as any)
-const ApiAdminUsersUserIdRoute = ApiAdminUsersUserIdRouteImport.update({
-  id: '/$userId',
-  path: '/$userId',
-  getParentRoute: () => ApiAdminUsersRoute,
-} as any)
-const ApiAdminSchoolsSchoolIdRoute = ApiAdminSchoolsSchoolIdRouteImport.update({
-  id: '/$schoolId',
-  path: '/$schoolId',
-  getParentRoute: () => ApiAdminSchoolsRoute,
-} as any)
-const ApiAdminAnalyticsOverviewRoute =
-  ApiAdminAnalyticsOverviewRouteImport.update({
-    id: '/api/admin/analytics/overview',
-    path: '/api/admin/analytics/overview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const appAdminUsersUserIdRoute = appAdminUsersUserIdRouteImport.update({
   id: '/$userId',
   path: '/$userId',
@@ -240,27 +182,9 @@ const appAdminUsersUserIdRoute = appAdminUsersUserIdRouteImport.update({
 } as any)
 const ApiUsersMeSessionsSessionIdRoute =
   ApiUsersMeSessionsSessionIdRouteImport.update({
-    id: '/$sessionId',
-    path: '/$sessionId',
-    getParentRoute: () => ApiUsersMeSessionsRoute,
-  } as any)
-const ApiAdminUsersUserIdUnsuspendRoute =
-  ApiAdminUsersUserIdUnsuspendRouteImport.update({
-    id: '/unsuspend',
-    path: '/unsuspend',
-    getParentRoute: () => ApiAdminUsersUserIdRoute,
-  } as any)
-const ApiAdminUsersUserIdSuspendRoute =
-  ApiAdminUsersUserIdSuspendRouteImport.update({
-    id: '/suspend',
-    path: '/suspend',
-    getParentRoute: () => ApiAdminUsersUserIdRoute,
-  } as any)
-const ApiAdminUsersUserIdRolesRoute =
-  ApiAdminUsersUserIdRolesRouteImport.update({
-    id: '/roles',
-    path: '/roles',
-    getParentRoute: () => ApiAdminUsersUserIdRoute,
+    id: '/api/users/me/sessions/$sessionId',
+    path: '/api/users/me/sessions/$sessionId',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -288,22 +212,10 @@ export interface FileRoutesByFullPath {
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
   '/admin/users': typeof appAdminUsersRouteWithChildren
-  '/api/admin/audit-logs': typeof ApiAdminAuditLogsRoute
-  '/api/admin/oidc-clients': typeof ApiAdminOidcClientsRoute
-  '/api/admin/schools': typeof ApiAdminSchoolsRouteWithChildren
-  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/users/me': typeof ApiUsersMeRouteWithChildren
   '/admin/': typeof appAdminIndexRoute
   '/dashboard/': typeof appDashboardIndexRoute
   '/admin/users/$userId': typeof appAdminUsersUserIdRoute
-  '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
-  '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
-  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
-  '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
-  '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
-  '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
-  '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
   '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRoutesByTo {
@@ -331,22 +243,10 @@ export interface FileRoutesByTo {
   '/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/admin/schools': typeof appAdminSchoolsRoute
   '/admin/users': typeof appAdminUsersRouteWithChildren
-  '/api/admin/audit-logs': typeof ApiAdminAuditLogsRoute
-  '/api/admin/oidc-clients': typeof ApiAdminOidcClientsRoute
-  '/api/admin/schools': typeof ApiAdminSchoolsRouteWithChildren
-  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/users/me': typeof ApiUsersMeRouteWithChildren
   '/admin': typeof appAdminIndexRoute
   '/dashboard': typeof appDashboardIndexRoute
   '/admin/users/$userId': typeof appAdminUsersUserIdRoute
-  '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
-  '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
-  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
-  '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
-  '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
-  '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
-  '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
   '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRoutesById {
@@ -375,22 +275,10 @@ export interface FileRoutesById {
   '/(app)/admin/audit-logs': typeof appAdminAuditLogsRoute
   '/(app)/admin/schools': typeof appAdminSchoolsRoute
   '/(app)/admin/users': typeof appAdminUsersRouteWithChildren
-  '/api/admin/audit-logs': typeof ApiAdminAuditLogsRoute
-  '/api/admin/oidc-clients': typeof ApiAdminOidcClientsRoute
-  '/api/admin/schools': typeof ApiAdminSchoolsRouteWithChildren
-  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/users/me': typeof ApiUsersMeRouteWithChildren
   '/(app)/admin/': typeof appAdminIndexRoute
   '/(app)/dashboard/': typeof appDashboardIndexRoute
   '/(app)/admin/users/$userId': typeof appAdminUsersUserIdRoute
-  '/api/admin/analytics/overview': typeof ApiAdminAnalyticsOverviewRoute
-  '/api/admin/schools/$schoolId': typeof ApiAdminSchoolsSchoolIdRoute
-  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRouteWithChildren
-  '/api/users/me/sessions': typeof ApiUsersMeSessionsRouteWithChildren
-  '/api/admin/users/$userId/roles': typeof ApiAdminUsersUserIdRolesRoute
-  '/api/admin/users/$userId/suspend': typeof ApiAdminUsersUserIdSuspendRoute
-  '/api/admin/users/$userId/unsuspend': typeof ApiAdminUsersUserIdUnsuspendRoute
   '/api/users/me/sessions/$sessionId': typeof ApiUsersMeSessionsSessionIdRoute
 }
 export interface FileRouteTypes {
@@ -420,22 +308,10 @@ export interface FileRouteTypes {
     | '/admin/audit-logs'
     | '/admin/schools'
     | '/admin/users'
-    | '/api/admin/audit-logs'
-    | '/api/admin/oidc-clients'
-    | '/api/admin/schools'
-    | '/api/admin/users'
     | '/api/auth/$'
-    | '/api/users/me'
     | '/admin/'
     | '/dashboard/'
     | '/admin/users/$userId'
-    | '/api/admin/analytics/overview'
-    | '/api/admin/schools/$schoolId'
-    | '/api/admin/users/$userId'
-    | '/api/users/me/sessions'
-    | '/api/admin/users/$userId/roles'
-    | '/api/admin/users/$userId/suspend'
-    | '/api/admin/users/$userId/unsuspend'
     | '/api/users/me/sessions/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -463,22 +339,10 @@ export interface FileRouteTypes {
     | '/admin/audit-logs'
     | '/admin/schools'
     | '/admin/users'
-    | '/api/admin/audit-logs'
-    | '/api/admin/oidc-clients'
-    | '/api/admin/schools'
-    | '/api/admin/users'
     | '/api/auth/$'
-    | '/api/users/me'
     | '/admin'
     | '/dashboard'
     | '/admin/users/$userId'
-    | '/api/admin/analytics/overview'
-    | '/api/admin/schools/$schoolId'
-    | '/api/admin/users/$userId'
-    | '/api/users/me/sessions'
-    | '/api/admin/users/$userId/roles'
-    | '/api/admin/users/$userId/suspend'
-    | '/api/admin/users/$userId/unsuspend'
     | '/api/users/me/sessions/$sessionId'
   id:
     | '__root__'
@@ -506,22 +370,10 @@ export interface FileRouteTypes {
     | '/(app)/admin/audit-logs'
     | '/(app)/admin/schools'
     | '/(app)/admin/users'
-    | '/api/admin/audit-logs'
-    | '/api/admin/oidc-clients'
-    | '/api/admin/schools'
-    | '/api/admin/users'
     | '/api/auth/$'
-    | '/api/users/me'
     | '/(app)/admin/'
     | '/(app)/dashboard/'
     | '/(app)/admin/users/$userId'
-    | '/api/admin/analytics/overview'
-    | '/api/admin/schools/$schoolId'
-    | '/api/admin/users/$userId'
-    | '/api/users/me/sessions'
-    | '/api/admin/users/$userId/roles'
-    | '/api/admin/users/$userId/suspend'
-    | '/api/admin/users/$userId/unsuspend'
     | '/api/users/me/sessions/$sessionId'
   fileRoutesById: FileRoutesById
 }
@@ -550,15 +402,10 @@ export interface RootRouteChildren {
   appAdminAuditLogsRoute: typeof appAdminAuditLogsRoute
   appAdminSchoolsRoute: typeof appAdminSchoolsRoute
   appAdminUsersRoute: typeof appAdminUsersRouteWithChildren
-  ApiAdminAuditLogsRoute: typeof ApiAdminAuditLogsRoute
-  ApiAdminOidcClientsRoute: typeof ApiAdminOidcClientsRoute
-  ApiAdminSchoolsRoute: typeof ApiAdminSchoolsRouteWithChildren
-  ApiAdminUsersRoute: typeof ApiAdminUsersRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiUsersMeRoute: typeof ApiUsersMeRouteWithChildren
   appAdminIndexRoute: typeof appAdminIndexRoute
   appDashboardIndexRoute: typeof appDashboardIndexRoute
-  ApiAdminAnalyticsOverviewRoute: typeof ApiAdminAnalyticsOverviewRoute
+  ApiUsersMeSessionsSessionIdRoute: typeof ApiUsersMeSessionsSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -724,46 +571,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/users/me': {
-      id: '/api/users/me'
-      path: '/api/users/me'
-      fullPath: '/api/users/me'
-      preLoaderRoute: typeof ApiUsersMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/users': {
-      id: '/api/admin/users'
-      path: '/api/admin/users'
-      fullPath: '/api/admin/users'
-      preLoaderRoute: typeof ApiAdminUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/schools': {
-      id: '/api/admin/schools'
-      path: '/api/admin/schools'
-      fullPath: '/api/admin/schools'
-      preLoaderRoute: typeof ApiAdminSchoolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/oidc-clients': {
-      id: '/api/admin/oidc-clients'
-      path: '/api/admin/oidc-clients'
-      fullPath: '/api/admin/oidc-clients'
-      preLoaderRoute: typeof ApiAdminOidcClientsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/audit-logs': {
-      id: '/api/admin/audit-logs'
-      path: '/api/admin/audit-logs'
-      fullPath: '/api/admin/audit-logs'
-      preLoaderRoute: typeof ApiAdminAuditLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/admin/users': {
@@ -787,34 +599,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAdminAuditLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/users/me/sessions': {
-      id: '/api/users/me/sessions'
-      path: '/sessions'
-      fullPath: '/api/users/me/sessions'
-      preLoaderRoute: typeof ApiUsersMeSessionsRouteImport
-      parentRoute: typeof ApiUsersMeRoute
-    }
-    '/api/admin/users/$userId': {
-      id: '/api/admin/users/$userId'
-      path: '/$userId'
-      fullPath: '/api/admin/users/$userId'
-      preLoaderRoute: typeof ApiAdminUsersUserIdRouteImport
-      parentRoute: typeof ApiAdminUsersRoute
-    }
-    '/api/admin/schools/$schoolId': {
-      id: '/api/admin/schools/$schoolId'
-      path: '/$schoolId'
-      fullPath: '/api/admin/schools/$schoolId'
-      preLoaderRoute: typeof ApiAdminSchoolsSchoolIdRouteImport
-      parentRoute: typeof ApiAdminSchoolsRoute
-    }
-    '/api/admin/analytics/overview': {
-      id: '/api/admin/analytics/overview'
-      path: '/api/admin/analytics/overview'
-      fullPath: '/api/admin/analytics/overview'
-      preLoaderRoute: typeof ApiAdminAnalyticsOverviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(app)/admin/users/$userId': {
       id: '/(app)/admin/users/$userId'
       path: '/$userId'
@@ -824,31 +608,10 @@ declare module '@tanstack/react-router' {
     }
     '/api/users/me/sessions/$sessionId': {
       id: '/api/users/me/sessions/$sessionId'
-      path: '/$sessionId'
+      path: '/api/users/me/sessions/$sessionId'
       fullPath: '/api/users/me/sessions/$sessionId'
       preLoaderRoute: typeof ApiUsersMeSessionsSessionIdRouteImport
-      parentRoute: typeof ApiUsersMeSessionsRoute
-    }
-    '/api/admin/users/$userId/unsuspend': {
-      id: '/api/admin/users/$userId/unsuspend'
-      path: '/unsuspend'
-      fullPath: '/api/admin/users/$userId/unsuspend'
-      preLoaderRoute: typeof ApiAdminUsersUserIdUnsuspendRouteImport
-      parentRoute: typeof ApiAdminUsersUserIdRoute
-    }
-    '/api/admin/users/$userId/suspend': {
-      id: '/api/admin/users/$userId/suspend'
-      path: '/suspend'
-      fullPath: '/api/admin/users/$userId/suspend'
-      preLoaderRoute: typeof ApiAdminUsersUserIdSuspendRouteImport
-      parentRoute: typeof ApiAdminUsersUserIdRoute
-    }
-    '/api/admin/users/$userId/roles': {
-      id: '/api/admin/users/$userId/roles'
-      path: '/roles'
-      fullPath: '/api/admin/users/$userId/roles'
-      preLoaderRoute: typeof ApiAdminUsersUserIdRolesRouteImport
-      parentRoute: typeof ApiAdminUsersUserIdRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -863,68 +626,6 @@ const appAdminUsersRouteChildren: appAdminUsersRouteChildren = {
 
 const appAdminUsersRouteWithChildren = appAdminUsersRoute._addFileChildren(
   appAdminUsersRouteChildren,
-)
-
-interface ApiAdminSchoolsRouteChildren {
-  ApiAdminSchoolsSchoolIdRoute: typeof ApiAdminSchoolsSchoolIdRoute
-}
-
-const ApiAdminSchoolsRouteChildren: ApiAdminSchoolsRouteChildren = {
-  ApiAdminSchoolsSchoolIdRoute: ApiAdminSchoolsSchoolIdRoute,
-}
-
-const ApiAdminSchoolsRouteWithChildren = ApiAdminSchoolsRoute._addFileChildren(
-  ApiAdminSchoolsRouteChildren,
-)
-
-interface ApiAdminUsersUserIdRouteChildren {
-  ApiAdminUsersUserIdRolesRoute: typeof ApiAdminUsersUserIdRolesRoute
-  ApiAdminUsersUserIdSuspendRoute: typeof ApiAdminUsersUserIdSuspendRoute
-  ApiAdminUsersUserIdUnsuspendRoute: typeof ApiAdminUsersUserIdUnsuspendRoute
-}
-
-const ApiAdminUsersUserIdRouteChildren: ApiAdminUsersUserIdRouteChildren = {
-  ApiAdminUsersUserIdRolesRoute: ApiAdminUsersUserIdRolesRoute,
-  ApiAdminUsersUserIdSuspendRoute: ApiAdminUsersUserIdSuspendRoute,
-  ApiAdminUsersUserIdUnsuspendRoute: ApiAdminUsersUserIdUnsuspendRoute,
-}
-
-const ApiAdminUsersUserIdRouteWithChildren =
-  ApiAdminUsersUserIdRoute._addFileChildren(ApiAdminUsersUserIdRouteChildren)
-
-interface ApiAdminUsersRouteChildren {
-  ApiAdminUsersUserIdRoute: typeof ApiAdminUsersUserIdRouteWithChildren
-}
-
-const ApiAdminUsersRouteChildren: ApiAdminUsersRouteChildren = {
-  ApiAdminUsersUserIdRoute: ApiAdminUsersUserIdRouteWithChildren,
-}
-
-const ApiAdminUsersRouteWithChildren = ApiAdminUsersRoute._addFileChildren(
-  ApiAdminUsersRouteChildren,
-)
-
-interface ApiUsersMeSessionsRouteChildren {
-  ApiUsersMeSessionsSessionIdRoute: typeof ApiUsersMeSessionsSessionIdRoute
-}
-
-const ApiUsersMeSessionsRouteChildren: ApiUsersMeSessionsRouteChildren = {
-  ApiUsersMeSessionsSessionIdRoute: ApiUsersMeSessionsSessionIdRoute,
-}
-
-const ApiUsersMeSessionsRouteWithChildren =
-  ApiUsersMeSessionsRoute._addFileChildren(ApiUsersMeSessionsRouteChildren)
-
-interface ApiUsersMeRouteChildren {
-  ApiUsersMeSessionsRoute: typeof ApiUsersMeSessionsRouteWithChildren
-}
-
-const ApiUsersMeRouteChildren: ApiUsersMeRouteChildren = {
-  ApiUsersMeSessionsRoute: ApiUsersMeSessionsRouteWithChildren,
-}
-
-const ApiUsersMeRouteWithChildren = ApiUsersMeRoute._addFileChildren(
-  ApiUsersMeRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -952,15 +653,10 @@ const rootRouteChildren: RootRouteChildren = {
   appAdminAuditLogsRoute: appAdminAuditLogsRoute,
   appAdminSchoolsRoute: appAdminSchoolsRoute,
   appAdminUsersRoute: appAdminUsersRouteWithChildren,
-  ApiAdminAuditLogsRoute: ApiAdminAuditLogsRoute,
-  ApiAdminOidcClientsRoute: ApiAdminOidcClientsRoute,
-  ApiAdminSchoolsRoute: ApiAdminSchoolsRouteWithChildren,
-  ApiAdminUsersRoute: ApiAdminUsersRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiUsersMeRoute: ApiUsersMeRouteWithChildren,
   appAdminIndexRoute: appAdminIndexRoute,
   appDashboardIndexRoute: appDashboardIndexRoute,
-  ApiAdminAnalyticsOverviewRoute: ApiAdminAnalyticsOverviewRoute,
+  ApiUsersMeSessionsSessionIdRoute: ApiUsersMeSessionsSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

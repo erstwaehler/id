@@ -13,6 +13,7 @@ import {
   killDefectiveLogic,
   TypescriptVSEffectError,
 } from "'defective/wtf";
+import { Tracer } from "@effect/opentelemetry";
 import { APIError } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 import { Cache, Context, Data, Duration, Effect, Layer } from "effect";
@@ -22,54 +23,117 @@ import { Role } from "./permissions";
 export class AuthenticationResult extends Data.TaggedClass(
   "AuthenticationResult",
 )<{
-  readonly authenticated: boolean;
+  // readonly authenticated: boolean; // AuthenticationResult will allways be authenticated because else it will fail with an AuthenticationError
   readonly user?: UserWithRole;
   readonly method: "api_key" | "bearer" | "none";
 }> {}
+
+// biome-ignore lint/suspicious/noExplicitAny: Type helper
+type rtp<T extends (...args: any) => any> = Awaited<ReturnType<T>>;
 
 export class User extends Context.Tag("UserService")<
   User,
   {
     readonly fetchById: (
       userId: string,
-    ) => Effect.Effect<UserWithRole, BetterAuthAPIError, never>;
+    ) => Effect.Effect<rtp<typeof auth.api.getUser>, BetterAuthAPIError, never>;
     readonly hasRole: (
       userId: string,
       role: string,
     ) => Effect.Effect<boolean, BetterAuthAPIError, never>;
+    readonly revokeSession: (
+      sessionId: string,
+    ) => Effect.Effect<
+      rtp<typeof auth.api.revokeUserSession>,
+      BetterAuthAPIError,
+      never
+    >;
   }
 >() {}
 
-const _internalFetchUserById = Effect.fn("api.fetchUserById")(function* (
-  userId: string,
-) {
-  return yield* Effect.tryPromise({
-    try: async () =>
-      await auth.api.getUser({
-        query: {
-          id: userId,
-        },
-      }),
-    catch: (error) => {
-      if (
-        error instanceof APIError &&
-        (error.status === 404 || error.status === "NOT_FOUND")
-      ) {
-        return new BetterAuthAPIError({
-          message: "User not found",
-          code: 404,
-          reason: "UserNotFound",
-        });
-      }
+const _internalFetchUserById = Effect.fn("service.user.fetchUserById")(
+  function* (userId: string) {
+    const traceparent = yield* Tracer.currentOtelSpan.pipe(
+      annotateThis,
+      Effect.map(
+        (s) => `00-${s.spanContext().traceId}-${s.spanContext().spanId}-01`,
+      ),
+      Effect.orElseSucceed(() => undefined),
+    );
 
-      return new BetterAuthAPIError({
-        message: JSON.stringify(error),
-        code: 500,
-        reason: "UnexpectedThrow",
-      });
-    },
-  }).pipe(annotateThis);
-});
+    return yield* Effect.tryPromise({
+      try: async () =>
+        await auth.api.getUser({
+          query: {
+            id: userId,
+          },
+          headers: traceparent ? { traceparent } : undefined,
+        }),
+      catch: (error) => {
+        if (
+          error instanceof APIError &&
+          (error.status === 404 || error.status === "NOT_FOUND")
+        ) {
+          return new BetterAuthAPIError({
+            message: "User not found",
+            code: 404,
+            reason: "UserNotFound",
+          });
+        }
+
+        return new BetterAuthAPIError({
+          message: JSON.stringify(error),
+          code: 500,
+          reason: "UnexpectedThrow",
+        });
+      },
+    }).pipe(annotateThis);
+  },
+);
+
+const _internalRevokeSession = Effect.fn("service.user.revokeSession")(
+  function* (sessionId: string) {
+    const traceparent = yield* Tracer.currentOtelSpan.pipe(
+      annotateThis,
+      Effect.map(
+        (s) => `00-${s.spanContext().traceId}-${s.spanContext().spanId}-01`,
+      ),
+      Effect.orElseSucceed(() => undefined),
+    );
+
+    return yield* Effect.tryPromise({
+      try: async () =>
+        await auth.api.revokeUserSession({
+          body: {
+            sessionToken: sessionId,
+          },
+          headers: traceparent
+            ? {
+                traceparent,
+              }
+            : undefined,
+        }),
+      catch: (error) => {
+        if (
+          error instanceof APIError &&
+          (error.status === 404 || error.status === "NOT_FOUND")
+        ) {
+          return new BetterAuthAPIError({
+            message: "Session not found",
+            code: 404,
+            reason: "SessionNotFound",
+          });
+        }
+
+        return new BetterAuthAPIError({
+          message: JSON.stringify(error),
+          code: 500,
+          reason: "UnexpectedThrow",
+        });
+      },
+    }).pipe(annotateThis);
+  },
+);
 
 export const UserLive = Layer.effect(
   User,
@@ -82,6 +146,7 @@ export const UserLive = Layer.effect(
 
     return {
       fetchById: (userId: string) => fetchUserById.get(userId),
+      revokeSession: (userId: string) => _internalRevokeSession(userId),
       hasRole: (userId: string, role: string) =>
         fetchUserById.get(userId).pipe(
           Effect.map((user) => {
@@ -197,7 +262,6 @@ export const authenticateRequest = Effect.fn("api.authenticateRequest")(
 
       return yield* Effect.succeed(
         new AuthenticationResult({
-          authenticated: true,
           user,
           method: "api_key",
         }),
@@ -264,7 +328,6 @@ export const authenticateRequest = Effect.fn("api.authenticateRequest")(
 
       return yield* Effect.succeed(
         new AuthenticationResult({
-          authenticated: true,
           user,
           method: "bearer",
         }),

@@ -1,0 +1,12 @@
+diff --git a/lib/stream-hash.js b/lib/stream-hash.js
+index 3f9b44133766c04866ab2ab178c061f35dbf8f42..8b0676747014d5a923698d7e030d66cd037a648b 100644
+--- a/lib/stream-hash.js
++++ b/lib/stream-hash.js
+@@ -1,6 +1,6 @@
+ 'use strict';
+ 
+-const crypto = require('crypto');
++const crypto = require('node:crypto');
+ const Transform = require('stream').Transform;
+ 
+ class StreamHash extends Transform {

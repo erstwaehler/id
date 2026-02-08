@@ -14,20 +14,12 @@ import { CryptoAuthLive } from "'/betterauth.ts";
 import { annotateThis, otelNOT } from "'defective/o11y.ts";
 import { TelemetryError, TelemetryPayload } from "'defective/telemetry.ts";
 import { Crypto } from "'services/betterauth.ts";
+import process from "node:process";
 import { Tracer } from "@effect/opentelemetry";
 import { createFileRoute } from "@tanstack/react-router";
 import type { UserWithRole } from "better-auth/plugins";
 import { Effect, Logger, LogLevel, Schedule } from "effect";
-import { PostHog } from "posthog-node";
 import env from "#env";
-
-const posthog = env.POSTHOG_KEY
-  ? new PostHog(env.POSTHOG_KEY, {
-      host: env.POSTHOG_HOST,
-    })
-  : null;
-
-import process from "node:process";
 import { authenticateRequest, UserLive } from "~/lib/api-auth.ts";
 import { useServerTrace } from "~/lib/telemery/defective.ts";
 import {
@@ -35,6 +27,7 @@ import {
   CURRENT_BRANCH,
   LATEST_COMMIT_HASH,
 } from "~/lib/version.ts";
+import { posthog } from "~/server";
 
 /*
 # Test curl
